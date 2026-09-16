@@ -38,6 +38,13 @@ export interface MediaItem {
   /** Seconds. A hint for the UI, not authoritative — the engine measures it. */
   duration?: number;
   /**
+   * A live stream with no end — internet radio. Passed to the engine as
+   * `Track.continuous`, which reads it with a stream parser; without it the
+   * engine's file parser waits for the end of a broadcast and no station
+   * starts. Set from `contentKind` in `buildTrackItem`, and only when true.
+   */
+  continuous?: boolean;
+  /**
    * Set when the URL has no file extension to identify the format by. Bare
    * stream endpoints are the case that needs it.
    */

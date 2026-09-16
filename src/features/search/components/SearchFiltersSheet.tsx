@@ -11,6 +11,7 @@ import {
   OptionSheetSectionLabel,
   optionSheetStyles,
   useOptionSheetBackground,
+  useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives';
 import { ALL_SOURCES, getSourceMeta, type SourceId } from '@/features/sources/registry';
 import { promptSourceUse } from '@/features/settings/sources/sourceUsePrompt';
@@ -54,6 +55,7 @@ const SearchFiltersSheet = forwardRef<BottomSheetModal, Props>(
     const { t } = useTranslation();
     const { colors } = useTheme();
     const sheetBg = useOptionSheetBackground();
+    const sheetContent = useOptionSheetContentStyle();
 
     const entityTypeLabel = (entityType: SearchEntityType) => t(`search.entityTypes.${entityType}`);
     const anySourceOff = ALL_SOURCES.some(source => !availableSourceIds.includes(source.id));
@@ -78,7 +80,7 @@ const SearchFiltersSheet = forwardRef<BottomSheetModal, Props>(
         handleIndicatorStyle={{ backgroundColor: colors.border }}
         backgroundStyle={[optionSheetStyles.sheetBackground, sheetBg]}
       >
-        <BottomSheetScrollView style={sheetBg} contentContainerStyle={optionSheetStyles.sheetContent}>
+        <BottomSheetScrollView style={sheetBg} contentContainerStyle={sheetContent}>
           <Text style={[styles.title, { color: colors.secondary }]}>
             {t('search.filters.title')}
           </Text>

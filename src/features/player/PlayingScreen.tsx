@@ -27,6 +27,7 @@ import LyricsPreviewCard from './components/LyricsPreviewCard';
 import OutputDeviceSheet from './components/OutputDeviceSheet';
 import AboutTheArtistCard from './components/AboutTheArtistCard';
 import SleepTimerSheet from './components/SleepTimerSheet';
+import SleepTimerIndicator from './components/SleepTimerIndicator';
 import { setSleepTimerPlaybackRate } from './sleepTimer';
 import PlaybackSpeedCard from './components/PlaybackSpeedCard';
 import VolumeCard from './components/VolumeCard';
@@ -200,15 +201,24 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
                                         <ChevronDown size={iconSize.large} color={onDark.text} />
                                     </Touchable>
 
-                                    <Touchable
-                                        accessibilityRole="button"
-                                        accessibilityLabel={t('a11y.player.songOptions')}
-                                        onPress={() => songOptionsRef.current?.present()}
-                                        style={styles.headerButton}
-                                        hitSlop={hitSlopFor(40)}
-                                    >
-                                        <Ellipsis size={iconSize.header} color={onDark.text} />
-                                    </Touchable>
+                                    {/* A running sleep timer says so beside the
+                                        ⋯ that sets it, rather than adding a
+                                        third control to the transport row. */}
+                                    <View style={styles.headerRight}>
+                                        <SleepTimerIndicator
+                                            onPress={() => sleepTimerSheetRef.current?.present()}
+                                        />
+
+                                        <Touchable
+                                            accessibilityRole="button"
+                                            accessibilityLabel={t('a11y.player.songOptions')}
+                                            onPress={() => songOptionsRef.current?.present()}
+                                            style={styles.headerButton}
+                                            hitSlop={hitSlopFor(40)}
+                                        >
+                                            <Ellipsis size={iconSize.header} color={onDark.text} />
+                                        </Touchable>
+                                    </View>
                                 </View>
 
                                 <View style={styles.centerContent}>
@@ -237,7 +247,6 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
                                         mode={mode}
                                         setMode={changeMode}
                                         onOpenOutputSheet={() => outputDeviceSheetRef.current?.present()}
-                                        onOpenSleepTimer={() => sleepTimerSheetRef.current?.present()}
                                     />
                                 </View>
                             </View>
@@ -342,6 +351,11 @@ const styles = StyleSheet.create({
         height: 40,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
     },
     bottomControlsRow: {
         flexDirection: 'row',

@@ -140,6 +140,9 @@ interface SubsonicResponseBody {
       id?: string;
       name?: string;
       streamUrl?: string;
+      /** What a server actually answers with — see `getInternetRadioStations`. */
+      homePageUrl?: string;
+      /** The parameter's spelling, tolerated from servers that echo it back. */
       homepageUrl?: string;
     }[];
   };

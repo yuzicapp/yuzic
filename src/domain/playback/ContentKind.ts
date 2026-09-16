@@ -33,6 +33,16 @@ interface ContentKindBehaviour {
    * link is issued once — in which case it is used exactly as stored.
    */
   hasReissuableUrl: boolean;
+  /**
+   * A broadcast with no end, which the player has to be told about.
+   *
+   * Not the same question as `hasDuration`, though today only one kind answers
+   * both: this one changes how the audio is *fetched*. The engine reads a
+   * continuous track with a stream parser instead of a file parser, and a
+   * file parser waits for the end of a station that never ends — so a station
+   * the engine was not told about never started playing.
+   */
+  isContinuous: boolean;
 }
 
 const BEHAVIOUR: Record<ContentKind, ContentKindBehaviour> = {
@@ -42,12 +52,14 @@ const BEHAVIOUR: Record<ContentKind, ContentKindBehaviour> = {
     isSeekable: true,
     isAutoplaySeed: true,
     hasReissuableUrl: true,
+    isContinuous: false,
   },
   liveStream: {
     hasDuration: false,
     isScrobbleable: false,
     isSeekable: false,
     isAutoplaySeed: false,
+    isContinuous: true,
     // The station owns its endpoint, not the user's server. Asking the server
     // to build a stream URL for a radio station produces a URL for a track
     // that does not exist there, which is silent, total breakage of radio.
@@ -65,6 +77,7 @@ const BEHAVIOUR: Record<ContentKind, ContentKindBehaviour> = {
     // The server downloaded the episode and streams it, under an id of its own
     // that `Song.streamId` carries.
     hasReissuableUrl: true,
+    isContinuous: false,
   },
   // A short sample an integration supplies in place of the full recording —
   // typically thirty seconds. Any provider that hands back a sample rather
@@ -77,6 +90,7 @@ const BEHAVIOUR: Record<ContentKind, ContentKindBehaviour> = {
     isSeekable: true,
     isAutoplaySeed: false,
     hasReissuableUrl: false,
+    isContinuous: false,
   },
 };
 
@@ -87,3 +101,4 @@ export const isScrobbleable = (kind: ContentKind): boolean => BEHAVIOUR[kind].is
 export const isSeekable = (kind: ContentKind): boolean => BEHAVIOUR[kind].isSeekable;
 export const isAutoplaySeed = (kind: ContentKind): boolean => BEHAVIOUR[kind].isAutoplaySeed;
 export const hasReissuableUrl = (kind: ContentKind): boolean => BEHAVIOUR[kind].hasReissuableUrl;
+export const isContinuous = (kind: ContentKind): boolean => BEHAVIOUR[kind].isContinuous;

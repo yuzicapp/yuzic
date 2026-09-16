@@ -36,7 +36,9 @@
       "appearance": "Appearance",
       "github": "Github",
       "privacyPolicy": "Privacy Policy",
-      "termsOfUse": "Terms of Use"
+      "termsOfUse": "Terms of Use",
+      "changelog": "What's New",
+      "website": "Website"
     },
     "profile": {
       "unknownUser": "Unknown User",
@@ -1122,7 +1124,8 @@
       "arrived": "{{title}} is now in your library",
       "inLibrary": "In Library",
       "downloading": "Downloading to server… {{progress}}%",
-      "noServiceConnected": "Connect a downloader in Settings to download"
+      "noServiceConnected": "Connect a downloader in Settings to download",
+      "goToArtist": "Go to Artist"
     },
     "review": {
       "targetServer": "Target server",
@@ -1180,7 +1183,8 @@
       },
       "soulsyncDesc": "Search Soulseek through SoulSync",
       "addedToSoulsync": "Requested from SoulSync.",
-      "addedTrackToSoulsync": "Requested from SoulSync."
+      "addedTrackToSoulsync": "Requested from SoulSync.",
+      "monitoringOnLidarr": "Lidarr is following {{artist}}."
     },
     "header": {
       "songs": "{{count}} song",
@@ -1207,7 +1211,20 @@
   "wants": {
     "title": "Wants",
     "empty": "Nothing saved yet.",
-    "searchAction": "Search music"
+    "searchAction": "Search music",
+    "remove": "Remove",
+    "get": "Get",
+    "retry": "Try again",
+    "openAlbum": "Go to album",
+    "openArtist": "Go to artist",
+    "openArrival": "Open",
+    "artistLabel": "Artist",
+    "status": {
+      "queued": "Queued",
+      "downloading": "Downloading · {{progress}}%",
+      "failed": "Didn't arrive",
+      "arrived": "In your library"
+    }
   },
   "albumOptions": {
     "actions": {
@@ -1317,7 +1334,8 @@
       "downloaded": "Downloaded",
       "goToArtist": "Go to Artist",
       "viewExternal": "View External",
-      "generatePlaylist": "Make a playlist from this"
+      "generatePlaylist": "Make a playlist from this",
+      "share": "Share"
     },
     "sections": {
       "info": "Artist Info"
@@ -1351,7 +1369,12 @@
       "name": "Name",
       "streamUrl": "Stream URL",
       "homepage": "Homepage (optional)"
-    }
+    },
+    "play": "Play",
+    "openHomepage": "Open homepage",
+    "delete": "Delete station",
+    "refresh": "Refresh",
+    "openFailed": "Could not open that page"
   },
   "podcasts": {
     "title": "Podcasts",
@@ -1529,5 +1552,8 @@
     "albumLoadFailed": "Couldn't load album. Check your connection.",
     "artistLoadFailed": "Couldn't load artist. Check your connection.",
     "playlistLoadFailed": "Couldn't load playlist. Check your connection."
+  },
+  "externalOptions": {
+    "openInSource": "Open in {{source}}"
   }
 }

@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useRouter } from 'expo-router';
 import { notify } from '@/components/toast';
 import { useTranslation } from 'react-i18next';
 
 import { useAlbums } from '@/features/album/useAlbums';
+import { useArtists } from '@/features/artist/useArtists';
 import { useTracks } from '@/features/song/useTracks';
 import { selectActiveServerId } from '@/state/redux/selectors/serversSelectors';
 import { selectWantsForActiveServer } from '@/state/redux/selectors/wantsSelectors';
@@ -25,13 +27,20 @@ import { findArrivedWants } from './arrival';
  * deliberately no separate "Arrived" collection; Recently Added already
  * covers that, so a resolved want is simply removed from the active list
  * with a brief notification.
+ *
+ * That notification opens the copy that arrived. Telling someone the thing
+ * they waited for is finally here and leaving them to go and find it is the
+ * one moment in this feature where a tap is obviously worth offering — and
+ * the row that would have taken them there has just been removed.
  */
 export function useWantArrivalWatcher(): void {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const router = useRouter();
   const activeServerId = useSelector(selectActiveServerId);
   const wants = useSelector(selectWantsForActiveServer);
   const { albums } = useAlbums();
+  const { artists } = useArtists();
   const { tracks } = useTracks();
 
   // Guards against re-firing the toast/removal for a want already resolved
@@ -55,13 +64,23 @@ export function useWantArrivalWatcher(): void {
     const candidates = wants.filter((want) => !resolvedRef.current.has(want.localId));
     if (candidates.length === 0) return;
 
-    const arrived = findArrivedWants(candidates, { albums, tracks });
+    const arrived = findArrivedWants(candidates, { albums, artists, tracks });
     if (arrived.length === 0) return;
 
-    for (const want of arrived) {
+    for (const { want, libraryCopy } of arrived) {
       resolvedRef.current.add(want.localId);
       dispatch(removeWant({ serverId: activeServerId, localId: want.localId }));
-      notify.success(t('externalAlbum.menu.arrived', { title: want.title }));
+      notify.success(t('externalAlbum.menu.arrived', { title: want.title }), {
+        action: {
+          label: t('wants.openArrival'),
+          // The server adapter's own id, which is what the detail routes
+          // resolve their `id` param by calling back with.
+          onPress: () => router.push({
+            pathname: libraryCopy.kind === 'artist' ? '/artistView' : '/albumView',
+            params: { id: libraryCopy.nativeId },
+          }),
+        },
+      });
     }
-  }, [activeServerId, wants, albums, tracks, dispatch, t]);
+  }, [activeServerId, wants, albums, artists, tracks, dispatch, router, t]);
 }

@@ -2,6 +2,7 @@ import {
   contentKindBehaviour,
   hasDuration,
   isAutoplaySeed,
+  isContinuous,
   isScrobbleable,
   isSeekable,
   hasReissuableUrl,
@@ -21,6 +22,7 @@ describe('contentKindBehaviour', () => {
           isSeekable: expect.any(Boolean),
           isAutoplaySeed: expect.any(Boolean),
           hasReissuableUrl: expect.any(Boolean),
+          isContinuous: expect.any(Boolean),
         })
       );
     }
@@ -33,7 +35,18 @@ describe('contentKindBehaviour', () => {
       isSeekable: true,
       isAutoplaySeed: true,
       hasReissuableUrl: true,
+      isContinuous: false,
     });
+  });
+
+  it('only a live stream is continuous, which is what the engine reads it by', () => {
+    // Regression: nothing told the engine a station has no end, so it read
+    // one with a file parser that waits for the end of the broadcast, and no
+    // station played.
+    expect(isContinuous('liveStream')).toBe(true);
+    for (const kind of ALL_KINDS.filter(other => other !== 'liveStream')) {
+      expect(isContinuous(kind)).toBe(false);
+    }
   });
 
   it('preview has duration but is not scrobbleable, not an autoplay seed, and not stream-refreshable', () => {

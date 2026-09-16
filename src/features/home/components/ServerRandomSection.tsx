@@ -19,7 +19,7 @@ import {
   SECTION_GRID_GAP,
   SECTION_VISIBLE_ITEMS,
 } from '@/features/home/constants';
-import MediaTile from './MediaTile';
+import OptionsTile from './OptionsTile';
 import SkeletonTiles from '@/components/SkeletonTiles';
 import { useSourceSectionPresence } from './SourceGroup';
 import type { Song } from '@/domain/entities/Song';
@@ -122,7 +122,8 @@ export default function ServerRandomSection({ sectionKey, refreshKey = 0 }: Prop
   }, [data, playSongs]);
 
   const renderSong = useCallback(({ item, index }: { item: Song; index: number }) => (
-    <MediaTile
+    <OptionsTile
+      entity={{ kind: 'song', song: item }}
       cover={item.cover}
       title={item.title}
       subtitle={item.artist.name}

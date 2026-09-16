@@ -186,6 +186,7 @@ interface EngineTrackInput {
   albumTitle?: string;
   artworkUrl?: string;
   duration?: number;
+  continuous?: boolean;
   headers?: Record<string, string>;
   artworkHeaders?: Record<string, string>;
 }
@@ -209,6 +210,9 @@ export function toEngineTrack(item: EngineTrackInput): Track {
     // Absent, not zero: the engine treats an unknown duration differently from
     // a zero one when it clamps a crossfade.
     durationSec: item.duration,
+    // A radio station. The engine reads it with a stream parser; told nothing,
+    // it waits for the end of a broadcast and the station never starts.
+    ...(item.continuous ? { continuous: true } : {}),
     // Ephemeral request headers for a header-authenticated server (Plex behind
     // a Basic-auth proxy). Two distinct fields: the engine fetches the stream
     // and the artwork independently. Set only when present, so an unprotected
@@ -228,6 +232,7 @@ export function toMediaItem(track: Track): MediaItem {
     duration: track.durationSec,
     url: track.uri,
     artworkUrl: track.artworkUri,
+    ...(track.continuous ? { continuous: true } : {}),
     ...(track.headers ? { headers: track.headers } : {}),
     ...(track.artworkHeaders ? { artworkHeaders: track.artworkHeaders } : {}),
   };

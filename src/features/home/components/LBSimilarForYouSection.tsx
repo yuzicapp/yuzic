@@ -17,7 +17,7 @@ import {
   SECTION_GRID_GAP,
   SECTION_VISIBLE_ITEMS,
 } from '@/features/home/constants';
-import MediaTile from './MediaTile';
+import OptionsTile from './OptionsTile';
 import SkeletonTiles from '@/components/SkeletonTiles';
 import { useSourceSectionPresence } from './SourceGroup';
 import type { Artist } from '@/domain/entities/Artist';
@@ -127,7 +127,8 @@ export default function LBSimilarForYouSection({ sectionKey, artistNames, refres
   useSourceSectionPresence(sectionKey, hasContent);
 
   const renderArtist = useCallback(({ item }: { item: Artist }) => (
-    <MediaTile
+    <OptionsTile
+      entity={{ kind: 'artist', artist: item }}
       cover={item.cover}
       title={item.name}
       subtitle={t('common.artist')}

@@ -10,6 +10,7 @@ import {
   OptionSheetRow,
   optionSheetStyles,
   useOptionSheetBackground,
+  useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives';
 import { useSheetRef } from '@/components/useSheetRef';
 import { spacing, typography } from '@/constants/design';
@@ -29,6 +30,7 @@ export default function SourceUsePromptHost() {
   const { colors } = useTheme();
   const dispatch = useDispatch();
   const sheetBg = useOptionSheetBackground();
+  const sheetContent = useOptionSheetContentStyle();
   const sheetRef = useSheetRef();
   const pending = usePendingSourceUse();
 
@@ -52,7 +54,7 @@ export default function SourceUsePromptHost() {
       backgroundStyle={[optionSheetStyles.sheetBackground, sheetBg]}
       onDismiss={dismissSourceUsePrompt}
     >
-      <BottomSheetView style={[optionSheetStyles.sheetContent, sheetBg]}>
+      <BottomSheetView style={[sheetContent, sheetBg]}>
         {use && (
           <>
             <Text style={[styles.title, { color: colors.secondary }]}>

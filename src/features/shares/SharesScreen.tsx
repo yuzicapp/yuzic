@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { notify } from '@/components/toast';
-import { CloudOff, Link2, Pencil, Share2, Trash2 } from 'lucide-react-native';
+import { CloudOff, Ellipsis, Link2 } from 'lucide-react-native';
 
 import { useApi } from '@/providers/registry/useApi';
 import type { Share } from '@/providers/contracts/ServerAdapter';
@@ -14,6 +14,7 @@ import EmptyState from '@/components/EmptyState';
 import SkeletonListRow from '@/components/SkeletonListRow';
 import { FormSheet, FormSheetField } from '@/components/FormSheet';
 import RadioMark from '@/components/options/RadioMark';
+import { ShareLinkOptions } from '@/components/options/ShareLinkOptions';
 import { useTheme } from '@/features/theme/useTheme';
 import { useScrollClearance } from '@/features/theme/useScrollClearance';
 import { useListDensity } from '@/features/theme/useListDensity';
@@ -65,6 +66,7 @@ export default function SharesScreen() {
   const queryClient = useQueryClient();
   const serverReachable = useServerReachable();
   const [editing, setEditing] = useState<Share | null>(null);
+  const [optionsFor, setOptionsFor] = useState<Share | null>(null);
 
   const sharesQuery = useQuery<Share[]>({
     queryKey: [QueryKeys.Shares],
@@ -135,38 +137,20 @@ export default function SharesScreen() {
             ].filter(Boolean).join(' · ')}
           </Text>
         </View>
-        <View style={styles.actions}>
-          <Touchable
-            onPress={() => handleShareAgain(item)}
-            hitSlop={hitSlopFor(18)}
-            style={styles.actionBtn}
-            accessibilityRole="button"
-            accessibilityLabel={t('shares.share')}
-          >
-            <Share2 size={iconSize.row} color={colors.subtext} />
-          </Touchable>
-          <Touchable
-            onPress={() => setEditing(item)}
-            hitSlop={hitSlopFor(18)}
-            style={styles.actionBtn}
-            accessibilityRole="button"
-            accessibilityLabel={t('shares.edit')}
-          >
-            <Pencil size={iconSize.row} color={colors.subtext} />
-          </Touchable>
-          <Touchable
-            onPress={() => handleDelete(item)}
-            hitSlop={hitSlopFor(18)}
-            style={styles.actionBtn}
-            accessibilityRole="button"
-            accessibilityLabel={t('shares.revoke')}
-          >
-            <Trash2 size={iconSize.row} color={colors.subtext} />
-          </Touchable>
-        </View>
+        <Touchable
+          testID="share-options"
+          onPress={() => setOptionsFor(item)}
+          hitSlop={hitSlopFor(iconSize.row)}
+          style={styles.actionBtn}
+          feedback="control"
+          accessibilityRole="button"
+          accessibilityLabel={t('a11y.rows.options', { title: item.description || item.url })}
+        >
+          <Ellipsis size={iconSize.row} color={colors.subtext} />
+        </Touchable>
       </View>
     ),
-    [colors.secondary, colors.subtext, handleShareAgain, handleDelete, t, density.rowPadding]
+    [colors.secondary, colors.subtext, t, density.rowPadding]
   );
 
   return (
@@ -211,6 +195,16 @@ export default function SharesScreen() {
           contentContainerStyle={[styles.listContent, { paddingBottom: scrollClearance }]}
           ItemSeparatorComponent={renderSeparator}
           renderItem={renderShare}
+        />
+      )}
+
+      {optionsFor && (
+        <ShareLinkOptions
+          share={optionsFor}
+          onClose={() => setOptionsFor(null)}
+          onShare={() => { void handleShareAgain(optionsFor); }}
+          onEdit={() => setEditing(optionsFor)}
+          onRevoke={() => handleDelete(optionsFor)}
         />
       )}
 
@@ -294,7 +288,6 @@ const styles = StyleSheet.create({
   title: { ...typography.rowTitle },
   url: { ...typography.caption, marginTop: spacing.xxs },
   meta: { ...typography.caption, marginTop: spacing.xxs },
-  actions: { flexDirection: 'row', gap: spacing.sm },
   actionBtn: { padding: spacing.sm },
   expiryLabel: { ...typography.caption, marginTop: spacing.sm },
   expiryRow: {

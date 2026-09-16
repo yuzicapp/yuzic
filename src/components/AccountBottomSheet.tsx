@@ -1,4 +1,4 @@
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Settings, RefreshCw, LogOut } from 'lucide-react-native';
@@ -13,6 +13,11 @@ import { useTheme } from '@/features/theme/useTheme';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
+import {
+  optionSheetStyles,
+  useOptionSheetBackground,
+  useOptionSheetContentStyle,
+} from '@/components/options/OptionSheetPrimitives';
 import Touchable from '@/components/Touchable';
 import UserAvatar from '@/components/UserAvatar';
 import { controlSize, iconSize, radius, spacing, typography } from '@/constants/design';
@@ -30,8 +35,8 @@ const AccountBottomSheet = forwardRef<BottomSheetModal, Props>(({ onDismiss }, r
   const router = useRouter();
   const dispatch = useDispatch();
   const api = useApi();
-
-  const snapPoints = useMemo(() => ['40%'], []);
+  const sheetBg = useOptionSheetBackground();
+  const sheetContent = useOptionSheetContentStyle();
 
   const activeServer = useSelector(selectActiveServer);
   const username = activeServer?.username;
@@ -79,14 +84,14 @@ const AccountBottomSheet = forwardRef<BottomSheetModal, Props>(({ onDismiss }, r
     <BottomSheetModal
       ref={ref}
       onDismiss={onDismiss}
-      snapPoints={snapPoints}
-      enableDynamicSizing={false}
+      enableDynamicSizing
       enablePanDownToClose
       backdropComponent={renderBackdrop}
-      backgroundStyle={[{ backgroundColor: colors.card, borderTopLeftRadius: rad.lg, borderTopRightRadius: rad.lg }, styles.sheetBackground]}
+      stackBehavior="push"
+      backgroundStyle={[optionSheetStyles.sheetBackground, sheetBg]}
       handleIndicatorStyle={{ backgroundColor: colors.border }}
     >
-      <BottomSheetView style={styles.container}>
+      <BottomSheetView style={[sheetBg, sheetContent]}>
         {/* Profile */}
         <View style={styles.header}>
           <UserAvatar username={username} size={controlSize.avatarSheet} borderRadius={rad.pill} />
@@ -132,11 +137,6 @@ AccountBottomSheet.displayName = 'AccountBottomSheet';
 export default AccountBottomSheet;
 
 const styles = StyleSheet.create({
-  sheetBackground: {},
-  container: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

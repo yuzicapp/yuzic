@@ -1,6 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
+jest.mock('@/features/sources/useMatchedNavigation', () => ({
+  useMatchedNavigation: () => ({ navigateToAlbum: jest.fn(), navigateToArtist: jest.fn() }),
+}));
+jest.mock('@/features/shares/share', () => ({ shareItem: jest.fn() }));
 jest.mock('@gorhom/bottom-sheet', () => require('@gorhom/bottom-sheet/mock'));
 
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
@@ -79,6 +83,7 @@ jest.mock('@/components/options/OptionSheetPrimitives', () => {
     OptionSheetDivider: () => <RNView />,
     optionSheetStyles: { sheetBackground: {}, sheetContent: {}, loading: {} },
     useOptionSheetBackground: () => ({}),
+    useOptionSheetContentStyle: () => ({}),
   };
 });
 

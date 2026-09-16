@@ -29,9 +29,11 @@ jest.mock('./SourceGroup', () => ({
 
 jest.mock('@/components/SkeletonTiles', () => 'SkeletonTiles');
 
-jest.mock('./MediaTile', () => {
+// The tile now carries its own options sheet (`OptionsTile`), which pulls in
+// the bottom-sheet library; this shelf's test is about which artists it shows.
+jest.mock('./OptionsTile', () => {
   const { Text } = require('react-native');
-  return function MockMediaTile({ title }: { title: string }) {
+  return function MockOptionsTile({ title }: { title: string }) {
     return <Text>{title}</Text>;
   };
 });

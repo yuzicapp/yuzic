@@ -9,8 +9,15 @@ import { iconSize } from '@/constants/design';
 import type { Artist } from '@/domain/entities/Artist';
 import { useTheme } from '@/features/theme/useTheme';
 
-/** The "…" on a library artist's bar, opening the artist's options sheet. */
-export default function LocalOptionsButton({ artist }: { artist: Artist }) {
+/**
+ * The "…" on an artist's bar, opening the artist's options sheet.
+ *
+ * On a browsed artist as well as a library one — the browsed screen used to
+ * draw a 36pt hole where the button goes, which is why there was no way to
+ * share one or open it at its source. `ArtistOptions` picks the action set
+ * from the artist's own provenance.
+ */
+export default function ArtistOptionsButton({ artist }: { artist: Artist }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const optionsSheetRef = useSheetRef();

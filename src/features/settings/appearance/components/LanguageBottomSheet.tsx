@@ -9,7 +9,16 @@ interface LanguageBottomSheetProps { selected: string; onSelect: (code: string) 
 const LanguageBottomSheet = forwardRef<BottomSheetModal, LanguageBottomSheetProps>(({ selected, onSelect }, ref) => {
   const { t } = useTranslation();
   const options = useMemo<SingleSelectOption[]>(() => AVAILABLE_LANGUAGES.map(lang => ({ value: lang.code, label: t(lang.translationKey), Icon: Languages })), [t]);
-  return <SingleSelectBottomSheet ref={ref} selected={selected} options={options} title={t('settings.appearance.language.title')} snapPoint="35%" onSelect={onSelect} />;
+  return (
+    <SingleSelectBottomSheet
+      ref={ref}
+      testID="language-sheet"
+      selected={selected}
+      options={options}
+      title={t('settings.appearance.language.title')}
+      onSelect={onSelect}
+    />
+  );
 });
 LanguageBottomSheet.displayName = 'LanguageBottomSheet';
 export default LanguageBottomSheet;

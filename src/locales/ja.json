@@ -36,7 +36,9 @@
       "appearance": "外観",
       "github": "GitHub",
       "privacyPolicy": "プライバシーポリシー",
-      "termsOfUse": "利用規約"
+      "termsOfUse": "利用規約",
+      "changelog": "新着情報",
+      "website": "ウェブサイト"
     },
     "profile": {
       "unknownUser": "不明なユーザー",
@@ -1115,7 +1117,8 @@
       "arrived": "{{title}} がライブラリに追加されました",
       "inLibrary": "ライブラリ内",
       "downloading": "サーバーにダウンロード中… {{progress}}%",
-      "noServiceConnected": "ダウンロードするには設定でダウンローダーを接続してください"
+      "noServiceConnected": "ダウンロードするには設定でダウンローダーを接続してください",
+      "goToArtist": "アーティストへ移動"
     },
     "review": {
       "targetServer": "対象サーバー",
@@ -1173,7 +1176,8 @@
       },
       "soulsyncDesc": "SoulSync 経由で Soulseek を検索",
       "addedToSoulsync": "SoulSync にリクエストしました。",
-      "addedTrackToSoulsync": "SoulSync にリクエストしました。"
+      "addedTrackToSoulsync": "SoulSync にリクエストしました。",
+      "monitoringOnLidarr": "Lidarr が {{artist}} を追跡しています。"
     },
     "header": {
       "songs": "{{count}} 曲",
@@ -1190,7 +1194,20 @@
   "wants": {
     "title": "ウォンツ",
     "empty": "まだ何も保存されていません。",
-    "searchAction": "音楽を検索"
+    "searchAction": "音楽を検索",
+    "remove": "削除",
+    "get": "取得",
+    "retry": "再試行",
+    "openAlbum": "アルバムへ移動",
+    "openArtist": "アーティストへ移動",
+    "openArrival": "開く",
+    "artistLabel": "アーティスト",
+    "status": {
+      "queued": "待機中",
+      "downloading": "ダウンロード中 · {{progress}}%",
+      "failed": "届きませんでした",
+      "arrived": "ライブラリにあります"
+    }
   },
   "manualAddWant": {
     "title": "ウォンツに追加",
@@ -1295,7 +1312,8 @@
       "downloaded": "ダウンロード済み",
       "goToArtist": "アーティストへ",
       "viewExternal": "外部で表示",
-      "generatePlaylist": "これでプレイリストを作成"
+      "generatePlaylist": "これでプレイリストを作成",
+      "share": "共有"
     },
     "sections": {
       "info": "アーティスト情報"
@@ -1387,7 +1405,12 @@
       "name": "名前",
       "streamUrl": "ストリーム URL",
       "homepage": "ホームページ（任意）"
-    }
+    },
+    "play": "再生",
+    "openHomepage": "ホームページを開く",
+    "delete": "ラジオ局を削除",
+    "refresh": "更新",
+    "openFailed": "このページを開けませんでした"
   },
   "podcasts": {
     "title": "ポッドキャスト",
@@ -1524,5 +1547,8 @@
       "offline": "この端末に保存",
       "downloaders": "サーバー転送"
     }
+  },
+  "externalOptions": {
+    "openInSource": "{{source}} で開く"
   }
 }

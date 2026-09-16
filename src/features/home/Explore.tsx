@@ -1,7 +1,6 @@
 import { onDark, spacing, typography } from '@/constants/design';
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { StyleSheet, ScrollView, View, Text, RefreshControl } from 'react-native'
-import { useIsFetching } from '@tanstack/react-query'
 import { useScrollToTop } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -32,6 +31,7 @@ import ContinuePlayingSection from './components/ContinuePlayingSection'
 import SourceGroup from './components/SourceGroup'
 import { ResumeQueueBanner } from './components/ResumeQueueBanner'
 import { DownloadsInProgressBanner } from './components/DownloadsInProgressBanner'
+import { RefreshSettler } from './components/RefreshSettler'
 import { useApi } from '@/providers/registry/useApi'
 import type { SectionConfig } from '@/features/home/homeLayout'
 import { useRadius } from '@/features/theme/useRadius'
@@ -92,74 +92,106 @@ export default function Home() {
   const homeServerEnabled = useSelector(selectHomeServerSectionsEnabled)
   const homeVisibility = useSelector(selectHomeShelfVisibilityMap)
   const shelfOrders = useSelector(selectHomeShelfOrders)
-  const visibleIn = (tier: HomeShelfTier, sections: SectionConfig[]) =>
-    customizeHomeSections(sections, homeVisibility, resolveHomeShelfOrder(shelfOrders?.[tier], sections.map(s => s.key)))
-  const visibleResume = visibleIn('resume', resume)
-  const visibleLibrary = visibleIn('library', library)
-  const visibleServer = visibleIn('server', server)
+  // Memoised, down to the rendered elements. Home re-renders whenever
+  // something it reads changes, and a section element built fresh on every
+  // render re-renders that whole shelf even when nothing about it changed —
+  // which on a track change was every shelf on the screen, measured as a
+  // single 160–190ms commit. Handing React the same element lets it skip them.
+  const visibleResume = useMemo(
+    () => customizeHomeSections(resume, homeVisibility, resolveHomeShelfOrder(shelfOrders?.resume, resume.map(s => s.key))),
+    [resume, homeVisibility, shelfOrders]
+  )
+  const visibleLibrary = useMemo(
+    () => customizeHomeSections(library, homeVisibility, resolveHomeShelfOrder(shelfOrders?.library, library.map(s => s.key))),
+    [library, homeVisibility, shelfOrders]
+  )
+  const visibleServer = useMemo(
+    () => customizeHomeSections(server, homeVisibility, resolveHomeShelfOrder(shelfOrders?.server, server.map(s => s.key))),
+    [server, homeVisibility, shelfOrders]
+  )
+  const visibleSources = useMemo(() => {
+    const bySource: Partial<Record<HomeShelfTier, SectionConfig[]>> = {}
+    for (const tier of HOME_SOURCE_TIERS) {
+      const sections = sources[tier.source] ?? []
+      bySource[tier.source] = customizeHomeSections(
+        sections, homeVisibility, resolveHomeShelfOrder(shelfOrders?.[tier.source], sections.map(s => s.key))
+      )
+    }
+    return bySource
+  }, [sources, homeVisibility, shelfOrders])
   const api = useApi()
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // Track active query count so the spinner clears when fetches complete rather
-  // than after a fixed 500ms timeout.
-  const isFetching = useIsFetching()
-  const refreshStateRef = useRef({ fetchStarted: false, timer: null as ReturnType<typeof setTimeout> | null })
-
-  const clearRefreshing = useCallback(() => {
-    const s = refreshStateRef.current
-    if (s.timer) { clearTimeout(s.timer); s.timer = null }
-    s.fetchStarted = false
-    setIsRefreshing(false)
-  }, [])
-
-  useEffect(() => {
-    if (!isRefreshing) return
-    const s = refreshStateRef.current
-    if (isFetching > 0) {
-      // At least one fetch has started — cancel the safety timer and wait for 0.
-      s.fetchStarted = true
-      if (s.timer) { clearTimeout(s.timer); s.timer = null }
-    } else if (s.fetchStarted) {
-      // All fetches done — spinner can go away.
-      clearRefreshing()
-    }
-  }, [isRefreshing, isFetching, clearRefreshing])
+  // The spinner clears when the refresh's fetches complete — see
+  // `RefreshSettler`, which is mounted only while one is in flight.
+  const clearRefreshing = useCallback(() => setIsRefreshing(false), [])
 
   const onRefresh = useCallback(() => {
-    const s = refreshStateRef.current
-    s.fetchStarted = false
-    if (s.timer) clearTimeout(s.timer)
-    // Safety: if all data is already within staleTime, isFetching never rises.
-    // Cap the spinner at 2s so it doesn't spin forever.
-    s.timer = setTimeout(clearRefreshing, 2000)
     setIsRefreshing(true)
     setRefreshKey(k => k + 1)
-  }, [clearRefreshing])
+  }, [])
+
+  const resumeElements = useMemo(
+    () => visibleResume.map(config => renderSection(config, refreshKey)),
+    [visibleResume, refreshKey]
+  )
+  const libraryElements = useMemo(
+    () => visibleLibrary.map(config => renderSection(config, refreshKey)),
+    [visibleLibrary, refreshKey]
+  )
 
   // Server discovery is on whenever the adapter provides it — no per-user
   // toggle, matching how radio and shares appear only where the server can
   // back them. Every outside tier waits for its source's Home switch, and is
   // not attempted offline.
-  const activeSources = [
-    {
-      id: 'server',
-      label: t('explore.sources.server'),
-      // Your own server is not a third-party brand, so it gets the app's own
-      // accent rather than borrowing an outside source's colour.
-      color: colors.themeColor,
-      letter: 'S',
-      sections: visibleServer,
-      enabled: Boolean(api.discovery) && homeServerEnabled,
-    },
-    ...HOME_SOURCE_TIERS.map(tier => ({
-      id: tier.source,
-      label: t(SOURCES[tier.source].nameKey),
-      color: tier.badge.color,
-      letter: tier.badge.letter,
-      sections: visibleIn(tier.source, sources[tier.source] ?? []),
-      enabled: Boolean(sourceUses?.[`${tier.source}.homeShelves`]) && !isOffline,
-    })),
-  ]
+  const sourceGroups = useMemo(() => {
+    const groups = [
+      {
+        id: 'server',
+        label: t('explore.sources.server'),
+        // Your own server is not a third-party brand, so it gets the app's own
+        // accent rather than borrowing an outside source's colour.
+        color: colors.themeColor,
+        letter: 'S',
+        sections: visibleServer,
+        enabled: Boolean(api.discovery) && homeServerEnabled,
+      },
+      ...HOME_SOURCE_TIERS.map(tier => ({
+        id: tier.source,
+        label: t(SOURCES[tier.source].nameKey),
+        color: tier.badge.color,
+        letter: tier.badge.letter,
+        sections: visibleSources[tier.source] ?? [],
+        enabled: Boolean(sourceUses?.[`${tier.source}.homeShelves`]) && !isOffline,
+      })),
+    ]
+    return groups.map(source => {
+      if (!source.enabled || source.sections.length === 0) return null
+      // The shelves under a source decide for themselves whether they have
+      // anything; the group withholds the heading until one of them says it
+      // does, so a source that renders nothing takes its label with it.
+      return (
+        <SourceGroup
+          key={source.id}
+          sectionKeys={source.sections.map(config => config.key)}
+          header={
+            <View style={styles.sourceHeader}>
+              {showSourceHeaders && (
+                <View style={[styles.sourceBadge, { backgroundColor: source.color, borderRadius: rad.pill }]}>
+                  <Text style={styles.sourceBadgeLetter}>{source.letter}</Text>
+                </View>
+              )}
+              <Text style={[styles.sourceHeaderText, { color: colors.subtext }]}>
+                {source.label}
+              </Text>
+            </View>
+          }
+        >
+          {source.sections.map(config => renderSection(config, refreshKey))}
+        </SourceGroup>
+      )
+    })
+  }, [t, colors.themeColor, colors.subtext, visibleServer, visibleSources, api.discovery, homeServerEnabled, sourceUses, isOffline, showSourceHeaders, rad.pill, refreshKey])
 
   return (
     <ScrollView
@@ -175,10 +207,11 @@ export default function Home() {
         />
       }
     >
+      {isRefreshing && <RefreshSettler onSettled={clearRefreshing} />}
       <ResumeQueueBanner />
       <DownloadsInProgressBanner />
 
-      {visibleResume.map(config => renderSection(config, refreshKey))}
+      {resumeElements}
 
       {visibleLibrary.length > 0 && (
         <>
@@ -187,36 +220,11 @@ export default function Home() {
               {t('explore.sections.fromYourLibrary')}
             </Text>
           </View>
-          {visibleLibrary.map(config => renderSection(config, refreshKey))}
+          {libraryElements}
         </>
       )}
 
-      {activeSources.map(source => {
-        if (!source.enabled || source.sections.length === 0) return null
-        // The shelves under a source decide for themselves whether they have
-        // anything; the group withholds the heading until one of them says it
-        // does, so a source that renders nothing takes its label with it.
-        return (
-          <SourceGroup
-            key={source.id}
-            sectionKeys={source.sections.map(config => config.key)}
-            header={
-              <View style={styles.sourceHeader}>
-                {showSourceHeaders && (
-                  <View style={[styles.sourceBadge, { backgroundColor: source.color, borderRadius: rad.pill }]}>
-                    <Text style={styles.sourceBadgeLetter}>{source.letter}</Text>
-                  </View>
-                )}
-                <Text style={[styles.sourceHeaderText, { color: colors.subtext }]}>
-                  {source.label}
-                </Text>
-              </View>
-            }
-          >
-            {source.sections.map(config => renderSection(config, refreshKey))}
-          </SourceGroup>
-        )
-      })}
+      {sourceGroups}
     </ScrollView>
   )
 }

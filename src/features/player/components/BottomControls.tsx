@@ -1,18 +1,16 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Cast, ListMusic, Moon } from 'lucide-react-native';
+import { Cast, ListMusic } from 'lucide-react-native';
 import { usePlaybackSink } from '@/features/player/PlaybackSinkContext';
 import Touchable from '@/components/Touchable';
 import { controlSize, hitSlopFor, iconSize, onDark, spacing, stateLayer } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
-import { useSleepTimer } from '../sleepTimer';
 
 type BottomControlsProps = {
   mode: 'player' | 'queue';
   setMode: (mode: 'player' | 'queue') => void;
   onOpenOutputSheet: () => void;
-  onOpenSleepTimer: () => void;
 };
 
 /** The size these two are drawn at. Below the 68pt play button and above
@@ -22,7 +20,19 @@ type BottomControlsProps = {
  *  that was on. `hitSlopFor` takes the finger the rest of the way. */
 const BUTTON_SIZE = controlSize.playerSecondary;
 
-const BottomControls: React.FC<BottomControlsProps> = ({ mode, setMode, onOpenOutputSheet, onOpenSleepTimer }) => {
+/**
+ * The player's two secondary destinations: where the sound goes, and what is
+ * coming next.
+ *
+ * The sleep timer used to appear here as a third button, but only while a
+ * timer was running — so this row changed shape underneath the finger, and a
+ * control the user could not reach until after they had already found the
+ * feature elsewhere is not a control. Setting it belongs to the track's
+ * options (the `⋯` this screen already has); a running timer says so in the
+ * player's header, next to that `⋯`, where it is visible without taking a
+ * place in the transport.
+ */
+const BottomControls: React.FC<BottomControlsProps> = ({ mode, setMode, onOpenOutputSheet }) => {
   const { t } = useTranslation();
   const { sink } = usePlaybackSink();
   const rad = useRadius();
@@ -30,9 +40,6 @@ const BottomControls: React.FC<BottomControlsProps> = ({ mode, setMode, onOpenOu
   // for all of them, so it answers "is the sound somewhere else?".
   const isCasting = sink.kind !== 'local';
   const showingQueue = mode === 'queue';
-  // The timer is set from the track's options, so the player only says one
-  // is running — and is the quickest way back to it once it is.
-  const sleepTimerOn = useSleepTimer().mode !== 'off';
 
   // One way of saying "on" for both. The queue toggle used to get a filled
   // background and the cast button only a colour change, so a pair of controls
@@ -68,20 +75,6 @@ const BottomControls: React.FC<BottomControlsProps> = ({ mode, setMode, onOpenOu
       >
         <ListMusic size={iconSize.header} color={showingQueue ? onDark.text : onDark.subtext} />
       </Touchable>
-
-      {sleepTimerOn && (
-        <Touchable
-          testID="playing-sleep-timer"
-          accessibilityRole="button"
-          accessibilityLabel={t('a11y.player.sleepTimer')}
-          accessibilityState={{ selected: true }}
-          onPress={onOpenSleepTimer}
-          style={buttonStyle(true)}
-          hitSlop={hitSlopFor(BUTTON_SIZE)}
-        >
-          <Moon size={iconSize.header} color={onDark.text} />
-        </Touchable>
-      )}
     </View>
   );
 };

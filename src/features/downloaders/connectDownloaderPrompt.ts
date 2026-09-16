@@ -13,8 +13,14 @@ import { useSyncExternalStore } from 'react';
  * source's use that a switch turns on.
  */
 
-/** What is being asked for, so only downloaders that take it are offered. */
-type DownloadUnit = 'album' | 'track';
+/**
+ * What is being asked for, so only downloaders that take it are offered.
+ *
+ * `artist` is not a thing to fetch but a thing to follow, and only a
+ * collection manager has any concept of one — so it offers a different, and
+ * usually shorter, list than the two release units.
+ */
+type DownloadUnit = 'album' | 'track' | 'artist';
 
 let pending: DownloadUnit | null = null;
 const listeners = new Set<() => void>();

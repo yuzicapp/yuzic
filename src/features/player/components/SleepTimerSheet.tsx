@@ -9,6 +9,7 @@ import {
   OptionSheetRow,
   optionSheetStyles,
   useOptionSheetBackground,
+  useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives';
 import { dismissSheetRef } from '@/features/entity-actions/shared/sheetRef';
 import { iconSize, spacing, statusColor, typography } from '@/constants/design';
@@ -34,6 +35,7 @@ const SleepTimerSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const sheetBg = useOptionSheetBackground();
+  const sheetContent = useOptionSheetContentStyle();
   const timer = useSleepTimer();
 
   const choose = (run: () => void) => {
@@ -55,7 +57,7 @@ const SleepTimerSheet = forwardRef<BottomSheetModal>((_, ref) => {
       <BottomSheetScrollView
         testID="sleep-timer-sheet"
         style={sheetBg}
-        contentContainerStyle={optionSheetStyles.sheetContent}
+        contentContainerStyle={sheetContent}
       >
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.secondary }]}>{t('playing.sleepTimer.title')}</Text>

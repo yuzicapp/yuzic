@@ -166,33 +166,17 @@ export function OptionSheetChipsRow({ label, values }: ChipsRowProps) {
   );
 }
 
-/** Shared scaffold styles for BottomSheetModal-based option sheets.
- *  Top corners are applied through {@link useOptionSheetBackground} so they
- *  follow the user's radius preset. */
-export const optionSheetStyles = StyleSheet.create({
-  sheetBackground: {},
-  sheetContent: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: spacing.generous,
-  },
-});
-
-/** Sheet surface color + top-corner radii scaled by the user's preset. */
-export function useOptionSheetBackground() {
-  const { isDarkMode, colors } = useTheme();
-  const rad = useRadius();
-  return {
-    backgroundColor: isDarkMode ? colors.card : colors.background,
-    borderTopLeftRadius: rad.lg,
-    borderTopRightRadius: rad.lg,
-  };
-}
+/**
+ * The sheet shell lives in `sheetScaffold`, which carries no components and so
+ * can be imported by a sheet that needs nothing but a background. Re-exported
+ * here because most sheets want the rows and the shell together.
+ */
+export {
+  optionSheetStyles,
+  useOptionSheetBackground,
+  useOptionSheetContentStyle,
+  useSheetBottomInset,
+} from './sheetScaffold';
 
 const styles = StyleSheet.create({
   header: {

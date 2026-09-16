@@ -1,7 +1,7 @@
 {
   "name": "yuzic",
   "main": "expo-router/entry",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -102,7 +102,7 @@
     "react-redux": "^9.2.0",
     "reanimated-color-picker": "^4.2.0",
     "redux-persist": "^6.0.0",
-    "yuzic-engine": "1.0.10"
+    "yuzic-engine": "1.0.11"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

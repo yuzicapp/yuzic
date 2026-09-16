@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -35,8 +35,6 @@ export default function Address() {
     const provider = type ? getServerProvider(type) : undefined;
 
     const schemeSheetRef = useSheetRef();
-    const snapPoints = useMemo(() => ['28%'], []);
-
     const serverUrl = `${scheme}://${host.trim()}`;
     const goToCredentials = () => {
         setProblem(null);
@@ -139,10 +137,10 @@ export default function Address() {
 
             <BottomSheetModal
                 ref={schemeSheetRef}
-                snapPoints={snapPoints}
-                enableDynamicSizing={false}
+                enableDynamicSizing
                 enablePanDownToClose
                 backdropComponent={renderBackdrop}
+                stackBehavior="push"
                 backgroundStyle={styles.sheetBackground}
                 handleIndicatorStyle={styles.sheetHandle}
             >

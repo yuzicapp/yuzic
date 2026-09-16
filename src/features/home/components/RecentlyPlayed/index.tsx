@@ -17,6 +17,7 @@ import PlaylistOptions from '@/components/options/PlaylistOptions';
 import { useSheetRef } from '@/components/useSheetRef';
 import { spacing } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
+import { useStableList } from '@/features/home/hooks/useStableList';
 
 // The shelf's own inset has to be the shared one: its heading comes from
 // SectionShelfHeader, which is inset with every other shelf on the screen.
@@ -39,6 +40,18 @@ type TileProps = {
   item: RecentItem;
   itemWidth: number;
 };
+
+/**
+ * The same tile, for as long as it shows the same album or playlist.
+ *
+ * `ts` is not drawn, and it moves at the end of every song: the scrobble
+ * stamps the album just played. Compared by default, every tile on the shelf
+ * re-rendered at every track change for a number nobody sees.
+ */
+const sameTile = (prev: TileProps, next: TileProps) =>
+  prev.itemWidth === next.itemWidth && sameRecentItem(prev.item, next.item);
+
+const sameRecentItem = (a: RecentItem, b: RecentItem) => a.kind === b.kind && a.data === b.data;
 
 const RecentTile = memo(function RecentTile({ item, itemWidth }: TileProps) {
   const { t } = useTranslation();
@@ -92,7 +105,7 @@ const RecentTile = memo(function RecentTile({ item, itemWidth }: TileProps) {
       ))}
     </>
   );
-});
+}, sameTile);
 
 export default function RecentlyPlayed() {
   const { t } = useTranslation();
@@ -105,7 +118,9 @@ export default function RecentlyPlayed() {
   const { albums } = useAlbums();
   const { playlists } = usePlaylists();
 
-  const items = useMemo<RecentItem[]>(() => {
+  // Stable while the same albums and playlists are listed in the same order;
+  // see `useStableList`.
+  const items = useStableList(useMemo<RecentItem[]>(() => {
     // `selectAlbumLastPlayedAt`/`selectPlaylistLastPlayedAt` key by the
     // origin's own id (see `useScrobbling`'s `incrementPlay` dispatch), so
     // these maps look albums/playlists up by `nativeId`, not `localId`.
@@ -126,7 +141,7 @@ export default function RecentlyPlayed() {
     }
 
     return result.sort((a, b) => b.ts - a.ts).slice(0, MAX_ITEMS);
-  }, [albumLastPlayedAt, playlistLastPlayedAt, albums, playlists]);
+  }, [albumLastPlayedAt, playlistLastPlayedAt, albums, playlists]), sameRecentItem);
 
   const coversToPrefetch = useMemo(() => items.map(i => i.data.cover), [items]);
   usePrefetchCovers(coversToPrefetch, 'grid');

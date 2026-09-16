@@ -1,9 +1,9 @@
-Edit playlists, podcasts that keep up, and a rebuilt, steadier app.
+Radio that plays, a wishlist worth keeping, and the same options everywhere.
 
-- Remove and reorder songs in a playlist, Plex included
-- Podcasts show the latest episodes; delete downloaded ones
-- Sleep timer in a track's options, and it can stop at the track's end
-- Home shelves from Jellyfin, Emby and Plex servers
-- Plex lyrics and similar tracks
-- One Downloads screen for offline files and downloaders
-- Fixed playlists missing from Recently Played
+- Internet radio plays, and stations keep their homepage
+- Wants: artwork, a way in, and downloads you ask for
+- Want an artist, not just an album
+- Your own copy plays instead of a preview, wherever it appears
+- Every screen and sheet carries the same options menu
+- No more stalls at the end of a song
+- Music comes back after a call or another app takes the audio

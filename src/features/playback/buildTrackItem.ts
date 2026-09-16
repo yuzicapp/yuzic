@@ -2,6 +2,7 @@ import type { MediaItem } from '../player/mediaItem';
 import type { RequestHeaders } from '../player/mediaHeaders';
 import type { PlayableResource } from '@/features/playback/playableResource';
 import { toEngineBoundaryTrack } from '@/features/playback/engineBoundary';
+import { isContinuous } from '@/domain/playback/ContentKind';
 
 /**
  * `extra` carries the ephemeral request headers a protected server needs — a
@@ -29,6 +30,7 @@ export function buildTrackItem(resource: PlayableResource, extra?: RequestHeader
     duration: track.durationSec,
     url: track.uri.startsWith('file://') ? { uri: track.uri } : track.uri,
     artworkUrl: track.artworkUri,
+    ...(isContinuous(track.contentKind) ? { continuous: true } : {}),
     ...(track.headers ? { headers: track.headers } : {}),
     ...(track.artworkHeaders ? { artworkHeaders: track.artworkHeaders } : {}),
   };

@@ -1,17 +1,48 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { LocalId } from '@/domain/identity/LocalId';
 import type { ExternalIds } from '@/domain/identity/ExternalIds';
+import type { CoverSource } from '@/domain/entities/Cover';
+import type { DownloaderId } from '@/state/redux/slices/downloadersSlice';
 
-export type WantUnit = 'track' | 'album';
+export type WantUnit = 'track' | 'album' | 'artist';
 
 export type WantOrigin = 'search' | 'shelf' | 'artist-page' | 'manual';
 
 /**
- * A saved intent to acquire a track or album. Stores enough (title/artist)
- * to render a wishlist row with zero lookups — per design, even a
- * 'manual' origin (nothing resolved on-device) saves title+artist locally.
- * `jobRef` is populated later (Phase C3/C4) when a Get is dispatched for
- * this want; the want only references the job, it never owns it.
+ * The Get that was sent for a want, as the want remembers it.
+ *
+ * Deliberately not a status: a job's state is read live off the downloader's
+ * own queue (`features/wants/jobStatus`), because the downloader is the only
+ * thing that knows it. What is stored is which downloader was asked and when
+ * — enough to find the job in that queue, and enough to tell a request that
+ * never showed up from one that has not been picked up yet.
+ *
+ * It replaces a `jobRef: string` that was written as `${id}:${Date.now()}`
+ * and never read: the id half could not be compared to anything without
+ * parsing it back out of the string, so nothing ever did.
+ */
+interface WantJobRef {
+  downloader: DownloaderId;
+  /** Unix ms the Get was accepted by the downloader. */
+  requestedAt: number;
+}
+
+/**
+ * A saved intent to acquire a track, an album, or an artist's output.
+ *
+ * Stores enough (title/artist/cover) to render a wishlist row with zero
+ * lookups — per design, even a 'manual' origin (nothing resolved on-device)
+ * saves title+artist locally.
+ *
+ * `cover` is the entity's cover *as its source gave it*, which for a browsed
+ * record is usually a gap naming who it is of (`Cover.missingCover`). Storing
+ * it is what lets the one picture rule — own source, then the library's copy,
+ * then the artwork backups — fill a want row in, exactly as it fills any other
+ * surface. Absent on wants saved before covers were stored; those rows draw
+ * the placeholder as they always did.
+ *
+ * `jobRef` is populated when a Get is dispatched for this want; the want only
+ * references the job, it never owns it, and nothing here ever starts one.
  */
 export interface Want {
   localId: LocalId;
@@ -19,8 +50,9 @@ export interface Want {
   unit: WantUnit;
   title: string;
   artist: string;
+  cover?: CoverSource;
   origin: WantOrigin;
-  jobRef?: string;
+  jobRef?: WantJobRef;
   createdAt: number;
   updatedAt: number;
 }
@@ -64,7 +96,7 @@ const wantsSlice = createSlice({
       if (!existing) return;
       state.byServer[serverId] = existing.filter(w => w.localId !== localId);
     },
-    setWantJobRef(state, action: PayloadAction<ServerRef & { localId: LocalId; jobRef: string | undefined }>) {
+    setWantJobRef(state, action: PayloadAction<ServerRef & { localId: LocalId; jobRef: WantJobRef | undefined }>) {
       const { serverId, localId, jobRef } = action.payload;
       const existing = state.byServer[serverId];
       if (!existing) return;

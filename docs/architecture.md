@@ -249,6 +249,28 @@ Three things about it are not obvious:
   `fire()` warns as well as emitting, because in a release build nothing
   subscribes to that event.
 
+**A track change has to stay cheap on the JS thread.** It lands at the end of
+every song, and a stall there is heard as the app freezing between tracks. What
+belongs in it is the player catching up — `PlayingProvider`, the playing bar,
+the player host. What does not:
+
+- **Recording the outgoing listen.** It bumps play stats, and Home's shelves
+  are drawn from them; dispatched inside the change it joined the player's
+  commit. `playbackCoordinator` still reads it before the pointer moves, and
+  `outgoingScrobble.ts` sends it a second later.
+- **Anything reading `useIsFetching` above a large tree.** It re-renders on
+  every fetch in the app, and a track change starts several. Home's refresh
+  spinner reads it in `RefreshSettler`, mounted only while refreshing.
+- **Derived lists that change identity without changing contents.** A shelf
+  built from stats is rebuilt when the stats move; `useStableList` keeps the
+  previous array when the entries are the same, `useDailyLayout` keeps its
+  seeds by value, and the local mix keeps the day's seeds (`chooseDailySeeds`)
+  rather than re-picking — which had re-fetched the mix behind a skeleton at
+  every song.
+
+Measured on the simulator with a Metro inspector probe: the worst JS-thread
+gap around an automatic advance went from 226–541ms to 149–195ms.
+
 `@rntp/player` was removed in full — package, lockfile, patch and all. It was
 proprietary from v5 (non-commercial, with a non-compete clause), which is a
 probable GPL-3 conflict for yuzic and a definite F-Droid blocker.
@@ -294,6 +316,11 @@ side-effects:
 Live streams are `Song`-shaped fabrications built by `buildStationSong`; the
 title and streamUrl carry meaning, everything else is a placeholder that the
 gates above hide.
+
+A live stream also reaches the engine marked `continuous` (`isContinuous`,
+set in `buildTrackItem`). That one is not a UI gate: yuzic-engine reads a
+continuous track with a stream parser, and without the flag it treats a
+station like a file and waits for the end of a broadcast, so no station starts.
 
 Podcasts use `buildPodcastSong`. The bookmark manager treats podcastEpisode as
 always-bookmarkable, so resume across sessions works for free.

@@ -9,6 +9,7 @@ import {
   OptionSheetRow,
   optionSheetStyles,
   useOptionSheetBackground,
+  useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import { iconSize } from '@/constants/design';
@@ -58,6 +59,7 @@ export const EntityOptionsSheet = forwardRef<BottomSheetModal, EntityOptionsShee
   ) => {
     const { colors } = useTheme();
     const sheetBg = useOptionSheetBackground();
+    const sheetContent = useOptionSheetContentStyle();
 
     return (
       <BottomSheetModal
@@ -79,7 +81,7 @@ export const EntityOptionsSheet = forwardRef<BottomSheetModal, EntityOptionsShee
           <BottomSheetScrollView
             testID={testID}
             style={sheetBg}
-            contentContainerStyle={optionSheetStyles.sheetContent}
+            contentContainerStyle={sheetContent}
           >
             <OptionSheetHeader cover={header.cover} title={header.title} subtitle={header.subtitle} titleLines={header.titleLines} />
 

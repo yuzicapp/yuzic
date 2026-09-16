@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -18,6 +19,9 @@ import { useUnstarAlbum } from '@/features/library/useUnstarAlbum';
 import { useExternalAlbumStatus } from '@/features/downloaders/useExternalAlbumStatus';
 import type { Album } from '@/domain/entities/Album';
 import { useLazyAlbumDetail } from '@/components/options/useLazyCollectionDetails';
+import { useMatchedNavigation } from '@/features/sources/useMatchedNavigation';
+import { albumWebLink } from '@/providers/registry/sourceLinks';
+import { shareItem } from '@/features/shares/share';
 import { toggleFavorite, confirmDestructive } from '../shared/starActions';
 import { useWantToggle } from '../shared/wantActions';
 import { useShareAction } from '../shared/shareActions';
@@ -128,12 +132,49 @@ export function useAlbumExternalActions(album: Album, opts: { close: () => void;
   const status = useExternalAlbumStatus(album);
   const canDownload = useAnyAlbumDownloaderConnected();
   const { isWanted, toggle } = useWantToggle(album.localId, 'album', 'artist-page');
+  const { navigateToArtist } = useMatchedNavigation();
+  const webLink = useMemo(() => albumWebLink(album), [album]);
 
   const ctx: AlbumExternalActionContext = {
     kind: 'album', origin: 'external', album, t, colors, close: opts.close, status, isWanted, canDownload,
+    webSourceNameKey: webLink?.sourceNameKey ?? null,
+    canGoToArtist: Boolean(album.artist.name),
     handlers: {
-      toggleWant: () => toggle({ externalIds: album.externalIds, title: album.title, artist: album.artist.name }),
+      toggleWant: () => toggle({
+        externalIds: album.externalIds, title: album.title, artist: album.artist.name, cover: album.cover,
+      }),
       openGet: opts.openGet,
+      // The album carries a thin `ArtistRef`, not a full `Artist` — the same
+      // minimal-but-valid build the external header's meta row does, so both
+      // ways to the artist land on the same screen.
+      goToArtist: () => {
+        opts.close();
+        navigateToArtist({
+          localId: album.artist.localId,
+          nativeId: album.artist.nativeId,
+          provenance: album.provenance,
+          externalIds: album.artist.externalIds,
+          libraryState: 'external',
+          name: album.artist.name,
+          cover: album.artist.cover,
+          tags: [],
+          albumIds: [],
+        });
+      },
+      share: () => {
+        if (!webLink) return;
+        opts.close();
+        void shareItem({
+          url: webLink.url,
+          title: album.title,
+          message: album.artist.name ? `${album.title} — ${album.artist.name}` : album.title,
+        });
+      },
+      openInSource: () => {
+        if (!webLink) return;
+        opts.close();
+        void Linking.openURL(webLink.url);
+      },
     },
   };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, CloudDownload, ChevronRight, Link } from 'lucide-react-native';
+import { Heart, CloudDownload, ChevronRight, Link, Share2, SquareArrowOutUpRight, User } from 'lucide-react-native';
 import type { Album } from '@/domain/entities/Album';
 import { iconSize, spacing, statusColor } from '@/constants/design';
 import type { ActionDef, BaseActionContext } from '../types';
@@ -15,9 +15,16 @@ export interface AlbumExternalActionContext extends BaseActionContext {
   status: ExternalAlbumStatus;
   isWanted: boolean;
   canDownload: boolean;
+  /** i18n key naming the source this record has a public page on, or null when
+   *  nothing identifies it publicly — see `providers/registry/sourceLinks`. */
+  webSourceNameKey: string | null;
+  canGoToArtist: boolean;
   handlers: {
     toggleWant: () => void;
     openGet: () => void;
+    goToArtist: () => void;
+    share: () => void;
+    openInSource: () => void;
   };
 }
 
@@ -76,5 +83,32 @@ export const albumExternalActions: ActionDef<Ctx>[] = [
     labelColor: ctx => ctx.colors.muted,
     visible: ctx => ctx.status.kind === 'none' && !ctx.canDownload,
     invoke: () => promptConnectDownloader('album'),
+  },
+  // Below the ownership rows, the same three a library album's sheet ends on:
+  // where else to go, and the two ways to take the record out of the app. An
+  // external album has no server share link — `shares` links to something on
+  // your own server — so Share sends the source's own page for it.
+  {
+    id: 'goToArtist',
+    label: ctx => ctx.t('externalAlbum.menu.goToArtist'),
+    icon: ctx => React.createElement(User, { size: sz, color: ctx.colors.secondary }),
+    visible: ctx => ctx.canGoToArtist,
+    invoke: ctx => ctx.handlers.goToArtist(),
+  },
+  {
+    id: 'share',
+    label: ctx => ctx.t('albumOptions.actions.share'),
+    icon: ctx => React.createElement(Share2, { size: sz, color: ctx.colors.secondary }),
+    visible: ctx => ctx.webSourceNameKey !== null,
+    invoke: ctx => ctx.handlers.share(),
+  },
+  {
+    id: 'openInSource',
+    label: ctx => ctx.t('externalOptions.openInSource', {
+      source: ctx.webSourceNameKey ? ctx.t(ctx.webSourceNameKey) : '',
+    }),
+    icon: ctx => React.createElement(SquareArrowOutUpRight, { size: sz, color: ctx.colors.secondary }),
+    visible: ctx => ctx.webSourceNameKey !== null,
+    invoke: ctx => ctx.handlers.openInSource(),
   },
 ];

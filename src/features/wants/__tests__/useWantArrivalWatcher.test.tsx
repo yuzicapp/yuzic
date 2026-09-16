@@ -9,16 +9,21 @@ import { makeLocalId , makeLocalId as makeDomainLocalId } from '@/domain/identit
 import { integrationProvenance , serverProvenance } from '@/domain/identity/Provenance';
 import type { Server } from '@/providers/contracts/Server';
 import type { Album } from '@/domain/entities/Album';
+import type { Artist } from '@/domain/entities/Artist';
 import type { Song } from '@/domain/entities/Song';
 import { useWantArrivalWatcher } from '../useWantArrivalWatcher';
 
 const WANT_1_LOCAL_ID = makeLocalId('album', integrationProvenance('deezer'), 'w-1');
 const WANT_2_LOCAL_ID = makeLocalId('album', integrationProvenance('deezer'), 'w-2');
+const WANT_3_LOCAL_ID = makeLocalId('artist', integrationProvenance('deezer'), 'w-3');
 
 const mockToastSuccess = jest.fn();
 jest.mock('@/components/toast', () => ({
   notify: { success: (...args: unknown[]) => mockToastSuccess(...args) },
 }));
+
+const mockPush = jest.fn();
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 
 // Library membership is driven directly through this mock so tests can move
 // an album "into" the library between renders without a real synced-query
@@ -28,8 +33,10 @@ jest.mock('@/components/toast', () => ({
 // `useAlbums`/`useTracks`), but this unit test only needs their shape.
 let mockAlbums: Album[] = [];
 let mockTracks: Song[] = [];
+let mockArtists: Artist[] = [];
 jest.mock('@/features/album/useAlbums', () => ({ useAlbums: () => ({ albums: mockAlbums }) }));
 jest.mock('@/features/song/useTracks', () => ({ useTracks: () => ({ tracks: mockTracks }) }));
+jest.mock('@/features/artist/useArtists', () => ({ useArtists: () => ({ artists: mockArtists }) }));
 
 const SERVER_ID = 'server-1';
 
@@ -68,6 +75,20 @@ function libraryAlbum(): Album {
   };
 }
 
+function libraryArtist(): Artist {
+  return {
+    localId: makeDomainLocalId('artist', PROVENANCE, 'lib-artist-1'),
+    nativeId: 'lib-artist-1',
+    provenance: PROVENANCE,
+    externalIds: {},
+    libraryState: 'in-library',
+    name: 'Some Artist',
+    cover: { kind: 'none' },
+    tags: [],
+    albumIds: [],
+  };
+}
+
 function makeStore() {
   return configureStore({
     reducer: {
@@ -88,7 +109,9 @@ function wrapper(store: ReturnType<typeof makeStore>) {
 beforeEach(() => {
   mockAlbums = [];
   mockTracks = [];
+  mockArtists = [];
   mockToastSuccess.mockReset();
+  mockPush.mockReset();
 });
 
 describe('useWantArrivalWatcher', () => {
@@ -121,6 +144,53 @@ describe('useWantArrivalWatcher', () => {
     // even if the selector briefly still returned it.
     await rerender({});
     expect(mockToastSuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers a way into the copy that arrived, since the row has just gone', async () => {
+    const store = makeStore();
+    store.dispatch(addServer(testServer()));
+    store.dispatch(setActiveServer(SERVER_ID));
+    store.dispatch(
+      addWant({
+        serverId: SERVER_ID,
+        want: { localId: WANT_1_LOCAL_ID, unit: 'album', title: 'Some Album', artist: 'Some Artist', origin: 'search' },
+      })
+    );
+
+    const { rerender } = await renderHook(() => useWantArrivalWatcher(), { wrapper: wrapper(store) });
+    mockAlbums = [libraryAlbum()];
+    await rerender({});
+
+    const [, options] = mockToastSuccess.mock.calls[0];
+    options.action.onPress();
+
+    // The server adapter's own id, which is what the detail route resolves by.
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/albumView', params: { id: 'lib-album-1' } });
+  });
+
+  it('resolves an artist want when the artist turns up, and links to their page', async () => {
+    const store = makeStore();
+    store.dispatch(addServer(testServer()));
+    store.dispatch(setActiveServer(SERVER_ID));
+    store.dispatch(
+      addWant({
+        serverId: SERVER_ID,
+        want: { localId: WANT_3_LOCAL_ID, unit: 'artist', title: 'Some Artist', artist: 'Some Artist', origin: 'artist-page' },
+      })
+    );
+
+    const { rerender } = await renderHook(() => useWantArrivalWatcher(), { wrapper: wrapper(store) });
+    expect(store.getState().wants.byServer[SERVER_ID]).toHaveLength(1);
+
+    mockArtists = [libraryArtist()];
+    await rerender({});
+
+    expect(store.getState().wants.byServer[SERVER_ID]).toEqual([]);
+    expect(mockToastSuccess).toHaveBeenCalledTimes(1);
+
+    const [, options] = mockToastSuccess.mock.calls[0];
+    options.action.onPress();
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/artistView', params: { id: 'lib-artist-1' } });
   });
 
   it('does not remove or toast for a want whose entity never appears', async () => {

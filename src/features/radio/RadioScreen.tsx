@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, Linking, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { notify } from '@/components/toast';
-import { CloudOff, Pencil, Plus, Radio as RadioIcon, Trash2 } from 'lucide-react-native';
+import { CloudOff, Ellipsis, Radio as RadioIcon } from 'lucide-react-native';
 
 import { useApi } from '@/providers/registry/useApi';
 import type { InternetRadioStation } from '@/providers/contracts/ServerAdapter';
@@ -13,6 +13,7 @@ import { stationToSong } from '@/features/radio/buildStationSong';
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 import { DetailHeaderBar, DetailHeaderIconButton } from '@/components/DetailHeader';
 import { FormSheet, FormSheetField } from '@/components/FormSheet';
+import { RadioListOptions, RadioStationOptions } from '@/components/options/RadioOptions';
 import MediaListRow from '@/components/MediaListRow';
 import Touchable from '@/components/Touchable';
 import EmptyState from '@/components/EmptyState';
@@ -34,6 +35,13 @@ type Editing =
  * Radio browsing surface — Navidrome only (the empty adapter's `api.radio` is
  * undefined, and the LibraryEntryRows entry hides itself accordingly, so
  * reaching this screen already means the server supports it).
+ *
+ * Built like every other list screen here: the shared bar with one "…" for
+ * what applies to the list, and a row whose own "…" carries what applies to
+ * one station (`components/options/RadioOptions`). The actions used to be
+ * bare icons — a "+" on the bar, a pencil and a bin on each row — which made
+ * this the only screen where a destructive action sat one stray tap from the
+ * row you press to play.
  */
 export default function RadioScreen() {
   const { t } = useTranslation();
@@ -45,6 +53,8 @@ export default function RadioScreen() {
   const { playSong } = usePlayingActions();
   const activeServer = useSelector(selectActiveServer);
   const [editing, setEditing] = useState<Editing | null>(null);
+  const [optionsFor, setOptionsFor] = useState<InternetRadioStation | null>(null);
+  const [listOptionsOpen, setListOptionsOpen] = useState(false);
 
   const stationsQuery = useQuery({
     queryKey: [QueryKeys.Radio],
@@ -81,6 +91,17 @@ export default function RadioScreen() {
     );
   }, [api.radio, queryClient, t]);
 
+  // The station's own page, where it has one. A stream URL is not a page, so
+  // this is offered only for the field the editor asks for by name.
+  const handleOpenHomepage = useCallback(async (station: InternetRadioStation) => {
+    if (!station.homepageUrl) return;
+    try {
+      await Linking.openURL(station.homepageUrl);
+    } catch {
+      notify.error(t('radio.openFailed'));
+    }
+  }, [t]);
+
   const closeEditor = useCallback(() => setEditing(null), []);
   const refreshList = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: [QueryKeys.Radio] });
@@ -94,41 +115,30 @@ export default function RadioScreen() {
   const renderStation = useCallback(
     ({ item }: { item: InternetRadioStation }) => (
       <MediaListRow
+        testID="radio-station-row"
         title={item.name}
-        subtitle={item.streamUrl}
+        subtitle={item.homepageUrl || item.streamUrl}
         cover={{ kind: 'none' }}
         showCover={false}
         variant="compact"
         onPress={() => handlePlay(item)}
         leading={<StationIcon />}
         trailing={
-          <View style={styles.rowActions}>
-            {/* Editing used to be reachable only by long-pressing the row,
-                which is both invisible and — on the Podcasts screen next
-                door — the gesture that deletes things. */}
-            <Touchable
-              onPress={() => setEditing({ mode: 'edit', station: item })}
-              hitSlop={hitSlopFor(18)}
-              style={styles.rowAction}
-              accessibilityRole="button"
-              accessibilityLabel={t('radio.editTitle')}
-            >
-              <Pencil size={iconSize.row} color={colors.subtext} />
-            </Touchable>
-            <Touchable
-              onPress={() => handleDelete(item)}
-              hitSlop={hitSlopFor(18)}
-              style={styles.rowAction}
-              accessibilityRole="button"
-              accessibilityLabel={t('common.delete')}
-            >
-              <Trash2 size={iconSize.row} color={colors.subtext} />
-            </Touchable>
-          </View>
+          <Touchable
+            testID="radio-station-options"
+            onPress={() => setOptionsFor(item)}
+            hitSlop={hitSlopFor(iconSize.row)}
+            style={styles.rowAction}
+            feedback="control"
+            accessibilityRole="button"
+            accessibilityLabel={t('a11y.rows.options', { title: item.name })}
+          >
+            <Ellipsis size={iconSize.row} color={colors.subtext} />
+          </Touchable>
         }
       />
     ),
-    [handlePlay, handleDelete, colors.subtext, t]
+    [handlePlay, colors.subtext, t]
   );
 
   const stationCount = stationsQuery.data?.length ?? 0;
@@ -146,10 +156,10 @@ export default function RadioScreen() {
         }
         rightAction={
           <DetailHeaderIconButton
-            onPress={() => setEditing({ mode: 'add' })}
-            accessibilityLabel={t('radio.add')}
+            onPress={() => setListOptionsOpen(true)}
+            accessibilityLabel={t('a11y.common.moreOptions')}
           >
-            <Plus size={iconSize.header} color={colors.secondary} />
+            <Ellipsis size={iconSize.header} color={colors.secondary} />
           </DetailHeaderIconButton>
         }
       />
@@ -184,6 +194,29 @@ export default function RadioScreen() {
           contentContainerStyle={[styles.listContent, { paddingBottom: scrollClearance }]}
           ItemSeparatorComponent={renderSeparator}
           renderItem={renderStation}
+        />
+      )}
+
+      {listOptionsOpen && (
+        <RadioListOptions
+          title={t('radio.title')}
+          subtitle={
+            stationCount > 0 ? t('library.count.stations', { count: stationCount }) : undefined
+          }
+          onClose={() => setListOptionsOpen(false)}
+          onAdd={() => setEditing({ mode: 'add' })}
+          onRefresh={() => { void refreshList(); }}
+        />
+      )}
+
+      {optionsFor && (
+        <RadioStationOptions
+          station={optionsFor}
+          onClose={() => setOptionsFor(null)}
+          onPlay={() => handlePlay(optionsFor)}
+          onEdit={() => setEditing({ mode: 'edit', station: optionsFor })}
+          onOpenHomepage={() => { void handleOpenHomepage(optionsFor); }}
+          onDelete={() => handleDelete(optionsFor)}
         />
       )}
 
@@ -230,15 +263,22 @@ function StationEditor({
   const handleSave = useCallback(async () => {
     if (!api.radio) return false;
     try {
-      const payload = {
-        name: name.trim(),
-        streamUrl: streamUrl.trim(),
-        homepageUrl: homepageUrl.trim() || undefined,
-      };
+      const trimmedHomepage = homepageUrl.trim();
       if (initial) {
-        await api.radio.update({ id: initial.id, ...payload });
+        // Sent even when empty — that is how clearing a homepage reaches the
+        // server; see `updateInternetRadioStation`.
+        await api.radio.update({
+          id: initial.id,
+          name: name.trim(),
+          streamUrl: streamUrl.trim(),
+          homepageUrl: trimmedHomepage,
+        });
       } else {
-        await api.radio.create(payload);
+        await api.radio.create({
+          name: name.trim(),
+          streamUrl: streamUrl.trim(),
+          homepageUrl: trimmedHomepage || undefined,
+        });
       }
       await onSaved();
       return true;
@@ -301,6 +341,5 @@ const styles = StyleSheet.create({
     // such row has nothing in front of the text at all.
     marginRight: spacing.rowGap,
   },
-  rowActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.inlineGap },
   rowAction: { padding: spacing.xs },
 });

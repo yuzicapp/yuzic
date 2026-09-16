@@ -7,6 +7,19 @@ import LocalMixSection from './LocalMixSection';
 import { useApi } from '@/providers/registry/useApi';
 import { useServerReachable } from '@/features/connectivity/useServerReachable';
 
+jest.mock('@/features/library/useLocalFirst', () => ({
+  useLocalFirst: () => ({
+    index: {
+      songs: { size: 0, find: () => null },
+      albums: { size: 0, find: () => null },
+      artists: { size: 0, find: () => null },
+    },
+    localSong: () => null,
+    localAlbum: () => null,
+    localArtist: () => null,
+    preferLocalSong: (song: unknown) => song,
+  }),
+}));
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));

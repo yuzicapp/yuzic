@@ -17,7 +17,7 @@ import {
   SECTION_GRID_GAP,
   SECTION_VISIBLE_ITEMS,
 } from '@/features/home/constants';
-import MediaTile from './MediaTile';
+import OptionsTile from './OptionsTile';
 import { spacing, typography } from '@/constants/design';
 
 type Entry = { song: Song; positionMs: number };
@@ -88,7 +88,8 @@ export default function ContinuePlayingSection() {
   }, [playSong]);
 
   const renderEntry = useCallback(({ item }: { item: Entry }) => (
-    <MediaTile
+    <OptionsTile
+      entity={{ kind: 'song', song: item.song }}
       cover={item.song.cover}
       title={item.song.title}
       subtitle={item.song.artist.name}

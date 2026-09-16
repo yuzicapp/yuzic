@@ -6,15 +6,14 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import Touchable from '@/components/Touchable';
 import {
   optionSheetStyles,
   useOptionSheetBackground,
-} from '@/components/options/OptionSheetPrimitives';
+  useSheetBottomInset,
+} from '@/components/options/sheetScaffold';
 import { controlSize, iconSize, spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import { useTheme } from '@/features/theme/useTheme';
@@ -67,7 +66,7 @@ export function FormSheet({
   const rad = useRadius();
   const sheetRef = useSheetRef();
   const sheetBg = useOptionSheetBackground();
-  const insets = useSafeAreaInsets();
+  const bottomInset = useSheetBottomInset();
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -110,7 +109,7 @@ export function FormSheet({
         style={[
           sheetBg,
           styles.content,
-          { paddingBottom: Math.max(spacing.generous, insets.bottom + spacing.xl) },
+          { paddingBottom: Math.max(spacing.generous, bottomInset + spacing.xl) },
         ]}
       >
         <Text style={[styles.title, { color: colors.secondary }]}>{title}</Text>

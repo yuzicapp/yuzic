@@ -25,7 +25,7 @@ import { CATALOGUE_HOME_USE, fetchAlbumsForGenre } from '@/providers/registry/ho
 import { QueryKeys } from '@/state/query/queryKeys'
 import { getDayKey } from '@/features/home/hooks/useDailyLayout'
 import SelectionBottomSheet from '@/components/SelectionBottomSheet'
-import MediaTile from './MediaTile'
+import OptionsTile from './OptionsTile'
 import SkeletonTiles from '@/components/SkeletonTiles'
 import type { Album } from '@/domain/entities/Album'
 import Touchable from '@/components/Touchable';
@@ -133,7 +133,8 @@ export default function GenreSection({ genre, refreshKey = 0 }: Props) {
   usePrefetchCovers(coversToPrefetch, 'grid')
 
   const renderAlbum = useCallback(({ item }: { item: Album }) => (
-    <MediaTile
+    <OptionsTile
+      entity={{ kind: 'album', album: item }}
       cover={item.cover}
       title={item.title}
       subtitle={item.artist.name}

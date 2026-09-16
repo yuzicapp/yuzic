@@ -9,6 +9,7 @@ import SectionShelfHeader from '../SectionShelfHeader';
 import { useTranslation } from 'react-i18next';
 import { usePrefetchCovers } from '@/features/library/usePrefetchCovers';
 import { sectionStyles, getSectionItemWidth } from '../sectionStyles';
+import { useStableList } from '../../hooks/useStableList';
 
 const MIN_ALBUMS = 4;
 const MAX_ALBUMS = 10;
@@ -21,7 +22,9 @@ export default function MostPlayedAlbums() {
   const albumPlayCounts = useSelector(selectAlbumPlayCounts);
   const { albums } = useAlbums();
 
-  const itemsToRender = useMemo(() => {
+  // Stable while the same albums are listed in the same order: the counts
+  // behind them change at the end of every song. See `useStableList`.
+  const itemsToRender = useStableList(useMemo(() => {
     // Collect only albums that have been played, then sort that smaller set —
     // O(n) scan + O(k log k) sort where k = played albums, not O(n log n) over all.
     const withCounts: { album: typeof albums[0]; count: number }[] = [];
@@ -31,7 +34,7 @@ export default function MostPlayedAlbums() {
     }
     withCounts.sort((a, b) => b.count - a.count);
     return withCounts.slice(0, MAX_ALBUMS).map(x => x.album);
-  }, [albumPlayCounts, albums]);
+  }, [albumPlayCounts, albums]));
 
   const coversToPrefetch = useMemo(() => itemsToRender.map(a => a.cover), [itemsToRender]);
   usePrefetchCovers(coversToPrefetch, 'grid');

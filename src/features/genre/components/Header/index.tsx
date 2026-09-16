@@ -167,6 +167,10 @@ const GenreHeader: React.FC<Props> = ({ genre, albums, showNavigation = true }) 
         />
 
         {showNavigation && (
+          // The hero carries the same pair as every other detail hero: back on
+          // the left, "…" on the right. The genre's options were reachable only
+          // once the bar had faded in, which is after the hero has scrolled
+          // away — so on arrival the screen had none.
           <View style={styles.header}>
             <Touchable
               testID="detail-back-button"
@@ -177,6 +181,7 @@ const GenreHeader: React.FC<Props> = ({ genre, albums, showNavigation = true }) 
             >
               <ChevronLeft size={iconSize.header} color={onDark.text} style={{ marginLeft: -2 }} />
             </Touchable>
+            <GenreOptionsButton genre={genre} albums={albums} />
           </View>
         )}
       </View>
@@ -284,6 +289,7 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
     zIndex: 20,
   },

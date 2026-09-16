@@ -6,6 +6,19 @@ import { configureStore } from '@reduxjs/toolkit';
 import LBCreatedForSection from './LBCreatedForSection';
 import type { Song } from '@/domain/entities/Song';
 
+jest.mock('@/features/library/useLocalFirst', () => ({
+  useLocalFirst: () => ({
+    index: {
+      songs: { size: 0, find: () => null },
+      albums: { size: 0, find: () => null },
+      artists: { size: 0, find: () => null },
+    },
+    localSong: () => null,
+    localAlbum: () => null,
+    localArtist: () => null,
+    preferLocalSong: (song: unknown) => song,
+  }),
+}));
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));

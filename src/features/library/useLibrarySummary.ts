@@ -7,7 +7,7 @@ import { usePlaylists } from '@/features/playlist/usePlaylists'
 import { useTracks } from '@/features/song/useTracks'
 import { useDownload } from '@/features/offline/DownloadContext'
 import { useGenres } from '@/features/genre/useGenres'
-import { selectWantCountForActiveServer } from '@/state/redux/selectors/wantsSelectors'
+import { selectWantCountForActiveServer, selectWantsForActiveServer } from '@/state/redux/selectors/wantsSelectors'
 import { buildGenreRows } from '@/features/genre/genreList'
 import type { CoverSource } from '@/domain/entities/Cover'
 
@@ -73,6 +73,7 @@ export function useLibrarySummary(): Record<LibraryEntryKey, LibraryEntrySummary
   const { getAllDownloadedCollections } = useDownload()
   const { genres } = useGenres()
   const wantCount = useSelector(selectWantCountForActiveServer)
+  const wants = useSelector(selectWantsForActiveServer)
 
   return useMemo(() => {
     const genreRows = buildGenreRows(genres, albums)
@@ -124,10 +125,11 @@ export function useLibrarySummary(): Record<LibraryEntryKey, LibraryEntrySummary
       // of activity, not one collection size — so it goes uncounted, same
       // as Radio below.
       downloads: { count: undefined, covers: [] },
-      // A save-only wishlist: worth a count (there is exactly one number
-      // that means anything here), never art — nothing in it is resolved
-      // to an on-device cover yet.
-      wants: { count: wantCount, covers: [] },
+      // A wishlist of things no server has — but each want saves the cover
+      // its source gave it, or the gap naming who it is of, so the row's
+      // mosaic resolves through the same picture rule as every other row
+      // here. It showed no art at all while wants stored no cover.
+      wants: { count: wantCount, covers: coversOf(wants.filter(w => !!w.cover).map(w => ({ cover: w.cover! }))) },
       // Radio has no count summary here — the list lives on the server, and
       // fetching it just to say "3 stations" on a row people don't click yet
       // isn't worth the request. The screen itself fetches on open.
@@ -135,5 +137,5 @@ export function useLibrarySummary(): Record<LibraryEntryKey, LibraryEntrySummary
       podcasts: { count: undefined, covers: [] },
       shares: { count: undefined, covers: [] },
     }
-  }, [albums, artists, playlists, tracks, genres, getAllDownloadedCollections, wantCount])
+  }, [albums, artists, playlists, tracks, genres, getAllDownloadedCollections, wantCount, wants])
 }

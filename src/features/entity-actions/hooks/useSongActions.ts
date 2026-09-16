@@ -10,6 +10,7 @@ import { useIsOffline } from '@/features/connectivity/useIsOffline';
 import { useSimilarityService } from '@/providers/registry/similarityService';
 import { generateSimilarPlaylistForSong } from '@/features/playlist/generateSimilarPlaylist';
 import { usePlayingState, usePlayingActions } from '@/features/playback/PlayingContext';
+import { useLocalFirst } from '@/features/library/useLocalFirst';
 import { useStarredSongs } from '@/features/library/useStarredSongs';
 import { useStarSong } from '@/features/library/useStarSong';
 import { useUnstarSong } from '@/features/library/useUnstarSong';
@@ -130,13 +131,25 @@ export function useSongExternalActions(
   const canDownload = useAnyDownloaderConnected();
   const canDownloadTrack = useAnyTrackDownloaderConnected();
   const { isWanted, toggle } = useWantToggle(song.localId, 'track', 'search');
+  // Nothing to want or get if it is already yours — the one rule answers that
+  // here as everywhere else (features/library/localFirst).
+  const { localSong } = useLocalFirst();
+  const isInLibrary = localSong(song) !== null;
 
   const ctx: SongExternalActionContext = {
     kind: 'song', origin: 'external', song, t, colors, close: opts.close, onPlay: opts.onPlay,
-    isWanted, canDownload, canDownloadTrack,
+    isWanted, isInLibrary, canDownload, canDownloadTrack,
     handlers: {
       play: () => { opts.close(); opts.onPlay?.(); },
-      toggleWant: () => toggle({ externalIds: song.externalIds, title: song.title, artist: song.artist.name || opts.albumArtist }),
+      // The album's cover, not the song's own: a track want is looked up as
+      // the record it is on, which is the only thing an artwork archive has a
+      // picture of.
+      toggleWant: () => toggle({
+        externalIds: song.externalIds,
+        title: song.title,
+        artist: song.artist.name || opts.albumArtist,
+        cover: song.album.cover.kind === 'none' ? song.cover : song.album.cover,
+      }),
       openAlbumGet: opts.openAlbumGet,
       openTrackGet: opts.openTrackGet,
     },

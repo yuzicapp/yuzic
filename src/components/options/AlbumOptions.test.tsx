@@ -40,6 +40,11 @@ jest.mock('@/features/shares/share', () => ({
   shareItem: jest.fn(),
 }));
 
+const mockNavigateToArtist = jest.fn();
+jest.mock('@/features/sources/useMatchedNavigation', () => ({
+  useMatchedNavigation: () => ({ navigateToAlbum: jest.fn(), navigateToArtist: mockNavigateToArtist }),
+}));
+
 const mockDispatch = jest.fn();
 
 jest.mock('react-redux', () => ({
@@ -142,6 +147,7 @@ jest.mock('@/components/options/OptionSheetPrimitives', () => {
     OptionSheetDivider: () => <RNView />,
     optionSheetStyles: { sheetBackground: {}, sheetContent: {}, loading: {} },
     useOptionSheetBackground: () => ({}),
+    useOptionSheetContentStyle: () => ({}),
   };
 });
 
@@ -212,6 +218,33 @@ describe('AlbumOptions', () => {
     // External-only action must not appear.
     expect(view.queryByText('externalAlbum.menu.noServiceConnected')).toBeNull();
     expect(view.queryByText('externalAlbum.menu.get')).toBeNull();
+  });
+
+  it("offers the browsed album's artist, and shares its source page where it has one", async () => {
+    const { shareItem } = jest.requireMock('@/features/shares/share') as { shareItem: jest.Mock };
+    shareItem.mockClear();
+    mockNavigateToArtist.mockClear();
+    const withDeezerId = { ...externalAlbum, externalIds: { deezerId: '119606' } };
+
+    const view = await render(<AlbumOptions ref={null as any} album={withDeezerId} />);
+
+    view.getByText('externalAlbum.menu.goToArtist').props.onPress();
+    expect(mockNavigateToArtist).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'External Artist', libraryState: 'external' })
+    );
+
+    view.getByText('albumOptions.actions.share').props.onPress();
+    expect(shareItem).toHaveBeenCalledWith(
+      expect.objectContaining({ url: 'https://www.deezer.com/album/119606' })
+    );
+    expect(view.getByText('externalOptions.openInSource')).toBeTruthy();
+  });
+
+  it('leaves out Share and Open in … when nothing identifies the album publicly', async () => {
+    const view = await render(<AlbumOptions ref={null as any} album={externalAlbum} />);
+
+    expect(view.queryByText('albumOptions.actions.share')).toBeNull();
+    expect(view.queryByText('externalOptions.openInSource')).toBeNull();
   });
 
   it('renders parallel Want and Get actions for an external album (no downloader connected)', async () => {

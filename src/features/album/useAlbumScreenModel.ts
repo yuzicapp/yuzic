@@ -19,6 +19,8 @@ import { useArtistAlbums } from '@/features/artist/useArtistAlbums';
 import { useExternalAlbumPreviews } from '@/features/album/useExternalAlbumPreviews';
 import { useExternalAlbumStatus, type ExternalAlbumStatus } from '@/features/downloaders/useExternalAlbumStatus';
 import { matchAlbumToLibrary } from '@/features/library/matchToLibrary';
+import { preferLocalSong } from '@/features/library/localFirst';
+import { useLocalFirst } from '@/features/library/useLocalFirst';
 import { ALL_SOURCES, useEnabledExternalSources } from '@/features/sources/registry';
 import { QueryKeys } from '@/state/query/queryKeys';
 
@@ -110,8 +112,18 @@ export function useAlbumScreenModel(params: AlbumRouteParams): AlbumScreenModel 
   const external = useExternalAlbumLookup({ enabled: externalEnabled, source, albumId, artist, title });
 
   const album: Album | null = isLocal ? local.album : (external.data?.album ?? null);
-  const songs: Song[] = isLocal ? local.songs : (external.data?.songs ?? NO_SONGS);
+  const browsedSongs: Song[] = isLocal ? local.songs : (external.data?.songs ?? NO_SONGS);
   const songsLoading = isLocal ? local.songsLoading : external.isLoading;
+
+  // Local first: a browsed album's track list is resolved against the library
+  // once, here, so every consumer below — the rows, the preview queue, the
+  // play button — is holding the library's own recording wherever there is
+  // one. One rule, asked in one place: features/library/localFirst.
+  const { index: libraryIndex } = useLocalFirst();
+  const songs = useMemo(
+    () => (isLocal ? browsedSongs : browsedSongs.map(song => preferLocalSong(libraryIndex, song))),
+    [isLocal, browsedSongs, libraryIndex]
+  );
 
   const previews = useExternalAlbumPreviews(isLocal ? null : album, songs);
   const playability = useMemo(

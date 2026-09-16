@@ -15,7 +15,26 @@ jest.mock('react-native-safe-area-context', () => {
   return { SafeAreaView: View, useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) };
 });
 jest.mock('react-redux', () => ({ useSelector: () => ({ id: 'srv' }) }));
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => ({ channelId: 'c1' }) }));
+const mockBack = jest.fn();
+jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => ({ channelId: 'c1' }),
+  useRouter: () => ({ back: mockBack }),
+}));
+jest.mock('@/components/options/PodcastOptions', () => {
+  const { Text, View } = require('react-native');
+  return {
+    PodcastChannelOptions: ({ onUnsubscribe }: any) => (
+      <View testID="podcast-channel-options-sheet">
+        <Text testID="podcast-option-unsubscribe" onPress={onUnsubscribe}>unsubscribe</Text>
+      </View>
+    ),
+    PodcastEpisodeOptions: ({ onDelete }: any) => (
+      <View testID="podcast-episode-options-sheet">
+        <Text testID="episode-option-delete" onPress={onDelete}>delete</Text>
+      </View>
+    ),
+  };
+});
 jest.mock('@/providers/registry/useApi', () => ({ useApi: () => ({ podcasts: mockPodcasts }) }));
 jest.mock('@/features/playback/PlayingContext', () => ({ usePlayingActions: () => ({ playSong: mockPlaySong }) }));
 jest.mock('@/features/theme/useTheme', () => ({ useTheme: () => ({ colors: {} }) }));
@@ -28,8 +47,13 @@ jest.mock('@/components/SpinningLoaderCircle', () => {
   return { __esModule: true, default: () => <Text>downloading</Text> };
 });
 jest.mock('@/components/DetailHeader', () => {
-  const { Text } = require('react-native');
-  return { DetailHeaderBar: ({ title }: any) => <Text>{title}</Text> };
+  const { Text, View } = require('react-native');
+  return {
+    DetailHeaderBar: ({ title, rightAction }: any) => <View><Text>{title}</Text>{rightAction}</View>,
+    DetailHeaderIconButton: ({ onPress, accessibilityLabel, children }: any) => (
+      <Text onPress={onPress} accessibilityLabel={accessibilityLabel}>{children}</Text>
+    ),
+  };
 });
 jest.mock('@/components/Touchable', () => {
   const { Pressable } = require('react-native');
@@ -105,7 +129,8 @@ describe('PodcastChannelScreen', () => {
     mockPodcasts.deleteEpisode.mockResolvedValue(undefined);
     const view = await renderScreen();
 
-    fireEvent.press(await view.findByLabelText('podcasts.deleteEpisode'));
+    await fireEvent.press(await view.findByTestId('episode-options'));
+    await fireEvent.press(view.getByTestId('episode-option-delete'));
     expect(mockPodcasts.deleteEpisode).not.toHaveBeenCalled();
 
     const buttons = alert.mock.calls[0][2] as { style?: string; onPress?: () => void }[];

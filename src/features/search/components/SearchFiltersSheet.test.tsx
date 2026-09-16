@@ -30,6 +30,7 @@ jest.mock('@/components/options/OptionSheetPrimitives', () => {
     ),
     optionSheetStyles: {},
     useOptionSheetBackground: () => ({}),
+    useOptionSheetContentStyle: () => ({}),
   };
 });
 jest.mock('@/features/sources/registry', () => ({

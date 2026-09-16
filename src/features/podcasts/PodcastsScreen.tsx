@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { notify } from '@/components/toast';
-import { AlertTriangle, CloudOff, Plus, Podcast as PodcastIcon, RefreshCw, Trash2 } from 'lucide-react-native';
+import { AlertTriangle, CloudOff, Ellipsis, Podcast as PodcastIcon } from 'lucide-react-native';
 
 import { useApi } from '@/providers/registry/useApi';
 import type { PodcastChannel, PodcastEpisode } from '@/providers/contracts/ServerAdapter';
@@ -20,7 +20,7 @@ import { DetailHeaderBar, DetailHeaderIconButton } from '@/components/DetailHead
 import { FormSheet, FormSheetField } from '@/components/FormSheet';
 import MediaListRow from '@/components/MediaListRow';
 import Touchable from '@/components/Touchable';
-import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
+import { PodcastChannelOptions, PodcastListOptions } from '@/components/options/PodcastOptions';
 import EmptyState from '@/components/EmptyState';
 import SkeletonListRow from '@/components/SkeletonListRow';
 import { useTheme } from '@/features/theme/useTheme';
@@ -43,6 +43,8 @@ export default function PodcastsScreen() {
   const scrollClearance = useScrollClearance();
   const [adding, setAdding] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [listOptionsOpen, setListOptionsOpen] = useState(false);
+  const [optionsFor, setOptionsFor] = useState<PodcastChannel | null>(null);
 
   const channelsQuery = useQuery<PodcastChannel[]>({
     queryKey: [QueryKeys.Podcasts],
@@ -161,19 +163,21 @@ export default function PodcastsScreen() {
           }
           trailing={
             <Touchable
-              onPress={() => handleDelete(item)}
-              hitSlop={hitSlopFor(18)}
+              testID="podcast-channel-options"
+              onPress={() => setOptionsFor(item)}
+              hitSlop={hitSlopFor(iconSize.row)}
               style={styles.rowAction}
+              feedback="control"
               accessibilityRole="button"
-              accessibilityLabel={t('podcasts.unsubscribe')}
+              accessibilityLabel={t('a11y.rows.options', { title: item.title })}
             >
-              <Trash2 size={iconSize.row} color={colors.subtext} />
+              <Ellipsis size={iconSize.row} color={colors.subtext} />
             </Touchable>
           }
         />
       );
     },
-    [navigation, handleDelete, colors.subtext, t]
+    [navigation, colors.subtext, t]
   );
 
   return (
@@ -188,23 +192,12 @@ export default function PodcastsScreen() {
           channelCount > 0 ? t('library.count.podcasts', { count: channelCount }) : undefined
         }
         rightAction={
-          <View style={styles.headerActions}>
-            <DetailHeaderIconButton
-              onPress={handleRefresh}
-              accessibilityLabel={t('podcasts.refresh')}
-            >
-              {refreshing
-                ? <SpinningLoaderCircle size={iconSize.row} color={colors.secondary} />
-                : <RefreshCw size={iconSize.header} color={colors.secondary} />
-              }
-            </DetailHeaderIconButton>
-            <DetailHeaderIconButton
-              onPress={() => setAdding(true)}
-              accessibilityLabel={t('podcasts.add')}
-            >
-              <Plus size={iconSize.header} color={colors.secondary} />
-            </DetailHeaderIconButton>
-          </View>
+          <DetailHeaderIconButton
+            onPress={() => setListOptionsOpen(true)}
+            accessibilityLabel={t('a11y.common.moreOptions')}
+          >
+            <Ellipsis size={iconSize.header} color={colors.secondary} />
+          </DetailHeaderIconButton>
         }
       />
 
@@ -249,6 +242,25 @@ export default function PodcastsScreen() {
             />
           }
           renderItem={renderChannel}
+        />
+      )}
+
+      {listOptionsOpen && (
+        <PodcastListOptions
+          subtitle={
+            channelCount > 0 ? t('library.count.podcasts', { count: channelCount }) : undefined
+          }
+          onClose={() => setListOptionsOpen(false)}
+          onAdd={() => setAdding(true)}
+          onRefresh={() => { void handleRefresh(); }}
+        />
+      )}
+
+      {optionsFor && (
+        <PodcastChannelOptions
+          channel={optionsFor}
+          onClose={() => setOptionsFor(null)}
+          onUnsubscribe={() => handleDelete(optionsFor)}
         />
       )}
 
@@ -315,7 +327,6 @@ function SubscribeSheet({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerActions: { flexDirection: 'row', alignItems: 'center' },
   listContent: { paddingVertical: spacing.md },
   // Inset to match `MediaListRow`'s own page padding, so the rule starts where
   // the row's content does rather than running to the screen edge.

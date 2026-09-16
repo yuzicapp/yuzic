@@ -6,7 +6,7 @@ import {
   Platform,
 } from 'react-native';
 import { FormSheet, FormSheetField } from '@/components/FormSheet';
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Airplay, Cast, Check, Plus, RotateCcw, Server, Smartphone } from 'lucide-react-native';
 import IconActionButton from '@/components/IconActionButton';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
@@ -15,6 +15,11 @@ import { useTranslation } from 'react-i18next';
 import { notify } from '@/components/toast';
 import { useTheme } from '@/features/theme/useTheme';
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
+import {
+  optionSheetStyles,
+  useOptionSheetBackground,
+  useOptionSheetContentStyle,
+} from '@/components/options/OptionSheetPrimitives';
 import { selectThemeColor } from '@/features/settings/appearance/state';
 import { useDlnaDiscovery, type DiscoveredDevice } from '@/features/player/useDlnaDiscovery';
 import { usePlaybackSink } from '@/features/player/PlaybackSinkContext';
@@ -37,6 +42,8 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { colors } = useTheme();
   const rad = useRadius();
   const themeColor = useSelector(selectThemeColor);
+  const sheetBg = useOptionSheetBackground();
+  const sheetContent = useOptionSheetContentStyle();
   const { devices, isScanning, isProbing, scan, probeManual } = useDlnaDiscovery();
   const { sink, isSwitching, selectLocal, selectDlna, selectJukebox } = usePlaybackSink();
   const airplayRoutes = useAirplayRoutes();
@@ -95,11 +102,14 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
       enablePanDownToClose
       stackBehavior="push"
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: colors.card }}
+      backgroundStyle={[optionSheetStyles.sheetBackground, sheetBg]}
       handleIndicatorStyle={{ backgroundColor: colors.border }}
       onChange={(index) => { if (index >= 0) handleOpen(); else setIsSheetOpen(false); }}
     >
-      <BottomSheetView style={styles.container}>
+      {/* Scrolls rather than sizing to its content: the list grows as the scan
+          finds devices, and a house with a dozen of them used to run off the
+          bottom of a sheet that had no way to move. */}
+      <BottomSheetScrollView style={sheetBg} contentContainerStyle={sheetContent}>
 
         {/* Title */}
         <View style={styles.titleRow}>
@@ -245,7 +255,7 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
           </View>
         </Touchable>
 
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheetModal>
     </>
   );
@@ -289,11 +299,6 @@ function ManualDeviceSheet({ probe, onClose }: {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: spacing.roomy,
-    paddingTop: spacing.controlGap,
-    paddingBottom: spacing.xl,
-  },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',

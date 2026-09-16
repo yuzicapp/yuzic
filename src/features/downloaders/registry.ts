@@ -53,6 +53,12 @@ export type QualityProfile = { id: number; name: string }
  */
 type AlbumDownloadRequest = Album
 type TrackDownloadRequest = { title: string; artist: string }
+/**
+ * An artist to follow, rather than a release to fetch. The MBID is what
+ * actually identifies them where the catalogue supplied one; the name is the
+ * fallback and the thing a lookup is spelled with.
+ */
+type ArtistMonitorRequest = { name: string; mbid?: string }
 
 /**
  * What a downloader is and what it can do — the one place either is declared.
@@ -73,6 +79,8 @@ type DownloaderDefinition = {
   descriptionKey: string
   albumAddedKey: string
   trackAddedKey?: string
+  /** Confirms an artist is now followed. Present exactly when `monitorArtist` is. */
+  artistMonitoredKey?: string
   settingsRoute: Href
   /**
    * Both units are optional, because a downloader gets to have a natural one.
@@ -84,6 +92,16 @@ type DownloaderDefinition = {
    */
   downloadAlbum?(config: DownloaderConfig, req: AlbumDownloadRequest, options?: DownloadOptions): Promise<DownloadResult>
   downloadTrack?(config: DownloaderConfig, req: TrackDownloadRequest): Promise<DownloadResult>
+  /**
+   * Follow an artist, so what they release from now on is picked up.
+   *
+   * A third unit alongside the two above, and optional for the same reason:
+   * only a collection manager has any concept of an artist it watches. A
+   * transfer tool fetches a named file and has nothing to be told about a
+   * person, which is why an artist want with none of these connected stays a
+   * bookmark rather than showing a Get that would do nothing.
+   */
+  monitorArtist?(config: DownloaderConfig, req: ArtistMonitorRequest): Promise<DownloadResult>
   /**
    * The quality profiles an album Get can pick from, passed back as
    * `options.qualityProfileId`. Absent where a downloader has no such setting,
@@ -136,15 +154,27 @@ const lidarrDownloadAlbum = (
     qualityProfileId: options?.qualityProfileId,
   })
 
+const lidarrMonitorArtist = async (
+  config: DownloaderConfig,
+  req: ArtistMonitorRequest
+): Promise<DownloadResult> => {
+  const result = await lidarr.monitorArtist(lidarrConfigOf(config), req)
+  return result.success ? { success: true } : { success: false, code: result.code, message: result.message }
+}
+
 const lidarrDownloader: DownloaderDefinition = {
   id: 'lidarr',
   label: 'Lidarr',
   descriptionKey: 'externalAlbum.download.lidarrDesc',
   albumAddedKey: 'externalAlbum.download.addedToLidarr',
+  artistMonitoredKey: 'externalAlbum.download.monitoringOnLidarr',
   settingsRoute: '/settings/lidarrView',
   auth: apiKeyAuth,
   // Lidarr is album-only — no `downloadTrack`.
   downloadAlbum: lidarrDownloadAlbum,
+  // ...and the only one that follows an artist: it is a collection manager,
+  // where the other two are transfer tools with nobody to watch.
+  monitorArtist: lidarrMonitorArtist,
   getQualityProfiles: (config) => lidarr.getQualityProfiles(lidarrConfigOf(config)),
   fetchQueue: async (config) => (await lidarr.fetchQueue(lidarrConfigOf(config))).map(record => ({
     id: record.id,
@@ -344,4 +374,24 @@ export function useAnyTrackDownloaderConnected(): boolean {
  */
 export function useAnyAlbumDownloaderConnected(): boolean {
   return useDownloaderStates().some((d) => d.isConnected && !!(d.def.downloadAlbum || d.def.downloadTrack))
+}
+
+/**
+ * Somewhere to send an artist. Unlike an album, there is no standing-in for
+ * this: an artist cannot be followed as a list of tracks, so a want for one
+ * stays a bookmark until something that watches artists is connected.
+ */
+export function useAnyArtistDownloaderConnected(): boolean {
+  return useDownloaderStates().some((d) => d.isConnected && !!d.def.monitorArtist)
+}
+
+/** The connected downloaders that can take this unit, in registry order. */
+export function useDownloadersForUnit(unit: 'album' | 'track' | 'artist'): DownloaderState[] {
+  const states = useDownloaderStates()
+  return useMemo(() => states.filter((d) => {
+    if (!d.isConnected) return false
+    if (unit === 'artist') return !!d.def.monitorArtist
+    if (unit === 'track') return !!d.def.downloadTrack
+    return !!(d.def.downloadAlbum || d.def.downloadTrack)
+  }), [states, unit])
 }

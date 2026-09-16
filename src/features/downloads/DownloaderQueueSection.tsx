@@ -10,6 +10,7 @@ import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import Touchable from '@/components/Touchable';
 import { hitSlopFor, iconSize, spacing, statusColor, typography } from '@/constants/design';
 import type { Album } from '@/domain/entities/Album';
+import { albumCoverSubject, missingCover, type CoverSource } from '@/domain/entities/Cover';
 import { useAlbums } from '@/features/album/useAlbums';
 import { matchesAlbum, type DownloaderQueueItem } from '@/features/downloaders/queueItem';
 import { useQueueRowSubtitle } from '@/features/settings/downloaders/useQueueRowSubtitle';
@@ -28,6 +29,25 @@ type Props = {
 };
 
 const COVER_SIZE = 48;
+
+/**
+ * The picture for one transfer.
+ *
+ * The library's own copy once it has one — that is the record the row opens,
+ * and its cover is the one the rest of the app draws for it. Until then, the
+ * transfer is for something the server has never seen, so there is no cover
+ * to find: what there is, is the album's *name*, and naming the subject is
+ * all the one picture rule needs to go and ask an artwork backup for it.
+ *
+ * That gap is why this screen drew nothing. A transfer in flight is by
+ * definition not in the library yet, so the fallback was a bare
+ * `{ kind: 'none' }` — a gap about nobody, which `coverResolution` returns
+ * untouched — and the placeholder was the answer for every row that mattered.
+ */
+function coverFor(item: DownloaderQueueItem, album: Album | null): CoverSource {
+  if (album) return album.cover;
+  return missingCover(albumCoverSubject(item.title, item.artistName || item.peer));
+}
 
 /**
  * One downloader's transfers, drawn the way the library draws its rows.
@@ -107,7 +127,7 @@ export default function DownloaderQueueSection({ id, title, items, isLoading, ha
         accessibilityLabel={label}
       >
         <MediaImage
-          cover={album?.cover ?? { kind: 'none' }}
+          cover={coverFor(item, album)}
           size="thumb"
           style={[styles.cover, { borderRadius: rad.thumb, backgroundColor: colors.muted }]}
         />

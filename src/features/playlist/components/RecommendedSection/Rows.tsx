@@ -10,6 +10,7 @@ import { usePlayingActions } from '@/features/playback/PlayingContext';
 import { usePreviewPlayer } from '@/features/playback/usePreviewPlayer';
 import { useAddSongToPlaylist } from '@/features/playlist/useAddSongToPlaylist';
 import { usePlayableSongResolver } from '@/features/song/usePlayableSongResolver';
+import { useLocalFirst } from '@/features/library/useLocalFirst';
 import Touchable from '@/components/Touchable';
 import { formatDuration } from '@/components/formatDuration';
 import { hitSlopFor, iconSize, spacing } from '@/constants/design';
@@ -90,10 +91,15 @@ type ExternalRowProps = {
   onDownload: (song: Song) => void;
 };
 
-export const ExternalRow: React.FC<ExternalRowProps> = ({ song, hasDownloader, onDownload }) => {
+export const ExternalRow: React.FC<ExternalRowProps> = ({ song: browsedSong, hasDownloader, onDownload }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { toggle } = usePreviewPlayer();
+  const { localSong } = useLocalFirst();
+  // Local first: a recommendation the library already holds is played in full
+  // from the library, not sampled — see features/library/localFirst.
+  const owned = localSong(browsedSong);
+  const song = owned ?? browsedSong;
   // `streamId` carries a resolved preview URL — see `Song.streamId` and
   // `usePreviewPlayer`'s `attachPreviewUrl`.
   const hasPreview = !!song.streamId;

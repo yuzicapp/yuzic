@@ -15,6 +15,7 @@ import {
   OptionSheetSectionLabel,
   optionSheetStyles,
   useOptionSheetBackground,
+  useOptionSheetContentStyle,
 } from './OptionSheetPrimitives';
 import { EntityOptionsSheet } from '@/features/entity-actions/EntityOptionsSheet';
 import { dismissSheetRef } from '@/features/entity-actions/shared/sheetRef';
@@ -115,8 +116,10 @@ type ExternalAlbumOptionsSheetProps = {
 const ExternalAlbumOptionsSheet = forwardRef<BottomSheetModal, ExternalAlbumOptionsSheetProps>(
   ({ album }, ref) => {
     const { colors } = useTheme();
-    const snapPoints = useMemo(() => ['30%'], []);
+    // Taller than the original two rows: the sheet now also carries where to
+    // go next and the two ways out of the app (see `albumExternalActions`).
     const sheetBg = useOptionSheetBackground();
+    const sheetContent = useOptionSheetContentStyle();
     const close = () => dismissSheetRef(ref);
     const downloadSheetRef = useSheetRef();
 
@@ -126,14 +129,13 @@ const ExternalAlbumOptionsSheet = forwardRef<BottomSheetModal, ExternalAlbumOpti
       <>
         <BottomSheetModal
           ref={ref}
-          snapPoints={snapPoints}
-          enableDynamicSizing={false}
+          enableDynamicSizing
           enablePanDownToClose
           backdropComponent={renderBackdrop}
           handleIndicatorStyle={{ backgroundColor: colors.border }}
           backgroundStyle={[optionSheetStyles.sheetBackground, sheetBg]}
         >
-          <BottomSheetView style={[optionSheetStyles.sheetContent, sheetBg]}>
+          <BottomSheetView style={[sheetContent, sheetBg]}>
             <OptionSheetHeader cover={album.cover} title={album.title} subtitle={album.artist.name} />
             <OptionSheetDivider />
             {actions.map(action => (

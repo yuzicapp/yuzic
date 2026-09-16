@@ -12,6 +12,7 @@ import {
   OptionSheetSectionLabel,
   optionSheetStyles,
   useOptionSheetBackground,
+  useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives'
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import Touchable from '@/components/Touchable';
@@ -35,6 +36,7 @@ const ExternalSourcePickerSheet = forwardRef<BottomSheetModal, Props>(
     const { t } = useTranslation()
     const { colors } = useTheme()
     const sheetBg = useOptionSheetBackground()
+    const sheetContent = useOptionSheetContentStyle()
     const rad = useRadius()
 
     const grouped = items.reduce<Record<string, PickerItem[]>>((acc, item) => {
@@ -53,7 +55,7 @@ const ExternalSourcePickerSheet = forwardRef<BottomSheetModal, Props>(
         backgroundStyle={[optionSheetStyles.sheetBackground, sheetBg]}
         stackBehavior="push"
       >
-        <BottomSheetScrollView style={sheetBg} contentContainerStyle={optionSheetStyles.sheetContent}>
+        <BottomSheetScrollView style={sheetBg} contentContainerStyle={sheetContent}>
           {isLoading && (
             <View style={styles.loading}>
               <SpinningLoaderCircle size={iconSize.loader} color={colors.subtext} />

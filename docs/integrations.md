@@ -64,6 +64,17 @@ A Jellyfin user never sees a Radio row rather than seeing one that goes
 nowhere — the Library index builds its rows from what the adapter offers
 (`src/features/library/LibraryEntryRows.tsx`).
 
+**A radio station's homepage is spelled two ways, and both are correct.**
+`createInternetRadioStation`/`updateInternetRadioStation` take the parameter
+`homepageUrl`, while the station a server returns from
+`getInternetRadioStations` carries `homePageUrl` — capital P, in the XML
+attribute and the JSON field alike (Navidrome's `responses.Radio`). Reading the
+parameter's spelling back is why every saved homepage came back empty, and why
+the next save wrote that emptiness to the server. The mapper accepts either;
+the update always sends the parameter, empty string included, because the
+server replaces the whole record and an omitted parameter is indistinguishable
+from a cleared one.
+
 **Artist info and pictures come from the server first.** Servers already fetch
 a lot of this themselves, so the app reads it before any Metadata backup:
 Navidrome's artist page asks `getArtistInfo2.view` (`count=0`) alongside

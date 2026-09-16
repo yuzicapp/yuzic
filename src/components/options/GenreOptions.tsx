@@ -28,6 +28,7 @@ import {
   OptionSheetRow,
   optionSheetStyles,
   useOptionSheetBackground,
+  useOptionSheetContentStyle,
 } from './OptionSheetPrimitives';
 import { dismissSheetRef } from '@/features/entity-actions/shared/sheetRef';
 
@@ -62,6 +63,7 @@ const GenreOptions = forwardRef<BottomSheetModal, GenreOptionsProps>(({ genre, a
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   const sheetBg = useOptionSheetBackground();
+  const sheetContent = useOptionSheetContentStyle();
 
   const albumIds = useMemo(() => new Set(albums.map(a => a.localId)), [albums]);
   const genreTrackIds = useMemo(
@@ -183,7 +185,7 @@ const GenreOptions = forwardRef<BottomSheetModal, GenreOptionsProps>(({ genre, a
     >
       <BottomSheetScrollView
         style={sheetBg}
-        contentContainerStyle={optionSheetStyles.sheetContent}
+        contentContainerStyle={sheetContent}
       >
         <OptionSheetHeader
           cover={albums[0]?.cover ?? { kind: 'none' }}

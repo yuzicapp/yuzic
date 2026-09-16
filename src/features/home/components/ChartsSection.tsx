@@ -17,7 +17,7 @@ import {
   SECTION_VISIBLE_ITEMS,
   STALE_DEEZER_CHARTS,
 } from '@/features/home/constants'
-import MediaTile from './MediaTile'
+import OptionsTile from './OptionsTile'
 import SkeletonTiles from '@/components/SkeletonTiles'
 import type { Album } from '@/domain/entities/Album'
 import { spacing, typography } from '@/constants/design'
@@ -52,7 +52,8 @@ export default function ChartsSection({ refreshKey = 0 }: Props) {
   usePrefetchCovers(coversToPrefetch, 'grid')
 
   const renderAlbum = useCallback(({ item }: { item: Album }) => (
-    <MediaTile
+    <OptionsTile
+      entity={{ kind: 'album', album: item }}
       cover={item.cover}
       title={item.title}
       subtitle={item.artist.name}

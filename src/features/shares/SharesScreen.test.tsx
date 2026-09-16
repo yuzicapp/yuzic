@@ -35,6 +35,19 @@ jest.mock('@/components/Touchable', () => {
   return { __esModule: true, default: (props: any) => <Pressable {...props} /> };
 });
 jest.mock('@/components/options/RadioMark', () => 'RadioMark');
+// The sheet is covered where it lives; here it stands in as its actions.
+jest.mock('@/components/options/ShareLinkOptions', () => {
+  const { Text, View } = require('react-native');
+  return {
+    ShareLinkOptions: ({ onShare, onEdit, onRevoke }: any) => (
+      <View testID="share-options-sheet">
+        <Text testID="share-option-share" onPress={onShare}>share</Text>
+        <Text testID="share-option-edit" onPress={onEdit}>edit</Text>
+        <Text testID="share-option-revoke" onPress={onRevoke}>revoke</Text>
+      </View>
+    ),
+  };
+});
 jest.mock('@/components/FormSheet', () => {
   const { Text, TextInput, View } = require('react-native');
   return {
@@ -107,7 +120,8 @@ describe('SharesScreen', () => {
     mockShares.list.mockResolvedValue([share]);
     const view = await renderScreen();
 
-    fireEvent.press(await view.findByLabelText('shares.share'));
+    await fireEvent.press(await view.findByTestId('share-options'));
+    await fireEvent.press(view.getByTestId('share-option-share'));
 
     expect(mockShareItem).toHaveBeenCalledWith(expect.objectContaining({ url: share.url }));
   });
@@ -118,7 +132,8 @@ describe('SharesScreen', () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const view = await renderScreen();
 
-    fireEvent.press(await view.findByLabelText('shares.revoke'));
+    await fireEvent.press(await view.findByTestId('share-options'));
+    await fireEvent.press(view.getByTestId('share-option-revoke'));
     expect(mockShares.remove).not.toHaveBeenCalled();
 
     const destructive = (alert.mock.calls[0][2] ?? []).find(button => button.style === 'destructive');
@@ -137,7 +152,8 @@ describe('SharesScreen', () => {
       </QueryClientProvider>
     );
 
-    await fireEvent.press(await view.findByLabelText('shares.edit'));
+    await fireEvent.press(await view.findByTestId('share-options'));
+    await fireEvent.press(view.getByTestId('share-option-edit'));
     await fireEvent.changeText(view.getByTestId('share-description'), '  Summer trip ');
     await fireEvent.press(view.getByTestId('share-expiry-never'));
     await fireEvent.press(view.getByTestId('edit-share-save'));
@@ -154,7 +170,8 @@ describe('SharesScreen', () => {
     mockShares.update.mockResolvedValue(undefined);
     const view = await renderScreen();
 
-    await fireEvent.press(await view.findByLabelText('shares.edit'));
+    await fireEvent.press(await view.findByTestId('share-options'));
+    await fireEvent.press(view.getByTestId('share-option-edit'));
     await fireEvent.changeText(view.getByTestId('share-description'), 'New name');
     await fireEvent.press(view.getByTestId('edit-share-save'));
 

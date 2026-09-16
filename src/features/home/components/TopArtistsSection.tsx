@@ -17,7 +17,7 @@ import {
   SECTION_VISIBLE_ITEMS,
   STALE_DEEZER_CHARTS,
 } from '@/features/home/constants'
-import MediaTile from './MediaTile'
+import OptionsTile from './OptionsTile'
 import SkeletonTiles from '@/components/SkeletonTiles'
 import type { Artist } from '@/domain/entities/Artist'
 import { spacing, typography } from '@/constants/design'
@@ -50,7 +50,8 @@ export default function TopArtistsSection({ refreshKey = 0 }: Props) {
   usePrefetchCovers(coversToPrefetch, 'grid')
 
   const renderArtist = useCallback(({ item }: { item: Artist }) => (
-    <MediaTile
+    <OptionsTile
+      entity={{ kind: 'artist', artist: item }}
       cover={item.cover}
       title={item.name}
       subtitle={t('common.artist')}

@@ -27,7 +27,7 @@ import { useResolvedCover } from '@/features/artwork/useResolvedCover';
 import { SOURCES } from '@/providers/registry/sources';
 import ArtistMetaRow from './ArtistMetaRow';
 import LocalActionRow from './LocalActionRow';
-import LocalOptionsButton from './LocalOptionsButton';
+import ArtistOptionsButton from './ArtistOptionsButton';
 
 const NO_COVER: CoverSource = { kind: 'none' };
 
@@ -110,8 +110,8 @@ const ArtistHeader: React.FC<Props> = ({ model, showNavigation = true }) => {
             >
               <ChevronLeft size={iconSize.header} color={onDark.text} style={{ marginLeft: -2 }} />
             </Touchable>
-            {isLocal && artist ? (
-              <LocalOptionsButton artist={artist} />
+            {artist ? (
+              <ArtistOptionsButton artist={artist} />
             ) : (
               <View style={{ width: 36 }} />
             )}
@@ -148,7 +148,7 @@ export const ArtistHeaderBar: React.FC<Props> = ({ model }) => {
   return (
     <DetailHeaderBar
       title={displayName}
-      rightAction={model.isLocal && model.artist ? <LocalOptionsButton artist={model.artist} /> : undefined}
+      rightAction={model.artist ? <ArtistOptionsButton artist={model.artist} /> : undefined}
     />
   );
 };

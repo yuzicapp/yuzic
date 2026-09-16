@@ -50,8 +50,15 @@ const FEATURED_ARTISTS = /\s*[([]?\s*\b(?:feat\.|ft\.|featuring\s)[\s\S]*$/i;
 export const leadArtistName = (credit: string): string =>
   credit.replace(FEATURED_ARTISTS, '').trim() || credit.trim();
 
-/** The identifier fields that can carry an exact match, strongest first. */
-const ID_FIELDS: readonly (readonly [MatchReason, keyof ExternalIds])[] = Object.freeze([
+/**
+ * The identifier fields that can carry an exact match, strongest first.
+ *
+ * Exported because this order *is* the rule: anything that relates records by
+ * identifier — `findMatch` below, and the library index in
+ * `features/library/localFirst` — reads it here rather than writing the list
+ * out again and drifting from it.
+ */
+export const ID_FIELDS: readonly (readonly [MatchReason, keyof ExternalIds])[] = Object.freeze([
   ['mbid', 'mbid'],
   ['isrc', 'isrc'],
   ['upc', 'upc'],

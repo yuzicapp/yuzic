@@ -67,6 +67,22 @@ jest.mock('@/components/EmptyState', () => {
     ),
   };
 });
+jest.mock('@/components/options/PodcastOptions', () => {
+  const { Text, View } = require('react-native');
+  return {
+    PodcastListOptions: ({ onAdd, onRefresh }: any) => (
+      <View testID="podcast-list-options-sheet">
+        <Text testID="podcast-option-add" onPress={onAdd}>add</Text>
+        <Text testID="podcast-option-refresh" onPress={onRefresh}>refresh</Text>
+      </View>
+    ),
+    PodcastChannelOptions: ({ onUnsubscribe }: any) => (
+      <View testID="podcast-channel-options-sheet">
+        <Text testID="podcast-option-unsubscribe" onPress={onUnsubscribe}>unsubscribe</Text>
+      </View>
+    ),
+  };
+});
 jest.mock('@/components/FormSheet', () => {
   const { Text, TextInput, View } = require('react-native');
   return {
@@ -159,7 +175,8 @@ describe('PodcastsScreen', () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const view = await renderScreen();
 
-    fireEvent.press(await view.findByLabelText('podcasts.unsubscribe'));
+    await fireEvent.press(await view.findByTestId('podcast-channel-options'));
+    await fireEvent.press(view.getByTestId('podcast-option-unsubscribe'));
     expect(mockPodcasts.unsubscribe).not.toHaveBeenCalled();
 
     const destructive = (alert.mock.calls[0][2] ?? []).find(button => button.style === 'destructive');
@@ -189,9 +206,23 @@ describe('PodcastsScreen', () => {
     mockPodcasts.refreshAll.mockResolvedValue(undefined);
     const view = await renderScreen();
 
-    fireEvent.press(await view.findByLabelText('podcasts.refresh'));
+    await fireEvent.press(await view.findByLabelText('a11y.common.moreOptions'));
+    await fireEvent.press(view.getByTestId('podcast-option-refresh'));
 
     await waitFor(() => expect(mockPodcasts.refreshAll).toHaveBeenCalledTimes(1));
+  });
+
+  it('subscribes from the list options', async () => {
+    mockPodcasts.list.mockResolvedValue([channel('a')]);
+    mockPodcasts.subscribe.mockResolvedValue(undefined);
+    const view = await renderScreen();
+
+    await fireEvent.press(await view.findByLabelText('a11y.common.moreOptions'));
+    await fireEvent.press(view.getByTestId('podcast-option-add'));
+    await fireEvent.changeText(await view.findByTestId('feed-url'), 'https://feeds.example/new.xml');
+    await fireEvent.press(view.getByTestId('subscribe-submit'));
+
+    await waitFor(() => expect(mockPodcasts.subscribe).toHaveBeenCalledWith('https://feeds.example/new.xml'));
   });
 
   it('says the server has no podcasts rather than offering a retry', async () => {

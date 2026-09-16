@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
 
@@ -13,6 +13,41 @@ import type { Song } from '@/domain/entities/Song';
 const SEED_POOL_SIZE = 20;
 const SEED_COUNT = 2;
 const LOCAL_MIX_MAX_TRACKS = 10;
+
+type DailySeeds = { key: string; seeds: Song[] };
+
+/**
+ * Keep the day's seeds until there is a reason to pick again.
+ *
+ * The seeds come from play counts, and a scrobble changes those at the end of
+ * every song — which re-ranked the pool, reshuffled it, often picked different
+ * seeds, and so changed the query key. Every track change then dropped the
+ * shelf to a skeleton, fetched a new mix and wrote the whole query cache to
+ * disk: measured as a second Home commit half a second after each song ended,
+ * on top of the first. A "daily" mix should not change with every song.
+ *
+ * Picked again when the day or the manual refresh changes, when nothing had
+ * been picked yet, or when a held seed has left the library (a server switch,
+ * or a removal), since a mix seeded from a song the library no longer has is
+ * not one the server can answer for.
+ */
+export function chooseDailySeeds(
+  previous: DailySeeds | null,
+  candidates: Song[],
+  key: string,
+  songsById: ReadonlyMap<string, Song>,
+): DailySeeds {
+  if (
+    previous
+    && previous.key === key
+    && previous.seeds.length > 0
+    && previous.seeds.every(seed => songsById.has(seed.localId))
+  ) {
+    return previous;
+  }
+  if (previous && previous.key === key && previous.seeds === candidates) return previous;
+  return { key, seeds: candidates };
+}
 
 /**
  * The device-local daily mix used by both Home and its complete screen.
@@ -29,7 +64,7 @@ export function useLocalMix(refreshKey = 0) {
   const serverReachable = useServerReachable();
   const dayKey = getDayKey();
 
-  const seeds = useMemo<Song[]>(() => {
+  const candidateSeeds = useMemo<Song[]>(() => {
     const played = Object.entries(playCounts)
       .filter(([, count]) => count > 0)
       .sort((a, b) => b[1] - a[1])
@@ -39,6 +74,12 @@ export function useLocalMix(refreshKey = 0) {
 
     return seededShuffle(played, getDailySeed(`${dayKey}:localMix:${refreshKey}`)).slice(0, SEED_COUNT);
   }, [dayKey, playCounts, refreshKey, songsById]);
+
+  // The day's seeds, held rather than re-picked on every play-count change —
+  // see `chooseDailySeeds`.
+  const chosen = useRef<DailySeeds | null>(null);
+  chosen.current = chooseDailySeeds(chosen.current, candidateSeeds, `${dayKey}:${refreshKey}`, songsById);
+  const seeds = chosen.current.seeds;
 
   const hasSimilarity = typeof api.similar?.getSimilarSongs === 'function';
   const enabled = hasSimilarity && serverReachable && seeds.length > 0;

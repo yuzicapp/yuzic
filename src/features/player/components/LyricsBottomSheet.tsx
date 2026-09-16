@@ -17,12 +17,16 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePlayingProgress, usePlayingActions } from '@/features/playback/PlayingContext';
 import { useTheme } from '@/features/theme/useTheme';
 import { LyricsResult } from '@/providers/contracts/ServerAdapter';
 import { ChevronDown } from 'lucide-react-native';
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
+import {
+  optionSheetStyles,
+  useOptionSheetBackground,
+  useSheetBottomInset,
+} from '@/components/options/OptionSheetPrimitives';
 import Touchable from '@/components/Touchable';
 type LyricsBottomSheetProps = {
   lyrics: LyricsResult | null;
@@ -82,7 +86,8 @@ const LyricsBottomSheet = forwardRef<BottomSheetModal, LyricsBottomSheetProps>(
     const { colors } = useTheme();
     const progress = usePlayingProgress();
     const { seekSong } = usePlayingActions();
-    const insets = useSafeAreaInsets();
+    const bottomInset = useSheetBottomInset();
+    const sheetBg = useOptionSheetBackground();
     const scrollRef = useRef<BottomSheetScrollViewMethods>(null);
     const lineLayouts = useRef<Record<number, { y: number; height: number }>>({});
     const [contentHeight, setContentHeight] = useState(0);
@@ -152,7 +157,7 @@ const LyricsBottomSheet = forwardRef<BottomSheetModal, LyricsBottomSheetProps>(
         backdropComponent={renderBackdrop}
         stackBehavior="push"
         onDismiss={onClose}
-        backgroundStyle={{ backgroundColor: colors.card }}
+        backgroundStyle={[optionSheetStyles.sheetBackground, sheetBg]}
         handleIndicatorStyle={{ backgroundColor: colors.border }}
       >
         <View style={[styles.header, { paddingTop: spacing.md }]}>
@@ -182,7 +187,7 @@ const LyricsBottomSheet = forwardRef<BottomSheetModal, LyricsBottomSheetProps>(
             {
               paddingHorizontal: spacing.xl,
               paddingTop: spacing.lg,
-              paddingBottom: insets.bottom + 48,
+              paddingBottom: bottomInset + spacing.generous,
             },
           ]}
           showsVerticalScrollIndicator={false}

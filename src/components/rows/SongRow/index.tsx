@@ -25,6 +25,7 @@ import { formatDuration } from '@/components/formatDuration';
 import Touchable from '@/components/Touchable';
 import SongOptions from '@/components/options/SongOptions';
 import { useSheetRef } from '@/components/useSheetRef';
+import { useLocalFirst } from '@/features/library/useLocalFirst';
 import { useSourceUse } from '@/features/settings/sources/useSourceUse';
 import { promptSourceUse } from '@/features/settings/sources/sourceUsePrompt';
 import { PREVIEWS_USE } from '@/providers/registry/pageSources';
@@ -138,7 +139,7 @@ const ExternalSongRowView: React.FC<{
 };
 
 const SongRow: React.FC<Props> = ({
-  song,
+  song: browsedSong,
   collection,
   onPress,
   variant = 'default',
@@ -150,6 +151,12 @@ const SongRow: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  // Local first: a browsed track the library already holds is *this* library's
+  // track from here down — the full recording rather than a thirty-second
+  // sample, with the library's own row, options and favourite state. See
+  // features/library/localFirst for the one rule this asks.
+  const { preferLocalSong } = useLocalFirst();
+  const song = preferLocalSong(browsedSong);
   const { playSongInCollection } = usePlayingActions();
   const { openSongOptions } = useSongActionSheets();
   const { isTrackDownloaded } = useDownloadState();

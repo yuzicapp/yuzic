@@ -11,6 +11,7 @@ import {
   OptionSheetSectionLabel,
   optionSheetStyles,
   useOptionSheetBackground,
+  useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives';
 import { onDark, spacing, statusColor, typography } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
@@ -32,6 +33,7 @@ const SourceSheet = forwardRef<BottomSheetModal, Props>(({ source, onDone }, ref
   const { colors } = useTheme();
   const dispatch = useDispatch();
   const sheetBg = useOptionSheetBackground();
+  const sheetContent = useOptionSheetContentStyle();
   const uses = useSelector(selectSourceUses);
 
   const declaration = source ? SOURCES[source] : undefined;
@@ -49,7 +51,7 @@ const SourceSheet = forwardRef<BottomSheetModal, Props>(({ source, onDone }, ref
       backgroundStyle={[optionSheetStyles.sheetBackground, sheetBg]}
       onDismiss={onDone}
     >
-      <BottomSheetScrollView style={sheetBg} contentContainerStyle={optionSheetStyles.sheetContent}>
+      <BottomSheetScrollView style={sheetBg} contentContainerStyle={sheetContent}>
         {declaration && source && (
           <>
             <Text style={[styles.title, { color: colors.secondary }]}>{name}</Text>

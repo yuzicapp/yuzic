@@ -10,6 +10,7 @@ import {
   OptionSheetRow,
   optionSheetStyles,
   useOptionSheetBackground,
+  useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives';
 import { useSheetRef } from '@/components/useSheetRef';
 import { spacing, typography } from '@/constants/design';
@@ -22,13 +23,15 @@ import { dismissConnectDownloaderPrompt, usePendingDownloaderPrompt } from './co
  * one, mounted once at the root. It lists only the downloaders that can take
  * what was asked for — a track Get offers none that are album-only; an album
  * Get offers every one, since a track-only downloader takes an album as its
- * tracks — and each opens that downloader's own settings, where it is connected.
+ * tracks; an artist Get offers only the ones that follow artists — and each
+ * opens that downloader's own settings, where it is connected.
  */
 export default function ConnectDownloaderPromptHost() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const sheetBg = useOptionSheetBackground();
+  const sheetContent = useOptionSheetContentStyle();
   const sheetRef = useSheetRef();
   const unit = usePendingDownloaderPrompt();
 
@@ -38,7 +41,11 @@ export default function ConnectDownloaderPromptHost() {
   }, [unit, sheetRef]);
 
   const offered = unit
-    ? ALL_DOWNLOADERS.filter(def => (unit === 'album' ? !!(def.downloadAlbum || def.downloadTrack) : !!def.downloadTrack))
+    ? ALL_DOWNLOADERS.filter(def => {
+        if (unit === 'artist') return !!def.monitorArtist;
+        if (unit === 'track') return !!def.downloadTrack;
+        return !!(def.downloadAlbum || def.downloadTrack);
+      })
     : [];
 
   return (
@@ -52,7 +59,7 @@ export default function ConnectDownloaderPromptHost() {
       backgroundStyle={[optionSheetStyles.sheetBackground, sheetBg]}
       onDismiss={dismissConnectDownloaderPrompt}
     >
-      <BottomSheetView style={[optionSheetStyles.sheetContent, sheetBg]}>
+      <BottomSheetView style={[sheetContent, sheetBg]}>
         {unit && (
           <>
             <Text style={[styles.title, { color: colors.secondary }]}>

@@ -29,6 +29,12 @@ export function resolveTrackPlayability(
   previewUrlsByNativeId: Readonly<Record<string, string>>
 ): TrackPlayability {
   if (isLocal) return { kind: 'full' };
+  // Playability follows the *track*, not the album it was browsed on. A
+  // browsed album's track that the library turns out to hold has been replaced
+  // by the library's own record (features/library/localFirst), and the server
+  // can stream that outright — sampling it instead would be the app choosing a
+  // thirty-second clip over a recording the user already owns.
+  if (song.provenance.origin === 'server') return { kind: 'full' };
   const streamId = previewUrlsByNativeId[song.nativeId];
   return streamId ? { kind: 'preview', streamId } : { kind: 'unavailable' };
 }

@@ -276,6 +276,34 @@ because both halves of each pair look reasonable in isolation.
   Anything drawn above the items — a header, the sort row — cancels that
   padding with a negative margin and keeps `spacing.page`, so all of it lines
   up on one edge.
+- **Options live behind a `⋯`**: every detail-style screen — album, artist
+  (browsed as well as owned), playlist, genre, radio, podcasts, shares, wants —
+  puts its actions in an options sheet opened from a `⋯` on the right of
+  `DetailHeader`/`DetailHeaderBar`, and every row or tile puts its own behind a
+  `⋯` (a tile, having no room for one, answers a long press —
+  `features/home/OptionsTile`). Sheets are built on `EntityOptionsSheet` and
+  `OptionSheetPrimitives`; an entity kind's rows come from
+  `features/entity-actions/registry`, and a screen-level list (radio stations,
+  podcasts) builds `ResolvedAction`s directly, since a station is not a domain
+  entity. Bare icon buttons on a row are how this drifts back: radio drew a
+  pencil and a bin, shares three icons, podcasts a bin — one stray tap from the
+  row you press to play, and each screen answering "what can I do with this"
+  differently. A primary action may stay on the row (play an episode, download
+  one); everything else, and anything destructive, goes in the sheet.
+- **Sheets are one sheet**: anything that comes up from the bottom is a
+  `BottomSheetModal` wearing the shared scaffold — `useOptionSheetBackground`
+  for the surface (which is what makes its corners follow the user's radius
+  preset), `renderBackdrop` (which is also what gives it Android's back
+  button), a handle, `stackBehavior="push"`, and `useOptionSheetContentStyle`
+  for padding that clears the home indicator. Height comes from the content:
+  `enableDynamicSizing` for a fixed stack of rows, snap points only for a list
+  whose length the sheet cannot know (an options sheet over a long info
+  section, lyrics, the output picker while it scans). A percentage like `'40%'`
+  on a sheet of five rows is the caller guessing at a height it does not lay
+  out, and `sheetConventions.test.ts` fails on any sheet that skips the
+  scaffold. Three are deliberately their own design and named in that test:
+  `PlaylistList`, `SelectionBottomSheet`, and onboarding's scheme sheet, which
+  is dark because the flow around it is.
 - **Collection actions**: a screen led by artwork uses `DetailHeader`'s centred
   circle-and-pill pair. A screen without artwork uses
   `features/library/CollectionActions` — two square-shouldered halves of the

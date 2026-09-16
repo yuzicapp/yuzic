@@ -128,6 +128,10 @@ describe('per-downloader strings', () => {
       expect(download[def.descriptionKey.split('.').pop()!]).toBeTruthy()
       if (def.downloadAlbum) expect(download[def.albumAddedKey.split('.').pop()!]).toBeTruthy()
       if (def.downloadTrack) expect(download[def.trackAddedKey!.split('.').pop()!]).toBeTruthy()
+      // The third unit, same trap: an artist want's Get confirms with a key
+      // nothing in the source spells out, so only walking the downloaders
+      // can see it missing.
+      if (def.monitorArtist) expect(download[def.artistMonitoredKey!.split('.').pop()!]).toBeTruthy()
     }
   )
 })

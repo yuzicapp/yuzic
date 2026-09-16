@@ -16,7 +16,16 @@ const SortBottomSheet = forwardRef<BottomSheetModal, SortBottomSheetProps>(({ so
     { value: 'year', label: t('home.sort.releaseYear'), Icon: Calendar },
     { value: 'userplays', label: t('home.sort.mostPlayed'), Icon: Flame },
   ], [t]);
-  return <SingleSelectBottomSheet ref={ref} selected={sortOrder} options={options} title={t('home.sortSheet.title')} snapPoint="48%" onSelect={value => onSelect(value as SortOrder)} />;
+  return (
+    <SingleSelectBottomSheet
+      ref={ref}
+      testID="sort-sheet"
+      selected={sortOrder}
+      options={options}
+      title={t('home.sortSheet.title')}
+      onSelect={value => onSelect(value as SortOrder)}
+    />
+  );
 });
 SortBottomSheet.displayName = 'SortBottomSheet';
 export default SortBottomSheet;

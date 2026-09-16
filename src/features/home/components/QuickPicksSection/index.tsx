@@ -23,6 +23,7 @@ import {
 } from '@/state/redux/selectors/statsSelectors';
 import { useSongsById } from '@/features/song/useSongsById';
 import { seededShuffle } from '@/features/home/hooks/useDailyLayout';
+import { useStableList } from '@/features/home/hooks/useStableList';
 import type { Song } from '@/domain/entities/Song';
 import {
   QUICK_PICKS_PAGE_SIZE,
@@ -71,7 +72,8 @@ export default function QuickPicksSection({ refreshKey = 0 }: Props) {
   const { playSong } = usePlayingActions();
   const { resolvePlayableSong } = usePlayableSongResolver();
   const itemCount = useSelector(selectHomeShelfItemCount);
-  const picks = useQuickPicks(refreshKey, itemCount);
+  // Stable while the picks are unchanged; see `useStableList`.
+  const picks = useStableList(useQuickPicks(refreshKey, itemCount));
   const { width: screenWidth } = useWindowDimensions();
   const { openSongOptions } = useSongActionSheets();
 

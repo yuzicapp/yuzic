@@ -36,7 +36,9 @@
       "appearance": "外观",
       "github": "Github",
       "privacyPolicy": "隐私政策",
-      "termsOfUse": "使用条款"
+      "termsOfUse": "使用条款",
+      "changelog": "更新内容",
+      "website": "官方网站"
     },
     "profile": {
       "unknownUser": "未知用户",
@@ -1115,7 +1117,8 @@
       "arrived": "{{title}} 现已加入您的音乐库",
       "inLibrary": "已在库中",
       "downloading": "正在下载至服务器… {{progress}}%",
-      "noServiceConnected": "请在设置中连接下载器以进行下载"
+      "noServiceConnected": "请在设置中连接下载器以进行下载",
+      "goToArtist": "转到艺人"
     },
     "review": {
       "targetServer": "目标服务器",
@@ -1173,7 +1176,8 @@
       },
       "soulsyncDesc": "通过 SoulSync 搜索 Soulseek",
       "addedToSoulsync": "已向 SoulSync 发起请求。",
-      "addedTrackToSoulsync": "已向 SoulSync 发起请求。"
+      "addedTrackToSoulsync": "已向 SoulSync 发起请求。",
+      "monitoringOnLidarr": "Lidarr 正在关注 {{artist}}。"
     },
     "header": {
       "songs": "{{count}} 首曲目",
@@ -1190,7 +1194,20 @@
   "wants": {
     "title": "想要列表",
     "empty": "还没有保存任何内容。",
-    "searchAction": "搜索音乐"
+    "searchAction": "搜索音乐",
+    "remove": "移除",
+    "get": "获取",
+    "retry": "重试",
+    "openAlbum": "转到专辑",
+    "openArtist": "转到艺人",
+    "openArrival": "打开",
+    "artistLabel": "艺人",
+    "status": {
+      "queued": "排队中",
+      "downloading": "正在下载 · {{progress}}%",
+      "failed": "未能获取",
+      "arrived": "已在音乐库中"
+    }
   },
   "manualAddWant": {
     "title": "添加到想要列表",
@@ -1295,7 +1312,8 @@
       "downloaded": "已下载",
       "goToArtist": "前往歌手页面",
       "viewExternal": "查看外部信息",
-      "generatePlaylist": "以此生成播放列表"
+      "generatePlaylist": "以此生成播放列表",
+      "share": "分享"
     },
     "sections": {
       "info": "歌手信息"
@@ -1387,7 +1405,12 @@
       "name": "名称",
       "streamUrl": "流媒体地址",
       "homepage": "主页（可选）"
-    }
+    },
+    "play": "播放",
+    "openHomepage": "打开主页",
+    "delete": "删除电台",
+    "refresh": "刷新",
+    "openFailed": "无法打开该页面"
   },
   "podcasts": {
     "title": "播客",
@@ -1524,5 +1547,8 @@
       "offline": "已保存到本机",
       "downloaders": "服务器传输"
     }
+  },
+  "externalOptions": {
+    "openInSource": "在 {{source}} 中打开"
   }
 }

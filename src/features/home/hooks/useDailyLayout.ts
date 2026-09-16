@@ -20,6 +20,10 @@ const BECAUSE_SEED_POOL_SIZE = 20
 const SIMILAR_SEED_COUNT = 4
 const GENRE_COUNT = 1
 
+/** Cannot occur in an artist name, so joining and splitting round-trips. */
+const SEED_KEY_SEPARATOR = '\u0000'
+const splitSeedKey = (key: string): string[] => (key ? key.split(SEED_KEY_SEPARATOR) : [])
+
 export function getDayKey(date = new Date()): string {
   return date.toDateString()
 }
@@ -79,16 +83,17 @@ export function useDailyLayout(refreshKey = 0): HomeLayout {
     )
   }, [dailySeed, libraryArtists, artistPlayCounts])
 
-  const becauseSeeds = useMemo(
-    () => artistSeedPool.slice(0, BECAUSE_SEED_COUNT).map(a => a.name),
-    [artistSeedPool]
-  )
+  // Kept by value, not by identity. The pool is re-sorted on every play-count
+  // change — once per track change, from the scrobble — and almost never
+  // changes which names are at the top. Rebuilt as new arrays anyway, they
+  // changed `sources` and so re-rendered every shelf on Home at the end of
+  // every song. The key only moves when the names do.
+  const becauseKey = artistSeedPool.slice(0, BECAUSE_SEED_COUNT).map(a => a.name).join(SEED_KEY_SEPARATOR)
+  const becauseSeeds = useMemo(() => splitSeedKey(becauseKey), [becauseKey])
 
   // Same pool, same order, so the first seed matches the "More like" shelf's.
-  const similarSeeds = useMemo(
-    () => artistSeedPool.slice(0, SIMILAR_SEED_COUNT).map(a => a.name),
-    [artistSeedPool]
-  )
+  const similarKey = artistSeedPool.slice(0, SIMILAR_SEED_COUNT).map(a => a.name).join(SEED_KEY_SEPARATOR)
+  const similarSeeds = useMemo(() => splitSeedKey(similarKey), [similarKey])
 
   const availableGenres = useMemo(() => {
     const genres: string[] = [...libraryGenres]
@@ -105,10 +110,12 @@ export function useDailyLayout(refreshKey = 0): HomeLayout {
     return presentableGenres(genres)
   }, [libraryAlbums, libraryGenres])
 
-  const topGenres = useMemo(() => {
-    if (!availableGenres.length) return []
-    return seededShuffle(availableGenres, dailySeed).slice(0, GENRE_COUNT)
-  }, [availableGenres, dailySeed])
+  // By value for the same reason as the seeds above: `sources` depends on it,
+  // and a fresh `[]` for "no genres" is a new identity on every recompute.
+  const genreKey = availableGenres.length
+    ? seededShuffle(availableGenres, dailySeed).slice(0, GENRE_COUNT).join(SEED_KEY_SEPARATOR)
+    : ''
+  const topGenres = useMemo(() => splitSeedKey(genreKey), [genreKey])
 
   const hasLibrary = libraryArtists.length > 0 || libraryAlbums.length > 0
 

@@ -36,7 +36,9 @@
       "appearance": "Apparence",
       "github": "Github",
       "privacyPolicy": "Politique de confidentialité",
-      "termsOfUse": "Conditions d'utilisation"
+      "termsOfUse": "Conditions d'utilisation",
+      "changelog": "Nouveautés",
+      "website": "Site web"
     },
     "profile": {
       "unknownUser": "Utilisateur inconnu",
@@ -1120,7 +1122,8 @@
       "arrived": "{{title}} est maintenant dans votre bibliothèque",
       "inLibrary": "Dans la bibliothèque",
       "downloading": "Téléchargement vers le serveur… {{progress}}%",
-      "noServiceConnected": "Connectez un téléchargeur dans les réglages pour télécharger"
+      "noServiceConnected": "Connectez un téléchargeur dans les réglages pour télécharger",
+      "goToArtist": "Aller à l’artiste"
     },
     "review": {
       "targetServer": "Serveur cible",
@@ -1178,7 +1181,8 @@
       },
       "soulsyncDesc": "Chercher sur Soulseek via SoulSync",
       "addedToSoulsync": "Demandé à SoulSync.",
-      "addedTrackToSoulsync": "Demandé à SoulSync."
+      "addedTrackToSoulsync": "Demandé à SoulSync.",
+      "monitoringOnLidarr": "Lidarr suit désormais {{artist}}."
     },
     "header": {
       "songs": "{{count}} morceau",
@@ -1195,7 +1199,20 @@
   "wants": {
     "title": "Souhaits",
     "empty": "Rien d'enregistré pour l'instant.",
-    "searchAction": "Rechercher de la musique"
+    "searchAction": "Rechercher de la musique",
+    "remove": "Retirer",
+    "get": "Récupérer",
+    "retry": "Réessayer",
+    "openAlbum": "Aller à l’album",
+    "openArtist": "Aller à l’artiste",
+    "openArrival": "Ouvrir",
+    "artistLabel": "Artiste",
+    "status": {
+      "queued": "En attente",
+      "downloading": "Téléchargement · {{progress}} %",
+      "failed": "Non reçu",
+      "arrived": "Dans votre bibliothèque"
+    }
   },
   "manualAddWant": {
     "title": "Ajouter aux souhaits",
@@ -1300,7 +1317,8 @@
       "downloaded": "Téléchargé",
       "goToArtist": "Aller à l'artiste",
       "viewExternal": "Voir externe",
-      "generatePlaylist": "Créer une liste de lecture à partir de ceci"
+      "generatePlaylist": "Créer une liste de lecture à partir de ceci",
+      "share": "Partager"
     },
     "sections": {
       "info": "Informations sur l'artiste"
@@ -1392,7 +1410,12 @@
       "name": "Nom",
       "streamUrl": "URL du flux",
       "homepage": "Site web (facultatif)"
-    }
+    },
+    "play": "Lire",
+    "openHomepage": "Ouvrir le site web",
+    "delete": "Supprimer la station",
+    "refresh": "Actualiser",
+    "openFailed": "Impossible d’ouvrir cette page"
   },
   "podcasts": {
     "title": "Podcasts",
@@ -1529,5 +1552,8 @@
       "offline": "Enregistré sur cet appareil",
       "downloaders": "Transferts du serveur"
     }
+  },
+  "externalOptions": {
+    "openInSource": "Ouvrir dans {{source}}"
   }
 }

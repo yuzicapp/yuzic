@@ -218,7 +218,12 @@ export function createEngineBackend(): PlayerBackend {
       fire('setup', async () => {
         const api = load();
         try {
-          await api.setup({ progressIntervalMs: 250 });
+          // Once a second: every reader of progress — the progress provider,
+          // the heartbeat, the sleep timer — polls the shadow at 1s or slower,
+          // so faster events were bridge traffic and shadow rebuilds nobody
+          // read. The engine's own 4Hz ticker, which times crossfades, is
+          // unaffected by this.
+          await api.setup({ progressIntervalMs: 1000 });
         } finally {
           // Resolved in `finally` rather than after: a setup that threw still
           // has to open the gate, or the transport is blocked for the life of

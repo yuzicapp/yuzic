@@ -72,6 +72,7 @@ jest.mock('@/components/options/OptionSheetPrimitives', () => {
     OptionSheetDivider: () => <RNView />,
     optionSheetStyles: { sheetBackground: {}, sheetContent: {}, loading: {} },
     useOptionSheetBackground: () => ({}),
+    useOptionSheetContentStyle: () => ({}),
   };
 });
 

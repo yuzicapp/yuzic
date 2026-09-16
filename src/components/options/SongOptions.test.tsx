@@ -4,6 +4,19 @@ import { render } from '@testing-library/react-native';
 import SongOptions from './SongOptions';
 import type { Song } from '@/domain/entities/Song';
 
+jest.mock('@/features/library/useLocalFirst', () => ({
+  useLocalFirst: () => ({
+    index: {
+      songs: { size: 0, find: () => null },
+      albums: { size: 0, find: () => null },
+      artists: { size: 0, find: () => null },
+    },
+    localSong: () => null,
+    localAlbum: () => null,
+    localArtist: () => null,
+    preferLocalSong: (song: unknown) => song,
+  }),
+}));
 jest.mock('@gorhom/bottom-sheet', () => require('@gorhom/bottom-sheet/mock'));
 
 jest.mock('react-i18next', () => ({
@@ -123,6 +136,7 @@ jest.mock('@/components/options/OptionSheetPrimitives', () => {
     OptionSheetDivider: () => <RNView />,
     optionSheetStyles: { sheetBackground: {}, sheetContent: {}, loading: {} },
     useOptionSheetBackground: () => ({}),
+    useOptionSheetContentStyle: () => ({}),
   };
 });
 

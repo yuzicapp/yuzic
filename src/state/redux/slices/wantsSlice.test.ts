@@ -69,10 +69,15 @@ describe('wantsSlice', () => {
     let state = reducer(undefined, addWant({ serverId: 's1', want: wantInput('w1') }));
     const before = state.byServer.s1[0];
 
-    state = reducer(state, setWantJobRef({ serverId: 's1', localId: 'w1' as LocalId, jobRef: 'job-123' }));
+    state = reducer(state, setWantJobRef({
+      serverId: 's1', localId: 'w1' as LocalId, jobRef: { downloader: 'lidarr', requestedAt: 1_000 },
+    }));
 
     const after = state.byServer.s1[0];
-    expect(after.jobRef).toBe('job-123');
+    // Which downloader was asked, and when — the two facts a row needs to
+    // find the job in that downloader's queue and to tell "not picked up
+    // yet" from "never arrived". Deliberately not a status.
+    expect(after.jobRef).toEqual({ downloader: 'lidarr', requestedAt: 1_000 });
     expect(after.title).toBe(before.title);
     expect(after.artist).toBe(before.artist);
     expect(after.unit).toBe(before.unit);
@@ -81,8 +86,39 @@ describe('wantsSlice', () => {
   });
 
   it('setting a jobRef for a missing want is a no-op', () => {
-    const state = reducer(undefined, setWantJobRef({ serverId: 's1', localId: 'nope' as LocalId, jobRef: 'x' }));
+    const state = reducer(undefined, setWantJobRef({
+      serverId: 's1', localId: 'nope' as LocalId, jobRef: { downloader: 'slskd', requestedAt: 1 },
+    }));
     expect(state.byServer.s1).toBeUndefined();
+  });
+
+  it('clears a jobRef, so a retry is not read as the first job still running', () => {
+    let state = reducer(undefined, addWant({ serverId: 's1', want: wantInput('w1') }));
+    state = reducer(state, setWantJobRef({
+      serverId: 's1', localId: 'w1' as LocalId, jobRef: { downloader: 'lidarr', requestedAt: 1 },
+    }));
+
+    state = reducer(state, setWantJobRef({ serverId: 's1', localId: 'w1' as LocalId, jobRef: undefined }));
+
+    expect(state.byServer.s1[0].jobRef).toBeUndefined();
+  });
+
+  it('saves the cover the record was found with, so the row can draw it', () => {
+    const cover = { kind: 'none' as const, subject: { kind: 'album' as const, title: 'Kid A', artistName: 'Radiohead' } };
+    const state = reducer(undefined, addWant({
+      serverId: 's1', want: wantInput('w1', { cover }),
+    }));
+
+    expect(state.byServer.s1[0].cover).toEqual(cover);
+  });
+
+  it('holds an artist want alongside the release units', () => {
+    const state = reducer(undefined, addWant({
+      serverId: 's1',
+      want: wantInput('w1', { unit: 'artist', title: 'Radiohead', artist: 'Radiohead' }),
+    }));
+
+    expect(state.byServer.s1[0].unit).toBe('artist');
   });
 
   it('keeps wants isolated per server', () => {

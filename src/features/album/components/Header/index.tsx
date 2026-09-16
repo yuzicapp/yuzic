@@ -63,7 +63,7 @@ const AlbumHeader: React.FC<Props> = ({ model, showNavigation = true }) => {
     <DetailHeader
       title={displayTitle}
       cover={displayCover}
-      rightAction={isLocal && album ? <LocalOptionsButton album={album} /> : undefined}
+      rightAction={album ? <AlbumOptionsButton album={album} isLocal={isLocal} /> : undefined}
       meta={isLocal ? <LocalMetaRow album={album} songs={songs} /> : <ExternalMetaRow album={album} songs={songs} />}
       status={!isLocal ? <ExternalServerStatusRow model={model} /> : undefined}
       actions={isLocal ? <LocalActionRow model={model} /> : <ExternalActionRow model={model} />}
@@ -77,12 +77,23 @@ export const AlbumHeaderBar: React.FC<Props> = ({ model }) => {
   return (
     <DetailHeaderBar
       title={displayTitle}
-      rightAction={model.isLocal && model.album ? <LocalOptionsButton album={model.album} /> : undefined}
+      rightAction={model.album ? <AlbumOptionsButton album={model.album} isLocal={model.isLocal} /> : undefined}
     />
   );
 };
 
-function LocalOptionsButton({ album }: { album: Album }) {
+/**
+ * The "…" on an album's bar.
+ *
+ * On both kinds of album, not only a library one: a browsed album had no
+ * options at all, so there was no way to want it, send it to a downloader, or
+ * reach its artist from the screen that is about it. `AlbumOptions` picks the
+ * action set from the album's own provenance, so this button says the same
+ * thing on either. `hideGoToAlbum` only means anything for a library album —
+ * the external set has no such row — and is passed for the same reason it is
+ * everywhere else: this *is* the album screen.
+ */
+function AlbumOptionsButton({ album, isLocal }: { album: Album; isLocal: boolean }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const optionsSheetRef = useSheetRef();
@@ -94,7 +105,7 @@ function LocalOptionsButton({ album }: { album: Album }) {
       >
         <Ellipsis size={iconSize.header} color={colors.secondary} />
       </DetailHeaderIconButton>
-      <AlbumOptions ref={optionsSheetRef} album={album} hideGoToAlbum />
+      <AlbumOptions ref={optionsSheetRef} album={album} hideGoToAlbum={isLocal} />
     </>
   );
 }

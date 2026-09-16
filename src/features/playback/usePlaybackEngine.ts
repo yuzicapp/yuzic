@@ -12,10 +12,11 @@ import { selectAutoplayEnabled, selectPlaybackSpeeds } from '@/features/settings
 import { createAutoplayCoordinator } from './autoplayCoordinator';
 import { createPlaybackCoordinator } from './playbackCoordinator';
 import { createPlaybackEventHandlers } from './playbackEvents';
+import { captureOutgoingScrobble, deferOffTrackChange } from './outgoingScrobble';
 import type { PlaybackSession } from './playbackSession';
 import { assertPlayable, sameQueue, type PlayableResource } from './playableResource';
 import { backendRepeatMode } from './playingPolicies';
-import { resourcesFromPlayerQueue, segmentAt } from './playingQueue';
+import { resourcesFromPlayerQueue } from './playingQueue';
 import { speedFor } from './speedProfile';
 import { useLatestRef } from './useLatestRef';
 import type { PlaybackResources } from './usePlaybackResources';
@@ -56,11 +57,17 @@ export function usePlaybackEngine(
    * so the current index still names the queue position — and so the
    * playlist — that song was heard from.
    */
-  const scrobbleOutgoing = useCallback((song: Song | null, listenedSeconds: number) => {
-    const source = segmentAt(session.segments(), session.currentIndex())?.source;
-    const playlistId = source?.kind === 'user' && source.contextType === 'playlist' ? source.contextId : undefined;
-    return scrobble.current(song, { listenedSeconds, startTime: session.listenStartedAt(), playlistId });
-  }, [scrobble, session]);
+  const captureScrobble = useCallback((song: Song | null, listenedSeconds: number) => captureOutgoingScrobble({
+    segments: session.segments,
+    currentIndex: session.currentIndex,
+    listenStartedAt: session.listenStartedAt,
+    scrobble: (target, opts) => scrobble.current(target, opts),
+  }, song, listenedSeconds), [scrobble, session]);
+
+  const scrobbleOutgoing = useCallback(
+    (song: Song | null, listenedSeconds: number) => captureScrobble(song, listenedSeconds)(),
+    [captureScrobble]
+  );
 
   const loadQueue = useCallback<LoadQueue>(async (queue, startIndex, play = true, seekToPosition) => {
     assertPlayable(queue);
@@ -184,7 +191,8 @@ export function usePlaybackEngine(
     bumpQueue: session.bumpQueue,
 
     onTrackStarted: () => eventsRef.current.onTrackStarted(),
-    scrobbleOutgoing: (song, listenedSeconds) => { void scrobbleOutgoing(song, listenedSeconds); },
+    // Read now, sent once the change has been drawn — see `deferOffTrackChange`.
+    scrobbleOutgoing: (song, listenedSeconds) => { deferOffTrackChange(captureScrobble(song, listenedSeconds)); },
     markNewListen: () => session.markNewListen(),
     // Fire and forget: a save failing must not delay the next track.
     saveBookmark: (song, positionSeconds) => { void bookmarks.current.saveOrClear(song, positionSeconds); },
@@ -204,7 +212,7 @@ export function usePlaybackEngine(
     autoplayEnabled: () => autoplayEnabled.current,
     isFilling: () => autoplayRef.current.isFilling(),
     fillQueueIfLow: () => { void autoplayRef.current.fillQueueIfLow(); },
-  }), [autoplayEnabled, autoplayRef, bookmarks, eventsRef, nowPlaying, persistence, playbackSpeeds, queueSync, scrobbleOutgoing, session]);
+  }), [autoplayEnabled, autoplayRef, bookmarks, eventsRef, nowPlaying, persistence, playbackSpeeds, queueSync, captureScrobble, session]);
   const coordinatorRef = useLatestRef(coordinator);
 
   useEffect(() => {
