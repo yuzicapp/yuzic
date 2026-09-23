@@ -158,11 +158,21 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
             <View style={styles.container}>
                 <View style={styles.playerArea}>
 
-                    <StatusBar
-                        barStyle="light-content"
-                        backgroundColor="transparent"
-                        translucent
-                    />
+                    {/*
+                      Only while the player is open. The screen mounts early,
+                      before it is first opened, and stays mounted after it
+                      closes, so an unconditional light bar outranked the app's
+                      own and left white icons on every light screen whenever a
+                      track was loaded. Unmounted, the bar falls back to the
+                      app's own style.
+                    */}
+                    {isOpen && (
+                        <StatusBar
+                            barStyle="light-content"
+                            backgroundColor="transparent"
+                            translucent
+                        />
+                    )}
                     {queueMounted && (
                         <Animated.View
                             style={[queueStyle, { alignItems: 'center', justifyContent: 'flex-start' }]}
