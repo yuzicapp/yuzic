@@ -185,6 +185,17 @@
         "text": "テキスト",
         "readableHint": "文字が読みやすくなるよう、必要に応じて自動で調整されます。",
         "reset": "色をリセット"
+      },
+      "background": {
+        "title": "ホームの背景",
+        "subtitle": "ホームの背景に写真や再生中の曲を表示します。",
+        "none": "なし",
+        "image": "写真",
+        "cover": "再生中",
+        "changePhoto": "別の写真を選ぶ",
+        "blur": "ぼかし",
+        "dim": "暗さ",
+        "pickFailed": "この写真は使用できませんでした。"
       }
     },
     "library": {

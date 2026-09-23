@@ -16,6 +16,13 @@ type Scheme = 'light' | 'dark';
 /** A scheme's colours. The accent is the theme's, not the palette's. */
 export type ThemePalette = Omit<SemanticThemeColors, 'themeColor'>;
 
+export type ScreenBackgroundSource =
+  | { kind: 'none' }
+  /** A photo the user picked, copied into the app's own storage. */
+  | { kind: 'image'; uri: string }
+  /** The cover of whatever is playing, so the screen changes with the music. */
+  | { kind: 'cover' };
+
 export interface Theme {
   /** Both schemes, so the app follows the system's light and dark like it always has. */
   palettes: Record<Scheme, ThemePalette>;
@@ -27,6 +34,16 @@ export interface Theme {
   surface: {
     /** Tint a detail screen with a colour from its cover art. */
     coverTint: boolean;
+    /** What Home is drawn over: its plain colour, a photo, or what is playing. */
+    background: ScreenBackgroundSource;
+    /** Blur radius applied to the background image, in points. */
+    backgroundBlur: number;
+    /**
+     * How much of the theme's background colour is laid over the image, from 0
+     * to 1. It is a veil in the theme's own colour rather than black, so text
+     * that reads on the plain background keeps reading as it rises.
+     */
+    backgroundDim: number;
   };
   components: {
     dock: 'solid' | 'translucent';
@@ -55,7 +72,7 @@ export function themeFromSettings(settings: ThemeSettingsV0, base: Theme): Theme
       radius: settings.radiusPreset ?? base.shape.radius,
       density: settings.listDensity ?? base.shape.density,
     },
-    surface: { coverTint: settings.coverAccentEnabled ?? base.surface.coverTint },
+    surface: { ...base.surface, coverTint: settings.coverAccentEnabled ?? base.surface.coverTint },
     components: {
       dock: settings.translucentDock === undefined
         ? base.components.dock

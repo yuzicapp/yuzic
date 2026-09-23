@@ -185,6 +185,17 @@
         "text": "Text",
         "readableHint": "Text is adjusted if needed so it stays readable on your colours.",
         "reset": "Reset colours"
+      },
+      "background": {
+        "title": "Home background",
+        "subtitle": "Draw Home over a photo or what's playing.",
+        "none": "Plain",
+        "image": "Photo",
+        "cover": "Now playing",
+        "changePhoto": "Choose another photo",
+        "blur": "Blur",
+        "dim": "Dim",
+        "pickFailed": "Couldn't use that photo."
       }
     },
     "library": {

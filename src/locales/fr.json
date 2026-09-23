@@ -185,6 +185,17 @@
         "text": "Texte",
         "readableHint": "Le texte est ajusté si besoin pour rester lisible sur vos couleurs.",
         "reset": "Réinitialiser les couleurs"
+      },
+      "background": {
+        "title": "Arrière-plan de l'accueil",
+        "subtitle": "Afficher l'accueil sur une photo ou sur la lecture en cours.",
+        "none": "Uni",
+        "image": "Photo",
+        "cover": "Lecture en cours",
+        "changePhoto": "Choisir une autre photo",
+        "blur": "Flou",
+        "dim": "Assombrissement",
+        "pickFailed": "Impossible d'utiliser cette photo."
       }
     },
     "library": {

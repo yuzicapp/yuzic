@@ -31,6 +31,10 @@ jest.mock('@/features/player/playingBar/actions/Actions', () => ({ PLAYING_BAR_A
 // The switch's own behaviour is the appearance screen's business; which
 // servers have ratings is pinned in `adapterCapabilities.test.ts`.
 jest.mock('@/features/ratings/useRatingsAvailable', () => ({ useRatingsAvailable: () => true }));
+// The toast host draws with the gesture handler; the background card only calls it on a failed pick.
+jest.mock('@/components/toast', () => ({ notify: { error: jest.fn() } }));
+jest.mock('@/features/theme/backgroundImage', () => ({ pickBackgroundImage: jest.fn(), removeBackgroundImage: jest.fn() }));
+jest.mock('@/features/playback/PlayingContext', () => ({ usePlayingState: () => ({ currentSong: null }) }));
 
 function makeStore() {
   return configureStore({

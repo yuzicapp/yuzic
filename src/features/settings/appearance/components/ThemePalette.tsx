@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
   hint: {
     ...typography.caption,
     marginTop: spacing.sm,
+    marginBottom: spacing.md,
     paddingHorizontal: spacing.xs,
   },
 });

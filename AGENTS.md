@@ -332,7 +332,11 @@ because both halves of each pair look reasonable in isolation.
   and edited in place by every appearance setting; there are no presets to
   pick between. Its colours come from three picks per scheme through
   `derivePalette` (`features/theme/presets.ts`, the only file allowed to spell
-  a theme colour out), which also pushes text until it reads. Nothing reads
+  a theme colour out), which also pushes text until it reads. Home can be
+  drawn over a photo or the playing cover (`features/theme/ScreenBackground`):
+  a screen that draws it makes its own containers transparent, and the veil
+  over the image is the theme's background colour, so text keeps reading.
+  Nothing reads
   the settings that make up the theme except `useActiveTheme` and the
   appearance editors; `theme.test.ts` fails on a component that does.
   A round control is the trap here:
