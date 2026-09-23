@@ -109,12 +109,16 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   // Toasts live above the navigator and cannot read its context, so the dock
   // tells them too — see `components/toast/clearance.ts`.
   React.useEffect(() => () => setToastClearance(null), []);
+  // Floating, the panel sits a margin above the bottom edge, and what content
+  // has to clear is the panel and that margin together.
+  const floatingMargin = Math.max(insets.bottom, spacing.sm);
   const handleLayout = React.useCallback(
     (e: LayoutChangeEvent) => {
-      onHeightChange?.(e.nativeEvent.layout.height);
-      setToastClearance(e.nativeEvent.layout.height);
+      const height = e.nativeEvent.layout.height + (floating ? floatingMargin : 0);
+      onHeightChange?.(height);
+      setToastClearance(height);
     },
-    [onHeightChange]
+    [onHeightChange, floating, floatingMargin]
   );
 
   const activeColor = themeColor;
@@ -209,7 +213,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   // Floating, the panel stops short of the home indicator and the screen
   // edges, so the inset becomes its margin and it needs only its own padding.
   const padding = floating
-    ? { paddingBottom: spacing.sm, marginBottom: Math.max(insets.bottom, spacing.sm) }
+    ? { paddingBottom: spacing.sm, marginBottom: floatingMargin }
     : { paddingBottom: Math.max(insets.bottom, 8) };
   const shape = floating
     ? [styles.floatingPanel, { borderRadius: rad.panel }]
@@ -237,10 +241,13 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
     );
   }
 
+  // Floating is over the content as well, like glass, but opaque: content
+  // scrolls on underneath it, which is what makes it float rather than sit
+  // on a strip of its own. Screens reserve the height via useScrollClearance.
   return (
     <View
       onLayout={handleLayout}
-      style={[styles.panel, shape, padding, { backgroundColor: colors.card }]}
+      style={[styles.panel, floating && styles.floating, shape, padding, { backgroundColor: colors.card }]}
     >
       {rows}
     </View>
