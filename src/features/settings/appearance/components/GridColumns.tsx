@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/features/theme/useTheme';
-import { selectGridColumns, selectThemeColor, setGridColumns } from '@/features/settings/appearance/state';
+import { selectGridColumns, setGridColumns } from '@/features/settings/appearance/state';
 import { spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import SettingsCard from '../../components/SettingsCard';
@@ -20,7 +20,7 @@ export const GridColumns: React.FC = () => {
   const { colors } = useTheme();
   const rad = useRadius();
   const gridColumns = useSelector(selectGridColumns);
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = colors.themeColor;
 
   return (
     <SettingsCard>

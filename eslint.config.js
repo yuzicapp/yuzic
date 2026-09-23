@@ -74,7 +74,7 @@ module.exports = defineConfig([
     files: SCALED_FILES,
     // The scale file is where the numbers live, and its test has to write a
     // fixture scale to check the scaling with.
-    ignores: ["src/constants/design.ts", "src/constants/colors.ts", "src/constants/typography.ts", "src/constants/design.test.ts", "src/features/theme/useTheme.ts", "src/features/theme/coverAccent.ts", "**/*.test.ts", "**/*.test.tsx"],
+    ignores: ["src/constants/design.ts", "src/constants/colors.ts", "src/constants/typography.ts", "src/constants/design.test.ts", "src/features/theme/presets.ts", "src/features/theme/coverAccent.ts", "**/*.test.ts", "**/*.test.tsx"],
     plugins: { yuzic },
     rules: {
       "no-restricted-syntax": [

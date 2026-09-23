@@ -6,7 +6,7 @@ import { Check } from 'lucide-react-native';
 
 import { useTheme } from '@/features/theme/useTheme';
 import { iconSize, radius, scaleRadius, spacing, type RadiusPreset, typography } from '@/constants/design';
-import { selectRadiusPreset, selectThemeColor, setRadiusPreset } from '@/features/settings/appearance/state';
+import { selectRadiusPreset, setRadiusPreset } from '@/features/settings/appearance/state';
 import Touchable from '@/components/Touchable';
 import SettingsCardHeader from '../../components/SettingsCardHeader';
 import SettingsCard from '../../components/SettingsCard';
@@ -29,7 +29,7 @@ export const RadiusPresetSelector: React.FC = () => {
   const dispatch = useDispatch();
   const { colors } = useTheme();
   const selected = useSelector(selectRadiusPreset);
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = colors.themeColor;
 
   const handleSelect = useCallback((preset: RadiusPreset) => {
     if (preset === selected) return;

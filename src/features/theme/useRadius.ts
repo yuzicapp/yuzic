@@ -1,8 +1,6 @@
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-
-import { radius, scaleRadius, type RadiusPreset } from '@/constants/design';
-import { selectRadiusPreset } from '@/features/settings/appearance/state';
+import { radius, scaleRadius } from '@/constants/design';
+import { useActiveTheme } from './useActiveTheme';
 
 /**
  * Live radius values scaled by the user's preset.
@@ -49,7 +47,7 @@ type ScaledRadius = {
 };
 
 export function useRadius(): ScaledRadius {
-  const preset = useSelector(selectRadiusPreset) as RadiusPreset;
+  const preset = useActiveTheme().shape.radius;
   return useMemo(
     () => ({
       thumb: scaleRadius(radius.thumb, preset),
