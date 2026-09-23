@@ -5,8 +5,9 @@ import { render, fireEvent, screen } from '@testing-library/react-native'
 import Touchable, { dimsOnPress, rippleFor } from './Touchable'
 import { stateLayer } from '@/constants/design'
 
+let mockColorKey = 'a'
 jest.mock('@/features/theme/useTheme', () => ({
-  useTheme: () => ({ isDarkMode: true, colors: {} }),
+  useTheme: () => ({ isDarkMode: true, colors: {}, colorKey: mockColorKey }),
 }))
 
 /*
@@ -42,6 +43,30 @@ describe('Touchable', () => {
     expect(onPress).not.toHaveBeenCalled()
   })
 
+})
+
+describe('a colour change', () => {
+  /**
+   * On Android a Pressable's native view kept the background it was mounted
+   * with, so switching theme left buttons in the old colours while the plain
+   * views around them changed. The fix is a remount whenever the colours do,
+   * which this pins by watching a child's state reset.
+   */
+  it('remounts the pressable, so Android draws the new background', async () => {
+    let mounts = 0
+    const Child = () => {
+      React.useState(() => { mounts += 1 })
+      return <Text>go</Text>
+    }
+    mockColorKey = 'a'
+    const view = await render(<Touchable><Child /></Touchable>)
+    await view.rerender(<Touchable><Child /></Touchable>)
+    expect(mounts).toBe(1)
+
+    mockColorKey = 'b'
+    await view.rerender(<Touchable><Child /></Touchable>)
+    expect(mounts).toBe(2)
+  })
 })
 
 describe('rippleFor', () => {

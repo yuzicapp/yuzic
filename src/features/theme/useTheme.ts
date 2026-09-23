@@ -17,10 +17,8 @@ export const useTheme = () => {
 
   // A theme that is only ever dark (or light) wins over the setting: its
   // colours are one scheme's, and the status bar and blur have to agree.
-  const resolved: ResolvedTheme = schemeFor(
-    theme,
-    mode === 'system' ? systemScheme ?? 'light' : mode,
-  );
+  const modeScheme: ResolvedTheme = mode === 'system' ? systemScheme ?? 'light' : mode;
+  const resolved: ResolvedTheme = schemeFor(theme, modeScheme);
 
   const isDarkMode = resolved === 'dark';
 
@@ -29,10 +27,17 @@ export const useTheme = () => {
     [theme, resolved]
   );
 
+  // Every colour in one string, which changes exactly when something drawn
+  // would. `Touchable` keys on it; see there for why.
+  const colorKey = useMemo(() => Object.values(colors).join('|'), [colors]);
+
   return {
     mode,
+    /** What the light/dark setting alone asks for, before the theme has a say. */
+    modeScheme,
     resolved,
     isDarkMode,
     colors,
+    colorKey,
   };
 };
