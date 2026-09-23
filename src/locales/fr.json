@@ -84,7 +84,7 @@
     "appearance": {
       "title": "Apparence",
       "theme": {
-        "title": "Clair et sombre",
+        "title": "Thème",
         "light": "Clair",
         "dark": "Sombre",
         "system": "Système",
@@ -177,31 +177,14 @@
       "homeSourcesListenbrainzSubtext": "Afficher les rayons d'artistes similaires de ListenBrainz.",
       "homeSourcesDeezer": "Deezer",
       "homeSourcesDeezerSubtext": "Charts Deezer, top titres et artistes similaires.",
-      "gallery": {
-        "title": "Thèmes",
-        "customize": "Personnaliser le thème"
-      },
-      "editor": {
-        "title": "Personnaliser le thème",
-        "name": "Nom",
-        "copyHint": "{{name}} est un thème intégré. Votre première modification en crée une copie que vous pouvez renommer, et {{name}} reste inchangé.",
-        "scheme": "Clair et sombre",
-        "schemes": {
-          "follow": "Suivre le réglage",
-          "light": "Toujours clair",
-          "dark": "Toujours sombre"
-        },
-        "accent": "Accent",
-        "colors": {
-          "light": "Couleurs claires",
-          "dark": "Couleurs sombres"
-        },
+      "palette": {
+        "light": "Couleurs claires",
+        "dark": "Couleurs sombres",
         "background": "Arrière-plan",
         "surface": "Cartes",
         "text": "Texte",
         "readableHint": "Le texte est ajusté si besoin pour rester lisible sur vos couleurs.",
-        "delete": "Supprimer le thème",
-        "deleteConfirm": "Supprimer {{name}} ?"
+        "reset": "Réinitialiser les couleurs"
       }
     },
     "library": {
@@ -1641,7 +1624,6 @@
       "removeDownload": "Supprimer le téléchargement {{title}}",
       "reorderSource": "Réorganiser {{name}}",
       "sourceDetails": "À propos de {{name}}",
-      "themeCard": "Thème {{name}}",
       "editColor": "{{name}}, {{value}}. Modifier la couleur"
     },
     "onboarding": {

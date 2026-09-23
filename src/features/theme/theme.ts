@@ -1,35 +1,23 @@
 import type { ListDensity, RadiusPreset, SemanticThemeColors } from '@/constants/design';
 
 /**
- * A theme is data: everything about how the app looks, in one object.
+ * The theme is data: everything about how the app looks, in one object.
  *
  * The app's look used to be spread across code — two palettes written inline
  * in `useTheme`, and an accent, a corner preset, a density, cover tinting and
  * the translucent dock each read from their own setting by whichever component
- * cared. Here they become one value, so a preset is a theme we ship, an edited
- * theme is a copy with fields changed, and a shared theme is this object
- * written to a file. Every hook that draws the app reads the active theme; none
- * reads the appearance settings directly.
+ * cared. Here they become one value, which the appearance settings edit in
+ * place. There is one theme, and every option on it is the user's to change;
+ * every hook that draws the app reads it, and none reads the settings directly.
  */
 
-export type Scheme = 'light' | 'dark';
+type Scheme = 'light' | 'dark';
 
 /** A scheme's colours. The accent is the theme's, not the palette's. */
 export type ThemePalette = Omit<SemanticThemeColors, 'themeColor'>;
 
 export interface Theme {
-  id: string;
-  name: string;
-  /** The preset a custom theme was made from, so deleting it can go back there. */
-  basedOn?: string;
-  /**
-   * A theme that is only ever light or only ever dark. Absent, the theme
-   * follows the light/dark setting like the app always has. A dark-only theme
-   * has to say so rather than just carry two dark palettes, because the status
-   * bar, blur and keyboard read the scheme, not the colours.
-   */
-  scheme?: Scheme;
-  /** Both schemes, even for a fixed-scheme theme, so switching it back is never a blank. */
+  /** Both schemes, so the app follows the system's light and dark like it always has. */
   palettes: Record<Scheme, ThemePalette>;
   accent: string;
   shape: {
@@ -74,11 +62,6 @@ export function themeFromSettings(settings: ThemeSettingsV0, base: Theme): Theme
         : settings.translucentDock ? 'translucent' : 'solid',
     },
   };
-}
-
-/** Which scheme a theme draws in, given what the light/dark setting resolved to. */
-export function schemeFor(theme: Theme, resolvedMode: Scheme): Scheme {
-  return theme.scheme ?? resolvedMode;
 }
 
 /** What `useTheme().colors` hands every component: one scheme's palette and the accent. */

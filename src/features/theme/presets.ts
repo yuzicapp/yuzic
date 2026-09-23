@@ -3,7 +3,7 @@ import { ensureContrast, isDark, mix, withAlpha } from './color';
 import type { Theme, ThemePalette } from './theme';
 
 /**
- * The themes the app ships.
+ * The default theme, and how a palette is made from the colours a person picks.
  *
  * The one place a palette is spelled out in hex, which is why this file and
  * not the hooks is the lint rule's exception for theme colours.
@@ -61,8 +61,6 @@ const DARK: ThemePalette = {
 
 /** The look the app has always had. */
 export const DEFAULT_THEME: Theme = {
-  id: 'yuzic',
-  name: 'Yuzic',
   palettes: { light: LIGHT, dark: DARK },
   accent: themeColorPreset[0],
   shape: { radius: 'default', density: 'default' },
@@ -120,100 +118,17 @@ export function derivePalette(seed: PaletteSeed): ThemePalette {
   };
 }
 
-const both = (light: PaletteSeed, dark: PaletteSeed) => ({ light: derivePalette(light), dark: derivePalette(dark) });
-
-/** A fixed-scheme theme still carries both palettes; the other one is the default's. */
-const darkOnly = (seed: PaletteSeed) => ({ light: LIGHT, dark: derivePalette(seed) });
-const lightOnly = (seed: PaletteSeed) => ({ light: derivePalette(seed), dark: DARK });
-
-const defaults = { shape: DEFAULT_THEME.shape, surface: DEFAULT_THEME.surface, components: DEFAULT_THEME.components };
-
-/**
- * The gallery, in the order it is shown. The default comes first. Ids are
- * stored in settings and in custom themes' `basedOn`, so they never change;
- * names may.
- */
-export const PRESET_THEMES: Theme[] = [
-  DEFAULT_THEME,
-  {
-    ...defaults,
-    id: 'graphite',
-    name: 'Graphite',
-    scheme: 'dark',
-    accent: '#8ab4f8',
-    palettes: darkOnly({ background: '#121212', surface: '#1e1e1e', text: '#ececec' }),
-  },
-  {
-    ...defaults,
-    id: 'midnight',
-    name: 'Midnight',
-    scheme: 'dark',
-    accent: '#7aa2ff',
-    palettes: darkOnly({ background: '#0b1020', surface: '#151c33', text: '#e6e9f5' }),
-  },
-  {
-    ...defaults,
-    id: 'sunset',
-    name: 'Sunset',
-    scheme: 'dark',
-    accent: '#ff8a5b',
-    palettes: darkOnly({ background: '#1b1024', surface: '#2a1836', text: '#f5e9f7' }),
-  },
-  {
-    ...defaults,
-    id: 'paper',
-    name: 'Paper',
-    scheme: 'light',
-    accent: '#c2410c',
-    shape: { ...defaults.shape, radius: 'rounded' },
-    palettes: lightOnly({ background: '#f6f1e7', surface: '#fffaf0', text: '#2b2620' }),
-  },
-  {
-    ...defaults,
-    id: 'forest',
-    name: 'Forest',
-    accent: '#3fa96b',
-    palettes: both(
-      { background: '#eef3ee', surface: '#ffffff', text: '#14231a' },
-      { background: '#0d1510', surface: '#16221a', text: '#e3eee6' },
-    ),
-  },
-  {
-    ...defaults,
-    id: 'rose',
-    name: 'Rosé',
-    accent: '#e0567a',
-    palettes: both(
-      { background: '#fbf1f2', surface: '#ffffff', text: '#2a1a1d' },
-      { background: '#1a1113', surface: '#261a1d', text: '#f3e3e6' },
-    ),
-  },
-  {
-    ...defaults,
-    id: 'mono',
-    name: 'Mono',
-    accent: '#6e6e73',
-    shape: { ...defaults.shape, radius: 'sharp' },
-    palettes: both(
-      { background: '#f4f4f4', surface: '#ffffff', text: '#111111' },
-      { background: '#0a0a0a', surface: '#171717', text: '#f0f0f0' },
-    ),
-  },
-];
-
 /**
  * A stored theme made whole.
  *
  * A theme saved by an older build is missing whatever was added since, and a
  * missing value would reach a style as `undefined` and draw as a broken
- * layout. Each part falls back to the default theme's. Also the gate for a
- * theme read from a file, once themes can be shared.
+ * layout. Each part falls back to the default theme's.
  */
-export function normalizeTheme(theme: Partial<Theme> & { id: string }): Theme {
+export function normalizeTheme(theme: Partial<Theme>): Theme {
   return {
     ...DEFAULT_THEME,
     ...theme,
-    name: theme.name || DEFAULT_THEME.name,
     accent: theme.accent || DEFAULT_THEME.accent,
     palettes: {
       light: { ...DEFAULT_THEME.palettes.light, ...theme.palettes?.light },

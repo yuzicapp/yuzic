@@ -1,9 +1,9 @@
-import { createSelector, createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DEFAULT_LANGUAGE } from '@/features/settings/appearance/languages';
 import type { ListDensity, RadiusPreset } from '@/constants/design';
-import { DEFAULT_THEME, PRESET_THEMES, normalizeTheme } from '@/features/theme/presets';
+import { DEFAULT_THEME, normalizeTheme } from '@/features/theme/presets';
 import type { Theme } from '@/features/theme/theme';
-import { editActive, findTheme, type ThemeEdit } from './themeStore';
+import { applyThemeEdit, type ThemeEdit } from './themeStore';
 
 
 /**
@@ -52,18 +52,12 @@ type AppLanguage = string;
 interface AppearanceSettingsState {
   themeMode: ThemeMode;
   /**
-   * The theme the app is drawn with: a preset's id, or one of `customThemes`.
+   * How the app looks: palettes, accent, corners, density, cover tint, dock.
    *
-   * The accent, corner preset, list density, cover tinting and translucent
-   * dock used to be settings of their own here. They are the theme's now, and
-   * the setters below edit the active theme rather than a loose field.
+   * These used to be settings of their own here. They are the theme's now, and
+   * the setters below edit it in place.
    */
-  activeThemeId: string;
-  /**
-   * Themes the user made. Editing a preset makes one of these rather than
-   * changing the preset, so every shipped theme stays one tap away.
-   */
-  customThemes: Theme[];
+  theme: Theme;
   gridColumns: number;
   isGridView: boolean;
   /**
@@ -91,8 +85,7 @@ interface AppearanceSettingsState {
 
 const initialState: AppearanceSettingsState = {
   themeMode: 'system',
-  activeThemeId: DEFAULT_THEME.id,
-  customThemes: [],
+  theme: DEFAULT_THEME,
   gridColumns: 3,
   isGridView: true,
   libraryViewModes: {},
@@ -111,58 +104,25 @@ const appearanceSlice = createSlice({
     setThemeMode(state, action: PayloadAction<ThemeMode>) {
       state.themeMode = action.payload;
     },
-    /** Draw the app with a preset or a custom theme. An unknown id is ignored. */
-    setActiveTheme(state, action: PayloadAction<string>) {
-      if (findTheme(state, action.payload)) state.activeThemeId = action.payload;
+    /** Change any part of the theme. */
+    editTheme(state, action: PayloadAction<ThemeEdit>) {
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), action.payload);
     },
-    /**
-     * Change the active theme. A preset is copied into a custom theme first
-     * and the copy is changed, so the preset itself never moves.
-     */
-    editActiveTheme: {
-      reducer(state, action: PayloadAction<ThemeEdit, string, { copyId: string }>) {
-        editActive(state, action.payload, action.meta.copyId);
-      },
-      prepare: (edit: ThemeEdit) => ({ payload: edit, meta: { copyId: nanoid() } }),
+    /** Put the colours back to the default, leaving the accent and everything else. */
+    resetPalettes(state) {
+      state.theme = { ...normalizeTheme(state.theme), palettes: DEFAULT_THEME.palettes };
     },
-    renameTheme(state, action: PayloadAction<{ id: string; name: string }>) {
-      const theme = state.customThemes.find(t => t.id === action.payload.id);
-      const name = action.payload.name.trim();
-      if (theme && name) theme.name = name;
+    setThemeColor(state, action: PayloadAction<string>) {
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), { accent: action.payload });
     },
-    /** Remove a custom theme. Deleting the active one falls back to the preset it came from. */
-    deleteTheme(state, action: PayloadAction<string>) {
-      const theme = state.customThemes.find(t => t.id === action.payload);
-      if (!theme) return;
-      state.customThemes = state.customThemes.filter(t => t.id !== action.payload);
-      if (state.activeThemeId === action.payload) {
-        const origin = PRESET_THEMES.find(p => p.id === theme.basedOn);
-        state.activeThemeId = origin ? origin.id : DEFAULT_THEME.id;
-      }
+    setRadiusPreset(state, action: PayloadAction<RadiusPreset>) {
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), { shape: { radius: action.payload } });
     },
-    setThemeColor: {
-      reducer(state, action: PayloadAction<string, string, { copyId: string }>) {
-        editActive(state, { accent: action.payload }, action.meta.copyId);
-      },
-      prepare: (accent: string) => ({ payload: accent, meta: { copyId: nanoid() } }),
+    setListDensity(state, action: PayloadAction<ListDensity>) {
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), { shape: { density: action.payload } });
     },
-    setRadiusPreset: {
-      reducer(state, action: PayloadAction<RadiusPreset, string, { copyId: string }>) {
-        editActive(state, { shape: { radius: action.payload } }, action.meta.copyId);
-      },
-      prepare: (radius: RadiusPreset) => ({ payload: radius, meta: { copyId: nanoid() } }),
-    },
-    setListDensity: {
-      reducer(state, action: PayloadAction<ListDensity, string, { copyId: string }>) {
-        editActive(state, { shape: { density: action.payload } }, action.meta.copyId);
-      },
-      prepare: (density: ListDensity) => ({ payload: density, meta: { copyId: nanoid() } }),
-    },
-    setCoverAccentEnabled: {
-      reducer(state, action: PayloadAction<boolean, string, { copyId: string }>) {
-        editActive(state, { surface: { coverTint: action.payload } }, action.meta.copyId);
-      },
-      prepare: (coverTint: boolean) => ({ payload: coverTint, meta: { copyId: nanoid() } }),
+    setCoverAccentEnabled(state, action: PayloadAction<boolean>) {
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), { surface: { coverTint: action.payload } });
     },
     setGridColumns(state, action: PayloadAction<number>) {
       state.gridColumns = action.payload;
@@ -188,11 +148,10 @@ const appearanceSlice = createSlice({
     setShowSourceHeaders(state, action: PayloadAction<boolean>) {
       state.showSourceHeaders = action.payload;
     },
-    setTranslucentDock: {
-      reducer(state, action: PayloadAction<boolean, string, { copyId: string }>) {
-        editActive(state, { components: { dock: action.payload ? 'translucent' : 'solid' } }, action.meta.copyId);
-      },
-      prepare: (translucent: boolean) => ({ payload: translucent, meta: { copyId: nanoid() } }),
+    setTranslucentDock(state, action: PayloadAction<boolean>) {
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), {
+        components: { dock: action.payload ? 'translucent' : 'solid' },
+      });
     },
     setLanguage(state, action: PayloadAction<AppLanguage>) {
       state.language = action.payload;
@@ -208,10 +167,8 @@ const appearanceSlice = createSlice({
 
 export const {
   setThemeMode,
-  setActiveTheme,
-  editActiveTheme,
-  renameTheme,
-  deleteTheme,
+  editTheme,
+  resetPalettes,
   setThemeColor,
   setRadiusPreset,
   setListDensity,
@@ -242,35 +199,18 @@ interface AppearanceRootState {
 export const selectThemeMode = (state: AppearanceRootState): ThemeMode =>
   state.settingsAppearance.themeMode;
 
-const selectActiveThemeId = (state: AppearanceRootState) => state.settingsAppearance.activeThemeId;
-const selectCustomThemes = (state: AppearanceRootState) => state.settingsAppearance.customThemes;
+const selectStoredTheme = (state: AppearanceRootState) => state.settingsAppearance.theme;
 
 /**
  * The theme the app is drawn with.
  *
  * Memoised on the stored theme, so it is the same object until the theme
- * changes. A missing or unknown id falls back to the default theme, and a
- * stored theme is completed from the default: one saved before a field
- * existed must not reach a style as `undefined`.
+ * changes. It is completed from the default: one saved before a field existed
+ * must not reach a style as `undefined`.
  */
 export const selectActiveTheme = createSelector(
-  [selectActiveThemeId, selectCustomThemes],
-  (id, customThemes): Theme => {
-    const preset = PRESET_THEMES.find(t => t.id === id);
-    if (preset) return preset;
-    // Only a stored theme can be missing a field; a preset is always whole.
-    const custom = customThemes?.find(t => t.id === id);
-    return custom ? normalizeTheme(custom) : DEFAULT_THEME;
-  },
-);
-
-/** Every theme the user can pick: the presets, then their own. */
-export const selectAllThemes = createSelector(
-  [selectCustomThemes],
-  (customThemes): { presets: Theme[]; custom: Theme[] } => ({
-    presets: PRESET_THEMES,
-    custom: (customThemes ?? []).map(normalizeTheme),
-  }),
+  [selectStoredTheme],
+  (theme): Theme => (theme ? normalizeTheme(theme) : DEFAULT_THEME),
 );
 
 export const selectThemeColor = (state: AppearanceRootState): string =>

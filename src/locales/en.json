@@ -84,7 +84,7 @@
     "appearance": {
       "title": "Appearance",
       "theme": {
-        "title": "Light and dark",
+        "title": "Theme",
         "light": "Light",
         "dark": "Dark",
         "system": "System",
@@ -177,31 +177,14 @@
       "homeSourcesListenbrainzSubtext": "Show ListenBrainz similar-artist shelves.",
       "homeSourcesDeezer": "Deezer",
       "homeSourcesDeezerSubtext": "Deezer charts, top tracks, and similar artists.",
-      "gallery": {
-        "title": "Themes",
-        "customize": "Customize theme"
-      },
-      "editor": {
-        "title": "Customize theme",
-        "name": "Name",
-        "copyHint": "{{name}} is a built-in theme. Your first change makes a copy you can rename, and {{name}} stays as it is.",
-        "scheme": "Light and dark",
-        "schemes": {
-          "follow": "Follow setting",
-          "light": "Always light",
-          "dark": "Always dark"
-        },
-        "accent": "Accent",
-        "colors": {
-          "light": "Light colours",
-          "dark": "Dark colours"
-        },
+      "palette": {
+        "light": "Light colours",
+        "dark": "Dark colours",
         "background": "Background",
         "surface": "Cards",
         "text": "Text",
         "readableHint": "Text is adjusted if needed so it stays readable on your colours.",
-        "delete": "Delete theme",
-        "deleteConfirm": "Delete {{name}}?"
+        "reset": "Reset colours"
       }
     },
     "library": {
@@ -1631,7 +1614,6 @@
       "removeDownload": "Remove download {{title}}",
       "reorderSource": "Reorder {{name}}",
       "sourceDetails": "About {{name}}",
-      "themeCard": "{{name}} theme",
       "editColor": "{{name}}, {{value}}. Edit colour"
     },
     "onboarding": {

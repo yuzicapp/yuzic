@@ -3,8 +3,8 @@ import path from 'path';
 
 import { themeColorPreset } from '@/constants/design';
 import { contrast } from './color';
-import { DEFAULT_THEME, PRESET_THEMES, derivePalette, normalizeTheme } from './presets';
-import { colorsFor, schemeFor, themeFromSettings } from './theme';
+import { DEFAULT_THEME, derivePalette, normalizeTheme } from './presets';
+import { colorsFor, themeFromSettings } from './theme';
 
 describe('the default theme', () => {
   /**
@@ -72,30 +72,6 @@ describe('themeFromSettings', () => {
  * draws the setting rather than the theme, and would silently ignore a theme
  * the moment themes are stored on their own.
  */
-describe('the presets', () => {
-  it('have ids that are unique, since settings store them', () => {
-    const ids = PRESET_THEMES.map(t => t.id);
-    expect(new Set(ids).size).toBe(ids.length);
-    expect(ids[0]).toBe(DEFAULT_THEME.id);
-  });
-
-  // Every scheme a preset can be drawn in, which is both unless it is fixed.
-  const drawn = PRESET_THEMES.flatMap(theme =>
-    (theme.scheme ? [theme.scheme] : (['light', 'dark'] as const)).map(scheme => [theme.id, scheme, theme] as const));
-
-  it.each(drawn)('%s reads in %s', (_id, scheme, theme) => {
-    const palette = theme.palettes[scheme];
-    for (const bg of [palette.background, palette.card]) {
-      expect(contrast(palette.text, bg)).toBeGreaterThanOrEqual(4.5);
-      expect(contrast(palette.subtext, bg)).toBeGreaterThanOrEqual(3);
-    }
-  });
-
-  it('accents are six-digit hex, which tinted() assumes', () => {
-    for (const theme of PRESET_THEMES) expect(theme.accent).toMatch(/^#[0-9a-f]{6}$/i);
-  });
-});
-
 describe('derivePalette', () => {
   it('keeps text as picked when it already reads', () => {
     expect(derivePalette({ background: '#000000', surface: '#111111', text: '#ffffff' }).text).toBe('#ffffff');
@@ -107,17 +83,9 @@ describe('derivePalette', () => {
   });
 });
 
-describe('schemeFor', () => {
-  it('lets a fixed-scheme theme win over the light/dark setting', () => {
-    const midnight = PRESET_THEMES.find(t => t.id === 'midnight')!;
-    expect(schemeFor(midnight, 'light')).toBe('dark');
-    expect(schemeFor(DEFAULT_THEME, 'light')).toBe('light');
-  });
-});
-
 describe('normalizeTheme', () => {
   it('completes a theme saved before a field existed', () => {
-    const old = { id: 'custom-1', name: 'Old', accent: '#123456', palettes: { dark: { background: '#101010' } } } as never;
+    const old = { accent: '#123456', palettes: { dark: { background: '#101010' } } } as never;
     const theme = normalizeTheme(old);
     expect(theme.palettes.dark.background).toBe('#101010');
     expect(theme.palettes.dark.text).toBe(DEFAULT_THEME.palettes.dark.text);
