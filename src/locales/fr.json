@@ -1656,8 +1656,7 @@
       "clearProviderDownloads": "Supprimer tous les téléchargements {{provider}}",
       "removeDownload": "Supprimer le téléchargement {{title}}",
       "reorderSource": "Réorganiser {{name}}",
-      "sourceDetails": "À propos de {{name}}",
-      "editColor": "{{name}}, {{value}}. Modifier la couleur"
+      "sourceDetails": "À propos de {{name}}"
     },
     "onboarding": {
       "serverOptions": "Options pour {{url}}"

@@ -66,7 +66,9 @@ function TabButton({
 }) {
   return (
     <Touchable
-      accessibilityLabel={accessibilityLabel}
+      // With its name drawn under the icon the tab speaks for itself; a label
+      // would only be a second copy of the same word.
+      accessibilityLabel={label ? undefined : accessibilityLabel}
       accessibilityRole="tab"
       accessibilityState={{ selected: active }}
       testID={testID}

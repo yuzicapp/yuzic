@@ -118,6 +118,12 @@ export const fontScaleCap = {
  * other is the mismatch this exists to close.
  */
 export const cappedTypography = {
-  control: withScaledLeading(TYPE_SCALE, Math.min(SYSTEM_FONT_SCALE, fontScaleCap.control)),
-  glyph: withScaledLeading(TYPE_SCALE, Math.min(SYSTEM_FONT_SCALE, fontScaleCap.glyph)),
+  // From the base scale, not the user's text size: the cap bounds only the
+  // system multiplier React Native applies, so a role already enlarged by the
+  // in-app setting would reach both factors at once, 1.3 times 1.3, and
+  // overflow the fixed-height box the cap exists to protect. Structural text
+  // grows with the system setting up to its cap and leaves the in-app size to
+  // everything that has room for it.
+  control: withScaledLeading(BASE_SCALE, Math.min(SYSTEM_FONT_SCALE, fontScaleCap.control)),
+  glyph: withScaledLeading(BASE_SCALE, Math.min(SYSTEM_FONT_SCALE, fontScaleCap.glyph)),
 } as const;

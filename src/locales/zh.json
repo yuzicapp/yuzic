@@ -1651,8 +1651,7 @@
       "clearProviderDownloads": "删除所有 {{provider}} 下载",
       "removeDownload": "移除下载 {{title}}",
       "reorderSource": "重新排序 {{name}}",
-      "sourceDetails": "关于 {{name}}",
-      "editColor": "{{name}}，{{value}}。编辑颜色"
+      "sourceDetails": "关于 {{name}}"
     },
     "onboarding": {
       "serverOptions": "{{url}}的选项"

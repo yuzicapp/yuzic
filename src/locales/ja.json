@@ -1651,8 +1651,7 @@
       "clearProviderDownloads": "{{provider}}のダウンロードをすべて削除",
       "removeDownload": "ダウンロード{{title}}を削除",
       "reorderSource": "{{name}}を並べ替え",
-      "sourceDetails": "{{name}}について",
-      "editColor": "{{name}}、{{value}}。色を編集"
+      "sourceDetails": "{{name}}について"
     },
     "onboarding": {
       "serverOptions": "{{url}}のオプション"

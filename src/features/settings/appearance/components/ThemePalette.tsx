@@ -88,7 +88,6 @@ type ColorRowProps = {
 
 /** One colour: its name, a swatch and the hex, opening a picker in place. */
 const ColorRow: React.FC<ColorRowProps> = ({ label, value, open, onToggle, onChange }) => {
-  const { t } = useTranslation();
   const { colors } = useTheme();
   return (
     <View>
@@ -97,7 +96,6 @@ const ColorRow: React.FC<ColorRowProps> = ({ label, value, open, onToggle, onCha
         onPress={onToggle}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        accessibilityLabel={t('a11y.settings.editColor', { name: label, value })}
       >
         <View style={styles.rowLeft}>
           <View style={[styles.swatch, { backgroundColor: value, borderColor: colors.border }]} />

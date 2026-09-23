@@ -1646,8 +1646,7 @@
       "clearProviderDownloads": "Delete all {{provider}} downloads",
       "removeDownload": "Remove download {{title}}",
       "reorderSource": "Reorder {{name}}",
-      "sourceDetails": "About {{name}}",
-      "editColor": "{{name}}, {{value}}. Edit colour"
+      "sourceDetails": "About {{name}}"
     },
     "onboarding": {
       "serverOptions": "Options for {{url}}"
