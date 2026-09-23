@@ -200,7 +200,15 @@
       "floatingDock": "Barre flottante",
       "floatingDockSubtext": "Détacher la barre d'onglets des bords de l'écran.",
       "tabLabels": "Noms des onglets",
-      "tabLabelsSubtext": "Afficher le nom de chaque onglet sous son icône."
+      "tabLabelsSubtext": "Afficher le nom de chaque onglet sous son icône.",
+      "textSize": {
+        "title": "Taille du texte",
+        "small": "Petite",
+        "default": "Par défaut",
+        "large": "Grande",
+        "larger": "Très grande",
+        "restart": "La nouvelle taille s'appliquera au prochain démarrage de Yuzic."
+      }
     },
     "library": {
       "title": "Bibliothèque",

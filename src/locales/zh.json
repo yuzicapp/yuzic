@@ -200,7 +200,15 @@
       "floatingDock": "悬浮底栏",
       "floatingDockSubtext": "让标签栏脱离屏幕边缘悬浮显示。",
       "tabLabels": "标签名称",
-      "tabLabelsSubtext": "在每个标签图标下显示名称。"
+      "tabLabelsSubtext": "在每个标签图标下显示名称。",
+      "textSize": {
+        "title": "文字大小",
+        "small": "小",
+        "default": "默认",
+        "large": "大",
+        "larger": "特大",
+        "restart": "新的文字大小将在下次启动 Yuzic 时生效。"
+      }
     },
     "library": {
       "title": "媒体库",

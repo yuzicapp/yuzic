@@ -200,7 +200,15 @@
       "floatingDock": "Floating dock",
       "floatingDockSubtext": "Lift the tab bar off the screen's edges.",
       "tabLabels": "Tab labels",
-      "tabLabelsSubtext": "Name each tab under its icon."
+      "tabLabelsSubtext": "Name each tab under its icon.",
+      "textSize": {
+        "title": "Text size",
+        "small": "Small",
+        "default": "Default",
+        "large": "Large",
+        "larger": "Larger",
+        "restart": "The new size applies the next time Yuzic starts."
+      }
     },
     "library": {
       "title": "Library",

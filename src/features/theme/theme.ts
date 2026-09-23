@@ -30,6 +30,8 @@ export interface Theme {
   shape: {
     radius: RadiusPreset;
     density: ListDensity;
+    /** A multiple of the type scale; one of `TEXT_SCALES`. Applies from the next start. */
+    textScale: number;
   };
   surface: {
     /** Tint a detail screen with a colour from its cover art. */
@@ -73,6 +75,7 @@ export function themeFromSettings(settings: ThemeSettingsV0, base: Theme): Theme
     ...base,
     accent: settings.themeColor ?? base.accent,
     shape: {
+      ...base.shape,
       radius: settings.radiusPreset ?? base.shape.radius,
       density: settings.listDensity ?? base.shape.density,
     },

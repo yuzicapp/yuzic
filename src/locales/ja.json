@@ -200,7 +200,15 @@
       "floatingDock": "フローティングドック",
       "floatingDockSubtext": "タブバーを画面の端から浮かせて表示します。",
       "tabLabels": "タブのラベル",
-      "tabLabelsSubtext": "各タブのアイコンの下に名前を表示します。"
+      "tabLabelsSubtext": "各タブのアイコンの下に名前を表示します。",
+      "textSize": {
+        "title": "文字サイズ",
+        "small": "小",
+        "default": "標準",
+        "large": "大",
+        "larger": "特大",
+        "restart": "新しいサイズは次回 Yuzic を起動したときに適用されます。"
+      }
     },
     "library": {
       "title": "ライブラリ",

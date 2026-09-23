@@ -13,6 +13,7 @@ import { LanguageSelector } from './components/LanguageSelector';
 import { GridColumns } from './components/GridColumns';
 import { RadiusPresetSelector } from './components/RadiusPresetSelector';
 import { ListDensitySelector } from './components/ListDensitySelector';
+import { TextSizeSelector } from './components/TextSizeSelector';
 import { selectShowQualityBadge, selectShowSourceHeaders, selectHapticsEnabled, selectTranslucentDock, selectRespectReducedMotion, selectCoverAccentEnabled, setShowQualityBadge, setShowSourceHeaders, setHapticsEnabled, setTranslucentDock, setRespectReducedMotion, setCoverAccentEnabled, selectActiveTheme, editTheme } from '@/features/settings/appearance/state';
 import { selectShowPlaybackSpeed, selectShowJumpButtons, selectShowVolumeSlider, selectShowRating, setShowPlaybackSpeed, setShowJumpButtons, setShowVolumeSlider, setShowRating } from '@/features/settings/playback/state';
 import { useRatingsAvailable } from '@/features/ratings/useRatingsAvailable';
@@ -163,6 +164,7 @@ const AppearanceSettings: React.FC = () => {
       <GridColumns />
       <RadiusPresetSelector />
       <ListDensitySelector />
+      <TextSizeSelector />
       <SettingsCardHeader subtle title={t('settings.appearance.feel')} />
       <SettingsToggleGroup items={feelItems} />
     </SettingsScreen>
