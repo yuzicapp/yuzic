@@ -15,6 +15,7 @@ import SettingsCard from '../../components/SettingsCard';
 import SettingsDivider from '../../components/SettingsDivider';
 import SettingsIconSelectCard from '../../components/SettingsIconSelectCard';
 import SettingsRow from '../../components/SettingsRow';
+import SettingsToggleRow from '../../components/SettingsToggleRow';
 
 type Choice = ScreenBackgroundSource['kind'];
 
@@ -25,13 +26,14 @@ const OPTIONS: { id: Choice; icon: React.ReactElement<{ color?: string }> }[] = 
 ];
 
 /**
- * What Home is drawn over: its plain colour, a photo, or the cover of what is
- * playing, with how blurred and how veiled the image is.
+ * What the tab screens are drawn over: their plain colour, a photo, or the
+ * cover of what is playing; whether that is Home alone or every tab; and how
+ * blurred and how veiled the image is.
  *
  * Choosing a photo asks for one straight away, since a photo background with
  * no photo is not a state worth being in. A replaced photo's copy is deleted.
  */
-export const HomeBackground: React.FC = () => {
+export const BackgroundSelector: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { colors } = useTheme();
@@ -83,6 +85,13 @@ export const HomeBackground: React.FC = () => {
               <SettingsDivider />
             </>
           )}
+          <SettingsToggleRow
+            label={t('settings.appearance.background.everyTab')}
+            subtext={t('settings.appearance.background.everyTabSubtext')}
+            value={surface.backgroundScope === 'tabs'}
+            onValueChange={v => dispatch(editTheme({ surface: { backgroundScope: v ? 'tabs' : 'home' } }))}
+          />
+          <SettingsDivider />
           <SliderRow
             label={t('settings.appearance.background.blur')}
             value={surface.backgroundBlur}

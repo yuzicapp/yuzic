@@ -36,8 +36,10 @@ export interface Theme {
   surface: {
     /** Tint a detail screen with a colour from its cover art. */
     coverTint: boolean;
-    /** What Home is drawn over: its plain colour, a photo, or what is playing. */
+    /** What the tab screens are drawn over: their plain colour, a photo, or what is playing. */
     background: ScreenBackgroundSource;
+    /** Behind Home alone, or behind every tab's root screen. */
+    backgroundScope: 'home' | 'tabs';
     /** Blur radius applied to the background image, in points. */
     backgroundBlur: number;
     /**

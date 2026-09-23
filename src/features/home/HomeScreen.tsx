@@ -23,7 +23,7 @@ export default function HomeScreen() {
   const username = activeServer?.username
 
   const { colors } = useTheme()
-  const hasBackground = useHasScreenBackground()
+  const hasBackground = useHasScreenBackground('home')
   const { openAccountSheet } = useAccountSheet()
 
   const [isMounted, setIsMounted] = useState(false)
@@ -69,7 +69,7 @@ export default function HomeScreen() {
       edges={['top']}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      {hasBackground && <ScreenBackground />}
+      {hasBackground && <ScreenBackground screen="home" />}
       <TabHeader
         title="Yuzic"
         username={username}

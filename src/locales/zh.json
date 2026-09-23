@@ -187,15 +187,17 @@
         "reset": "重置颜色"
       },
       "background": {
-        "title": "主页背景",
-        "subtitle": "在照片或正在播放的内容上显示主页。",
+        "title": "背景",
+        "subtitle": "在照片或正在播放的内容上显示应用。",
         "none": "纯色",
         "image": "照片",
         "cover": "正在播放",
         "changePhoto": "选择其他照片",
         "blur": "模糊",
         "dim": "遮罩",
-        "pickFailed": "无法使用这张照片。"
+        "pickFailed": "无法使用这张照片。",
+        "everyTab": "所有标签页",
+        "everyTabSubtext": "主页、搜索和资料库。关闭时仅主页。"
       },
       "floatingDock": "悬浮底栏",
       "floatingDockSubtext": "让标签栏脱离屏幕边缘悬浮显示。",

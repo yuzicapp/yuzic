@@ -187,15 +187,17 @@
         "reset": "色をリセット"
       },
       "background": {
-        "title": "ホームの背景",
-        "subtitle": "ホームの背景に写真や再生中の曲を表示します。",
+        "title": "背景",
+        "subtitle": "アプリの背景に写真や再生中の曲を表示します。",
         "none": "なし",
         "image": "写真",
         "cover": "再生中",
         "changePhoto": "別の写真を選ぶ",
         "blur": "ぼかし",
         "dim": "暗さ",
-        "pickFailed": "この写真は使用できませんでした。"
+        "pickFailed": "この写真は使用できませんでした。",
+        "everyTab": "すべてのタブに表示",
+        "everyTabSubtext": "ホーム・検索・ライブラリ。オフのときはホームのみ。"
       },
       "floatingDock": "フローティングドック",
       "floatingDockSubtext": "タブバーを画面の端から浮かせて表示します。",

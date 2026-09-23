@@ -3,7 +3,7 @@ import { act, fireEvent, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
-import { HomeBackground } from './HomeBackground';
+import { BackgroundSelector } from './BackgroundSelector';
 import settingsAppearanceReducer, { editTheme, selectActiveTheme } from '../state';
 import { ScreenBackground, useHasScreenBackground } from '@/features/theme/ScreenBackground';
 import { pickBackgroundImage, removeBackgroundImage } from '@/features/theme/backgroundImage';
@@ -38,10 +38,10 @@ beforeEach(() => {
   mockSong = null;
 });
 
-describe('HomeBackground', () => {
+describe('BackgroundSelector', () => {
   it('asks for a photo when Photo is chosen, and keeps it', async () => {
     pick.mockResolvedValueOnce('file:///docs/theme/background-1.jpg');
-    const { store, view } = setup(<HomeBackground />);
+    const { store, view } = setup(<BackgroundSelector />);
     const screen = await view;
 
     await act(async () => { fireEvent.press(screen.getByLabelText('settings.appearance.background.image')); });
@@ -52,7 +52,7 @@ describe('HomeBackground', () => {
 
   it('stays plain when the picker is cancelled', async () => {
     pick.mockResolvedValueOnce(null);
-    const { store, view } = setup(<HomeBackground />);
+    const { store, view } = setup(<BackgroundSelector />);
     const screen = await view;
 
     await act(async () => { fireEvent.press(screen.getByLabelText('settings.appearance.background.image')); });
@@ -61,7 +61,7 @@ describe('HomeBackground', () => {
   });
 
   it('deletes the copied photo when it is no longer the background', async () => {
-    const { store, view } = setup(<HomeBackground />);
+    const { store, view } = setup(<BackgroundSelector />);
     store.dispatch(editTheme({ surface: { background: { kind: 'image', uri: 'file:///docs/theme/background-1.jpg' } } }));
     const screen = await view;
 
@@ -72,7 +72,7 @@ describe('HomeBackground', () => {
   });
 
   it('shows the blur and dim sliders only when there is an image', async () => {
-    const { store, view } = setup(<HomeBackground />);
+    const { store, view } = setup(<BackgroundSelector />);
     const screen = await view;
     expect(screen.queryByLabelText('settings.appearance.background.blur')).toBeNull();
 
@@ -84,7 +84,9 @@ describe('HomeBackground', () => {
 });
 
 describe('ScreenBackground', () => {
-  const Probe = () => <>{useHasScreenBackground() ? <ScreenBackground /> : null}</>;
+  const Probe = ({ screen = 'home' }: { screen?: 'home' | 'search' }) => (
+    <>{useHasScreenBackground(screen) ? <ScreenBackground screen={screen} /> : null}</>
+  );
 
   it('draws nothing for a plain background', async () => {
     const { view } = setup(<Probe />);
@@ -99,6 +101,17 @@ describe('ScreenBackground', () => {
 
     mockSong = { cover: { kind: 'url', url: 'https://covers.test/1.jpg' } };
     await screen.rerender(<Probe />);
+    expect(screen.getByTestId('screen-background')).toBeTruthy();
+  });
+
+  it('stays on Home unless it is set to go behind every tab', async () => {
+    mockSong = { cover: { kind: 'url', url: 'https://covers.test/1.jpg' } };
+    const { store, view } = setup(<Probe screen="search" />);
+    store.dispatch(editTheme({ surface: { background: { kind: 'cover' } } }));
+    const screen = await view;
+    expect(screen.queryByTestId('screen-background')).toBeNull();
+
+    await act(async () => { store.dispatch(editTheme({ surface: { backgroundScope: 'tabs' } })); });
     expect(screen.getByTestId('screen-background')).toBeTruthy();
   });
 });

@@ -89,7 +89,7 @@ export default function Home() {
   useScrollToTop(scrollRef)
 
   const { colors } = useTheme()
-  const hasBackground = useHasScreenBackground()
+  const hasBackground = useHasScreenBackground('home')
   const rad = useRadius()
   const [refreshKey, setRefreshKey] = useState(0)
   const { resume, library, server, sources } = useDailyLayout(refreshKey)

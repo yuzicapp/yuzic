@@ -7,10 +7,14 @@ import { buildCover } from '@/providers/registry/covers';
 import { useActiveTheme } from './useActiveTheme';
 import { useTheme } from './useTheme';
 
-/** The image behind a screen right now, or null when it is drawn plain. */
-function useBackgroundUri(): string | null {
-  const background = useActiveTheme().surface.background;
+/** The tab screens that can have an image behind them. */
+type BackgroundScreen = 'home' | 'search' | 'library';
+
+/** The image behind this screen right now, or null when it is drawn plain. */
+function useBackgroundUri(screen: BackgroundScreen): string | null {
+  const { background, backgroundScope } = useActiveTheme().surface;
   const { currentSong } = usePlayingState();
+  if (screen !== 'home' && backgroundScope !== 'tabs') return null;
   if (background.kind === 'image') return background.uri;
   if (background.kind === 'cover' && currentSong) return buildCover(currentSong.cover, 'detail') ?? null;
   return null;
@@ -20,8 +24,8 @@ function useBackgroundUri(): string | null {
  * Whether the screen has an image behind it. A screen that does draws its own
  * containers transparent, or they would cover the image they sit on.
  */
-export function useHasScreenBackground(): boolean {
-  return useBackgroundUri() !== null;
+export function useHasScreenBackground(screen: BackgroundScreen): boolean {
+  return useBackgroundUri(screen) !== null;
 }
 
 /**
@@ -32,8 +36,8 @@ export function useHasScreenBackground(): boolean {
  * extra. The veil is the theme's own background colour, so the screen's text,
  * which already reads on that colour, still reads over the photo.
  */
-export function ScreenBackground() {
-  const uri = useBackgroundUri();
+export function ScreenBackground({ screen }: { screen: BackgroundScreen }) {
+  const uri = useBackgroundUri(screen);
   const { colors } = useTheme();
   const { backgroundBlur, backgroundDim } = useActiveTheme().surface;
   if (!uri) return null;

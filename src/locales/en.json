@@ -187,15 +187,17 @@
         "reset": "Reset colours"
       },
       "background": {
-        "title": "Home background",
-        "subtitle": "Draw Home over a photo or what's playing.",
+        "title": "Background",
+        "subtitle": "Draw the app over a photo or what's playing.",
         "none": "Plain",
         "image": "Photo",
         "cover": "Now playing",
         "changePhoto": "Choose another photo",
         "blur": "Blur",
         "dim": "Dim",
-        "pickFailed": "Couldn't use that photo."
+        "pickFailed": "Couldn't use that photo.",
+        "everyTab": "Behind every tab",
+        "everyTabSubtext": "Home, Search and Library. Off, just Home."
       },
       "floatingDock": "Floating dock",
       "floatingDockSubtext": "Lift the tab bar off the screen's edges.",

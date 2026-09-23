@@ -64,7 +64,7 @@ export const DEFAULT_THEME: Theme = {
   palettes: { light: LIGHT, dark: DARK },
   accent: themeColorPreset[0],
   shape: { radius: 'default', density: 'default', textScale: 1 },
-  surface: { coverTint: true, background: { kind: 'none' }, backgroundBlur: 24, backgroundDim: 0.6 },
+  surface: { coverTint: true, background: { kind: 'none' }, backgroundScope: 'home', backgroundBlur: 24, backgroundDim: 0.6 },
   components: { dock: 'solid', dockShape: 'edge', tabLabels: false },
 };
 

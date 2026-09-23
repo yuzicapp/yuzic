@@ -6,7 +6,7 @@ import SettingsCardHeader from '../components/SettingsCardHeader';
 import SettingsToggleGroup from '../components/SettingsToggleGroup';
 import { ThemeColor } from './components/ThemeColor';
 import { ThemePalette } from './components/ThemePalette';
-import { HomeBackground } from './components/HomeBackground';
+import { BackgroundSelector } from './components/BackgroundSelector';
 import { ThemeModeSelector } from './components/ThemeModeSelector';
 import { PlayingBarActionSelector } from './components/PlayingBarActionSelector';
 import { LanguageSelector } from './components/LanguageSelector';
@@ -147,7 +147,7 @@ const AppearanceSettings: React.FC = () => {
       <ThemeModeSelector />
       <ThemeColor />
       <ThemePalette />
-      <HomeBackground />
+      <BackgroundSelector />
       {/*
         "Playing" is which controls the player screen draws, which is a
         question about what the app looks like — so it belongs here, next to
