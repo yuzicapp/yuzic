@@ -57,6 +57,7 @@ async function renderScreen(store: Store) {
 
 /** Every switch on the screen, in the order the screen declares its toggle groups. */
 const SWITCH_ORDER = [
+  'settings.appearance.accentFromCover',
   'settings.appearance.showQualityBadge',
   'settings.player.showPlaybackSpeed',
   'settings.player.showJumpButtons',

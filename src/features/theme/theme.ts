@@ -27,6 +27,11 @@ export interface Theme {
   /** Both schemes, so the app follows the system's light and dark like it always has. */
   palettes: Record<Scheme, ThemePalette>;
   accent: string;
+  /**
+   * Take the accent from the cover of what is playing instead, falling back to
+   * `accent` when nothing is. See `useLiveCoverAccent`.
+   */
+  accentFromCover: boolean;
   shape: {
     radius: RadiusPreset;
     density: ListDensity;

@@ -12,6 +12,7 @@ import { themeFromSettings, type ThemeSettingsV0, type Theme } from '@/features/
  */
 export type ThemeEdit = {
   accent?: string;
+  accentFromCover?: boolean;
   palettes?: { light?: Partial<Theme['palettes']['light']>; dark?: Partial<Theme['palettes']['dark']> };
   shape?: Partial<Theme['shape']>;
   surface?: Partial<Theme['surface']>;
@@ -22,6 +23,7 @@ export function applyThemeEdit(theme: Theme, edit: ThemeEdit): Theme {
   return {
     ...theme,
     accent: edit.accent ?? theme.accent,
+    accentFromCover: edit.accentFromCover ?? theme.accentFromCover,
     palettes: {
       light: { ...theme.palettes.light, ...edit.palettes?.light },
       dark: { ...theme.palettes.dark, ...edit.palettes?.dark },

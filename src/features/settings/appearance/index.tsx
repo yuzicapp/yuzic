@@ -27,7 +27,9 @@ const AppearanceSettings: React.FC = () => {
   const translucentDock = useSelector(selectTranslucentDock);
   const respectReducedMotion = useSelector(selectRespectReducedMotion);
   const coverAccentEnabled = useSelector(selectCoverAccentEnabled);
-  const { dockShape, tabLabels } = useSelector(selectActiveTheme).components;
+  const activeTheme = useSelector(selectActiveTheme);
+  const { dockShape, tabLabels } = activeTheme.components;
+  const accentFromCover = activeTheme.accentFromCover;
   const showPlaybackSpeed = useSelector(selectShowPlaybackSpeed);
   const showJumpButtons = useSelector(selectShowJumpButtons);
   const showVolumeSlider = useSelector(selectShowVolumeSlider);
@@ -40,6 +42,9 @@ const AppearanceSettings: React.FC = () => {
   const toggleReducedMotion = useCallback((v: boolean) => { dispatch(setRespectReducedMotion(v)); }, [dispatch]);
   const toggleCoverAccent = useCallback((v: boolean) => { dispatch(setCoverAccentEnabled(v)); }, [dispatch]);
   const toggleTranslucentDock = useCallback((v: boolean) => { dispatch(setTranslucentDock(v)); }, [dispatch]);
+  const toggleAccentFromCover = useCallback((v: boolean) => {
+    dispatch(editTheme({ accentFromCover: v }));
+  }, [dispatch]);
   const toggleFloatingDock = useCallback((v: boolean) => {
     dispatch(editTheme({ components: { dockShape: v ? 'floating' : 'edge' } }));
   }, [dispatch]);
@@ -120,6 +125,13 @@ const AppearanceSettings: React.FC = () => {
     },
   ], [t, translucentDock, dockShape, tabLabels, hapticsEnabled, respectReducedMotion, toggleTranslucentDock, toggleFloatingDock, toggleTabLabels, toggleHaptics, toggleReducedMotion]);
 
+  const accentItems = useMemo(() => [{
+    label: t('settings.appearance.accentFromCover'),
+    subtext: t('settings.appearance.accentFromCoverSubtext'),
+    value: accentFromCover,
+    onValueChange: toggleAccentFromCover,
+  }], [t, accentFromCover, toggleAccentFromCover]);
+
   const qualityBadgeItems = useMemo(() => [{
     label: t('settings.appearance.showQualityBadge'),
     subtext: t('settings.appearance.showQualityBadgeSubtext'),
@@ -146,6 +158,7 @@ const AppearanceSettings: React.FC = () => {
       <LanguageSelector />
       <ThemeModeSelector />
       <ThemeColor />
+      <SettingsToggleGroup items={accentItems} />
       <ThemePalette />
       <BackgroundSelector />
       {/*

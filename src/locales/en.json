@@ -210,7 +210,9 @@
         "large": "Large",
         "larger": "Larger",
         "restart": "The new size applies the next time Yuzic starts."
-      }
+      },
+      "accentFromCover": "Accent from what's playing",
+      "accentFromCoverSubtext": "The accent changes with each cover. Picking a colour turns this off."
     },
     "library": {
       "title": "Library",

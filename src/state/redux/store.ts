@@ -63,6 +63,7 @@ const settingsAppearancePersistConfig = {
   key: 'settingsAppearance',
   storage,
   version: 1,
+  blacklist: ['liveAccent'],
   migrate: (state: any): Promise<any> => Promise.resolve(migrateAppearance(state)),
 };
 const settingsHomePersistConfig = { key: 'settingsHome', storage };

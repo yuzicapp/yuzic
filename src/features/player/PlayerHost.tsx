@@ -18,6 +18,7 @@ import { MediaImage } from '@/components/MediaImage';
 import { buildCover } from '@/providers/registry/covers';
 import { prefetchCovers } from '@/features/artwork/imageCache';
 import { useActiveTheme } from '@/features/theme/useActiveTheme';
+import { useLiveCoverAccent } from '@/features/theme/useLiveCoverAccent';
 import PlayingScreen from '@/features/player/PlayingScreen';
 import PlayingBackground from '@/features/player/components/PlayingBackground';
 import { useRadius } from '@/features/theme/useRadius';
@@ -64,6 +65,9 @@ export default function PlayerHost() {
   const { getQueue } = usePlayingActions();
   const queueVersion = usePlayingQueueVersion();
   const coverAccentEnabled = useActiveTheme().surface.coverTint;
+  // The app's accent follows the cover when the theme asks; this is where the
+  // cover is known, so this is where it is taken from.
+  useLiveCoverAccent();
   const rad = useRadius();
 
   const [currentGradient, setCurrentGradient] = useState<[string, string]>([onDark.background, onDark.background]);

@@ -210,7 +210,9 @@
         "large": "Grande",
         "larger": "Très grande",
         "restart": "La nouvelle taille s'appliquera au prochain démarrage de Yuzic."
-      }
+      },
+      "accentFromCover": "Accent selon la lecture",
+      "accentFromCoverSubtext": "L'accent change avec chaque pochette. Choisir une couleur désactive cette option."
     },
     "library": {
       "title": "Bibliothèque",
