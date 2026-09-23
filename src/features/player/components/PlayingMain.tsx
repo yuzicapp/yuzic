@@ -339,6 +339,8 @@ const styles = StyleSheet.create({
   },
   coverAbove: {
     marginBottom: spacing.lg,
+    // Centred in the column: the compact player's cover is narrower than it.
+    alignSelf: 'center',
   },
   coverBeside: {
     marginBottom: 0,

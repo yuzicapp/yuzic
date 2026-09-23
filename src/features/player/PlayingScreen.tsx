@@ -39,6 +39,7 @@ import { contentWidth, hitSlopFor, iconSize, onDark, spacing } from '@/constants
 import { useWindowLayout } from '@/features/layout/useWindowLayout';
 import { cappedContentWidth } from '@/features/layout/windowClass';
 import { playerLayout } from './playerLayout';
+import { useActiveTheme } from '@/features/theme/useActiveTheme';
 
 interface PlayingScreenProps {
     onClose: () => void;
@@ -119,14 +120,18 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
     }, []);
 
     const { width, height, landscape } = useWindowLayout();
-    const layout = playerLayout({ width, height, landscape });
+    const variant = useActiveTheme().components.playerLayout;
+    const layout = playerLayout({ width, height, landscape }, variant);
     // Everything under the player — the lyrics preview, the speed and volume
     // cards, the artist card — lines up with the player above it, which in
     // the split shape is the cover and the column together rather than just
     // the column.
     const columnWidth = layout.rowWidth;
     const queueWidth = cappedContentWidth(width - spacing.xl, contentWidth.readable);
-    const playerMinHeight = height - insets.top - insets.bottom;
+    // The full player fills the first screen and the rest waits below it. The
+    // compact one is only as tall as it is, so the lyrics preview and the
+    // cards follow straight on: that is what a smaller cover is for.
+    const playerMinHeight = variant === 'compact' ? undefined : height - insets.top - insets.bottom;
 
     const dragToClose = useDragToClose(expansion, scrollY, height);
 

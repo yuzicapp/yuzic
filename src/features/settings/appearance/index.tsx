@@ -9,6 +9,7 @@ import { ThemePalette } from './components/ThemePalette';
 import { BackgroundSelector } from './components/BackgroundSelector';
 import { ThemeModeSelector } from './components/ThemeModeSelector';
 import { PlayingBarActionSelector } from './components/PlayingBarActionSelector';
+import { PlayerLayoutSelector } from './components/PlayerLayoutSelector';
 import { LanguageSelector } from './components/LanguageSelector';
 import { GridColumns } from './components/GridColumns';
 import { RadiusPresetSelector } from './components/RadiusPresetSelector';
@@ -171,6 +172,7 @@ const AppearanceSettings: React.FC = () => {
       <SettingsToggleGroup items={qualityBadgeItems} />
       <SettingsToggleGroup items={playerControlItems} />
       <PlayingBarActionSelector />
+      <PlayerLayoutSelector />
       <SettingsCardHeader subtle title={t('settings.appearance.display')} />
       <SettingsToggleGroup items={sourceHeaderItems} />
       <SettingsToggleGroup items={coverAccentItems} />

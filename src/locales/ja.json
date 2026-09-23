@@ -212,7 +212,13 @@
         "restart": "新しいサイズは次回 Yuzic を起動したときに適用されます。"
       },
       "accentFromCover": "再生中の曲からアクセント",
-      "accentFromCoverSubtext": "アクセントがジャケットごとに変わります。色を選ぶとオフになります。"
+      "accentFromCoverSubtext": "アクセントがジャケットごとに変わります。色を選ぶとオフになります。",
+      "playerLayout": {
+        "title": "プレーヤーのレイアウト",
+        "subtitle": "ジャケットを大きく表示するか、小さくして歌詞などを見やすくします。",
+        "artwork": "大きいジャケット",
+        "compact": "コンパクト"
+      }
     },
     "library": {
       "title": "ライブラリ",

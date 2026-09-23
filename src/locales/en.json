@@ -212,7 +212,13 @@
         "restart": "The new size applies the next time Yuzic starts."
       },
       "accentFromCover": "Accent from what's playing",
-      "accentFromCoverSubtext": "The accent changes with each cover. Picking a colour turns this off."
+      "accentFromCoverSubtext": "The accent changes with each cover. Picking a colour turns this off.",
+      "playerLayout": {
+        "title": "Player layout",
+        "subtitle": "Full-size artwork, or smaller so lyrics and more start sooner.",
+        "artwork": "Full artwork",
+        "compact": "Compact"
+      }
     },
     "library": {
       "title": "Library",

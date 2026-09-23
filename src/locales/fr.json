@@ -212,7 +212,13 @@
         "restart": "La nouvelle taille s'appliquera au prochain démarrage de Yuzic."
       },
       "accentFromCover": "Accent selon la lecture",
-      "accentFromCoverSubtext": "L'accent change avec chaque pochette. Choisir une couleur désactive cette option."
+      "accentFromCoverSubtext": "L'accent change avec chaque pochette. Choisir une couleur désactive cette option.",
+      "playerLayout": {
+        "title": "Disposition du lecteur",
+        "subtitle": "Pochette en grand, ou plus petite pour voir les paroles plus tôt.",
+        "artwork": "Grande pochette",
+        "compact": "Compact"
+      }
     },
     "library": {
       "title": "Bibliothèque",

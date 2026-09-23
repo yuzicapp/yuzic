@@ -212,7 +212,13 @@
         "restart": "新的文字大小将在下次启动 Yuzic 时生效。"
       },
       "accentFromCover": "跟随正在播放的强调色",
-      "accentFromCoverSubtext": "强调色随每张封面变化。选择颜色会关闭此选项。"
+      "accentFromCoverSubtext": "强调色随每张封面变化。选择颜色会关闭此选项。",
+      "playerLayout": {
+        "title": "播放器布局",
+        "subtitle": "大尺寸封面，或缩小封面以便更快看到歌词等内容。",
+        "artwork": "大封面",
+        "compact": "紧凑"
+      }
     },
     "library": {
       "title": "媒体库",

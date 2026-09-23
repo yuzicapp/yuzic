@@ -65,6 +65,16 @@ const COVER_HEIGHT_SHARE: Record<PlayerLayoutMode, number> = {
 }
 
 /**
+ * The compact player's artwork, as a share of the column's width and of the
+ * window's height. Small enough that the lyrics preview and the cards below
+ * the controls start on the first screen, large enough to still be the cover.
+ */
+const COMPACT_COVER = { width: 0.62, height: 0.3 }
+
+/** Which player the theme asks for. Only the stacked shape has a compact form. */
+type PlayerLayoutVariant = 'artwork' | 'compact'
+
+/**
  * How the player lays itself out in this window.
  *
  * Landscape decides the mode, not the size class: a 667pt iPhone SE on its
@@ -72,11 +82,14 @@ const COVER_HEIGHT_SHARE: Record<PlayerLayoutMode, number> = {
  * times more width than height, which is the only fact the player cares
  * about.
  */
-export function playerLayout(window: {
-  width: number
-  height: number
-  landscape: boolean
-}): PlayerLayout {
+export function playerLayout(
+  window: {
+    width: number
+    height: number
+    landscape: boolean
+  },
+  variant: PlayerLayoutVariant = 'artwork',
+): PlayerLayout {
   // Floored, because every size below is derived from it and a window
   // narrower than its own insets would otherwise hand the layout a negative
   // square. Nothing renders at 40pt, but nothing should return -8 either.
@@ -84,9 +97,12 @@ export function playerLayout(window: {
 
   if (!window.landscape) {
     const columnWidth = cappedContentWidth(available, contentWidth.player)
+    const coverSize = variant === 'compact'
+      ? squareArtSize(columnWidth * COMPACT_COVER.width, window.height * COMPACT_COVER.height)
+      : squareArtSize(columnWidth, window.height * COVER_HEIGHT_SHARE.stacked)
     return {
       mode: 'stacked',
-      coverSize: squareArtSize(columnWidth, window.height * COVER_HEIGHT_SHARE.stacked),
+      coverSize,
       columnWidth,
       rowWidth: columnWidth,
       columnGap: 0,

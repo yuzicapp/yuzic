@@ -68,3 +68,19 @@ describe('playerLayout', () => {
     }
   })
 })
+
+describe('the compact player', () => {
+  it('draws a smaller cover in the same column, so the rest starts higher', () => {
+    const artwork = playerLayout({ width: 390, height: 844, landscape: false })
+    const compact = playerLayout({ width: 390, height: 844, landscape: false }, 'compact')
+
+    expect(compact.coverSize).toBeLessThan(artwork.coverSize * 0.7)
+    expect(compact.columnWidth).toBe(artwork.columnWidth)
+    expect(compact.rowWidth).toBe(artwork.rowWidth)
+  })
+
+  it('leaves the landscape player as it is', () => {
+    const window = { width: 844, height: 390, landscape: true }
+    expect(playerLayout(window, 'compact')).toEqual(playerLayout(window))
+  })
+})
