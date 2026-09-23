@@ -209,7 +209,7 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
                                         styles.header,
                                         {
                                             paddingTop: insets.top,
-                                            paddingBottom: landscape ? spacing.md : spacing.xxxl,
+                                            paddingBottom: landscape || layout.inline ? spacing.md : spacing.xxxl,
                                         },
                                     ]}
                                 >
@@ -244,7 +244,7 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
                                     </View>
                                 </View>
 
-                                <View style={styles.centerContent}>
+                                <View style={layout.inline ? styles.topContent : styles.centerContent}>
                                     <PlayingMain
                                         layout={layout}
                                         onPressArtist={navigateToArtist}
@@ -354,6 +354,11 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    // The compact player starts under the header rather than floating in the
+    // middle of a screen it no longer fills.
+    topContent: {
+        alignItems: 'center',
     },
     container: {
         flex: 1,

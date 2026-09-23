@@ -22,6 +22,11 @@ export type PlayerLayout = {
   rowWidth: number
   /** Between the cover and the column. Zero when they are not side by side. */
   columnGap: number
+  /**
+   * The compact player: a small cover beside the title, with the progress bar
+   * and transport full width below, instead of a cover above everything.
+   */
+  inline: boolean
 }
 
 /**
@@ -65,11 +70,10 @@ const COVER_HEIGHT_SHARE: Record<PlayerLayoutMode, number> = {
 }
 
 /**
- * The compact player's artwork, as a share of the column's width and of the
- * window's height. Small enough that the lyrics preview and the cards below
- * the controls start on the first screen, large enough to still be the cover.
+ * The compact player's cover, beside the title: a share of the column, capped
+ * so it stays a thumbnail on a tablet rather than growing back into a poster.
  */
-const COMPACT_COVER = { width: 0.62, height: 0.3 }
+const INLINE_COVER = { share: 0.3, max: 128 }
 
 /** Which player the theme asks for. Only the stacked shape has a compact form. */
 type PlayerLayoutVariant = 'artwork' | 'compact'
@@ -97,8 +101,9 @@ export function playerLayout(
 
   if (!window.landscape) {
     const columnWidth = cappedContentWidth(available, contentWidth.player)
-    const coverSize = variant === 'compact'
-      ? squareArtSize(columnWidth * COMPACT_COVER.width, window.height * COMPACT_COVER.height)
+    const inline = variant === 'compact'
+    const coverSize = inline
+      ? Math.min(Math.round(columnWidth * INLINE_COVER.share), INLINE_COVER.max)
       : squareArtSize(columnWidth, window.height * COVER_HEIGHT_SHARE.stacked)
     return {
       mode: 'stacked',
@@ -106,6 +111,7 @@ export function playerLayout(
       columnWidth,
       rowWidth: columnWidth,
       columnGap: 0,
+      inline,
     }
   }
 
@@ -130,5 +136,6 @@ export function playerLayout(
     // shrink to them or the whole thing sits off-centre.
     rowWidth: coverSize + SPLIT_GAP + columnWidth,
     columnGap: SPLIT_GAP,
+    inline: false,
   }
 }

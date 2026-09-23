@@ -71,6 +71,7 @@ const PlayingMain: React.FC<PlayingMainProps> = ({
 }) => {
   const { coverSize, columnWidth, rowWidth, columnGap } = layout;
   const split = layout.mode === 'split';
+  const inline = layout.inline;
   const { t } = useTranslation();
   const { currentSong, currentIndex, repeatMode } = usePlayingState();
   const { skipToNext, skipToPrevious, getQueue } = usePlayingActions();
@@ -237,7 +238,8 @@ const PlayingMain: React.FC<PlayingMainProps> = ({
           // Stacked, the gap below the artwork is the gap before the title.
           // Split, the title is beside it and the gap is the column's, so a
           // margin here would only push the square off centre.
-          split ? styles.coverBeside : styles.coverAbove,
+          split || inline ? styles.coverBeside : styles.coverAbove,
+          inline && styles.coverInline,
           { width: coverSize, height: coverSize, borderRadius: rad.card },
         ]}
         // The square is what the finger swipes, but the cover the eye
@@ -254,7 +256,8 @@ const PlayingMain: React.FC<PlayingMainProps> = ({
 
   const details = (
     <View style={{ width: columnWidth }}>
-      <View style={styles.titleRow}>
+      <View style={[styles.titleRow, inline && styles.titleRowInline]}>
+        {inline && cover}
         <View style={styles.textContainer}>
           <Text style={styles.title} numberOfLines={2}>
             {currentSong.title}
@@ -312,6 +315,11 @@ const PlayingMain: React.FC<PlayingMainProps> = ({
   // its two halves rather than stretched: in a short window the column is
   // what sets the height, and a cover stretched to match it would no longer
   // be square.
+  // Compact: the cover is already inside the title row, so the column is all.
+  if (inline) {
+    return <View style={[styles.root, { width: rowWidth }]}>{details}</View>;
+  }
+
   return split ? (
     <View style={[styles.splitRoot, { width: rowWidth, columnGap }]}>
       {cover}
@@ -344,6 +352,13 @@ const styles = StyleSheet.create({
   },
   coverBeside: {
     marginBottom: 0,
+  },
+  // Beside the title, with the title's own gap to its right.
+  coverInline: {
+    marginRight: spacing.lg,
+  },
+  titleRowInline: {
+    alignItems: 'center',
   },
   titleRow: {
     flexDirection: 'row',
