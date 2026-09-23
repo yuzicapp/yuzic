@@ -179,10 +179,6 @@
       "homeSourcesDeezerSubtext": "Deezerのチャート・人気曲・類似アーティスト。",
       "gallery": {
         "title": "テーマ",
-        "custom": "カスタム",
-        "alwaysDark": "常にダーク",
-        "alwaysLight": "常にライト",
-        "lightAndDark": "ライトとダーク",
         "customize": "テーマをカスタマイズ"
       },
       "editor": {

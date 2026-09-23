@@ -179,10 +179,6 @@
       "homeSourcesDeezerSubtext": "Charts Deezer, top titres et artistes similaires.",
       "gallery": {
         "title": "Thèmes",
-        "custom": "Le vôtre",
-        "alwaysDark": "Toujours sombre",
-        "alwaysLight": "Toujours clair",
-        "lightAndDark": "Clair et sombre",
         "customize": "Personnaliser le thème"
       },
       "editor": {

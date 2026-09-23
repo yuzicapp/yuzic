@@ -179,10 +179,6 @@
       "homeSourcesDeezerSubtext": "Deezer 榜单、热门曲和相似艺人。",
       "gallery": {
         "title": "主题",
-        "custom": "自定义",
-        "alwaysDark": "始终深色",
-        "alwaysLight": "始终浅色",
-        "lightAndDark": "浅色与深色",
         "customize": "自定义主题"
       },
       "editor": {
