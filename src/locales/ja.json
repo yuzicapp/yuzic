@@ -218,6 +218,13 @@
         "subtitle": "ジャケットを大きく表示するか、小さくして歌詞などを見やすくします。",
         "artwork": "大きいジャケット",
         "compact": "コンパクト"
+      },
+      "sections": {
+        "colours": "色",
+        "background": "背景",
+        "player": "プレーヤー",
+        "layout": "レイアウトと文字",
+        "dock": "ドックと操作感"
       }
     },
     "library": {

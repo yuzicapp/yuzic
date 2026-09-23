@@ -100,7 +100,7 @@ describe('who reads the theme settings', () => {
   const ALLOWED = [
     'features/theme/useActiveTheme.ts',
     'features/settings/appearance/state.ts',
-    'features/settings/appearance/index.tsx',
+    'features/settings/appearance/useAppearanceToggles.ts',
     'features/settings/appearance/components/ThemeColor.tsx',
     'features/settings/appearance/components/RadiusPresetSelector.tsx',
     'features/settings/appearance/components/ListDensitySelector.tsx',

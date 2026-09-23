@@ -218,6 +218,13 @@
         "subtitle": "Full-size artwork, or smaller so lyrics and more start sooner.",
         "artwork": "Full artwork",
         "compact": "Compact"
+      },
+      "sections": {
+        "colours": "Colours",
+        "background": "Background",
+        "player": "Player",
+        "layout": "Layout and text",
+        "dock": "Dock and feel"
       }
     },
     "library": {

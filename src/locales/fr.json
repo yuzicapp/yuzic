@@ -218,6 +218,13 @@
         "subtitle": "Pochette en grand, ou plus petite pour voir les paroles plus tôt.",
         "artwork": "Grande pochette",
         "compact": "Compact"
+      },
+      "sections": {
+        "colours": "Couleurs",
+        "background": "Arrière-plan",
+        "player": "Lecteur",
+        "layout": "Disposition et texte",
+        "dock": "Barre et sensations"
       }
     },
     "library": {

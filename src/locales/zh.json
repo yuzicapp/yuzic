@@ -218,6 +218,13 @@
         "subtitle": "大尺寸封面，或缩小封面以便更快看到歌词等内容。",
         "artwork": "大封面",
         "compact": "紧凑"
+      },
+      "sections": {
+        "colours": "颜色",
+        "background": "背景",
+        "player": "播放器",
+        "layout": "布局与文字",
+        "dock": "底栏与手感"
       }
     },
     "library": {
