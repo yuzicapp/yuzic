@@ -6,6 +6,7 @@ import serversReducer from './slices/serversSlice';
 import downloadersReducer from './slices/downloadersSlice';
 import audiomuseReducer from './slices/audiomuseSlice';
 import settingsAppearanceReducer from '@/features/settings/appearance/state';
+import { migrateAppearance } from '@/features/settings/appearance/themeStore';
 import settingsHomeReducer from '@/features/settings/home/state';
 import settingsSearchReducer from '@/features/settings/search/state';
 import settingsSourcesReducer from '@/features/settings/sources/state';
@@ -55,8 +56,15 @@ const audiomusePersistConfig = { key: 'audiomuse', storage };
 // fields) is gone — each feature owns its own slice and its own storage key.
 // These are new keys under the rewrite's storage namespace: there is no
 // legacy `settings` blob to migrate from, so no `migrate` function and no
-// version bump here — a fresh install and an upgrading one look the same.
-const settingsAppearancePersistConfig = { key: 'settingsAppearance', storage };
+// version bump for that — a fresh install and an upgrading one look the same.
+// Appearance has since had a change of its own: v1 moved the accent, corners, density, cover tint and dock into a stored
+// theme. `migrateAppearance` carries the old choices across as a custom theme.
+const settingsAppearancePersistConfig = {
+  key: 'settingsAppearance',
+  storage,
+  version: 1,
+  migrate: (state: any): Promise<any> => Promise.resolve(migrateAppearance(state)),
+};
 const settingsHomePersistConfig = { key: 'settingsHome', storage };
 const settingsSearchPersistConfig = { key: 'settingsSearch', storage, version: 1 };
 // Every outside-source switch, by use. The first read, with nothing stored

@@ -84,7 +84,7 @@
     "appearance": {
       "title": "Appearance",
       "theme": {
-        "title": "Theme",
+        "title": "Light and dark",
         "light": "Light",
         "dark": "Dark",
         "system": "System",
@@ -176,7 +176,37 @@
       "homeSourcesListenbrainz": "ListenBrainz",
       "homeSourcesListenbrainzSubtext": "Show ListenBrainz similar-artist shelves.",
       "homeSourcesDeezer": "Deezer",
-      "homeSourcesDeezerSubtext": "Deezer charts, top tracks, and similar artists."
+      "homeSourcesDeezerSubtext": "Deezer charts, top tracks, and similar artists.",
+      "gallery": {
+        "title": "Themes",
+        "custom": "Yours",
+        "alwaysDark": "Always dark",
+        "alwaysLight": "Always light",
+        "lightAndDark": "Light and dark",
+        "customize": "Customize theme"
+      },
+      "editor": {
+        "title": "Customize theme",
+        "name": "Name",
+        "copyHint": "{{name}} is a built-in theme. Your first change makes a copy you can rename, and {{name}} stays as it is.",
+        "scheme": "Light and dark",
+        "schemes": {
+          "follow": "Follow setting",
+          "light": "Always light",
+          "dark": "Always dark"
+        },
+        "accent": "Accent",
+        "colors": {
+          "light": "Light colours",
+          "dark": "Dark colours"
+        },
+        "background": "Background",
+        "surface": "Cards",
+        "text": "Text",
+        "readableHint": "Text is adjusted if needed so it stays readable on your colours.",
+        "delete": "Delete theme",
+        "deleteConfirm": "Delete {{name}}?"
+      }
     },
     "library": {
       "title": "Library",
@@ -1604,7 +1634,9 @@
       "clearProviderDownloads": "Delete all {{provider}} downloads",
       "removeDownload": "Remove download {{title}}",
       "reorderSource": "Reorder {{name}}",
-      "sourceDetails": "About {{name}}"
+      "sourceDetails": "About {{name}}",
+      "themeCard": "{{name}} theme",
+      "editColor": "{{name}}, {{value}}. Edit colour"
     },
     "onboarding": {
       "serverOptions": "Options for {{url}}"

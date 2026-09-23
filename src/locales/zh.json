@@ -84,7 +84,7 @@
     "appearance": {
       "title": "外观",
       "theme": {
-        "title": "主题",
+        "title": "浅色与深色",
         "light": "浅色",
         "dark": "深色",
         "system": "跟随系统",
@@ -176,7 +176,37 @@
       "homeSourcesListenbrainz": "ListenBrainz",
       "homeSourcesListenbrainzSubtext": "显示 ListenBrainz 的相似艺人栏目。",
       "homeSourcesDeezer": "Deezer",
-      "homeSourcesDeezerSubtext": "Deezer 榜单、热门曲和相似艺人。"
+      "homeSourcesDeezerSubtext": "Deezer 榜单、热门曲和相似艺人。",
+      "gallery": {
+        "title": "主题",
+        "custom": "自定义",
+        "alwaysDark": "始终深色",
+        "alwaysLight": "始终浅色",
+        "lightAndDark": "浅色与深色",
+        "customize": "自定义主题"
+      },
+      "editor": {
+        "title": "自定义主题",
+        "name": "名称",
+        "copyHint": "{{name}} 是内置主题。第一次修改会创建一个可重命名的副本，{{name}} 保持不变。",
+        "scheme": "浅色与深色",
+        "schemes": {
+          "follow": "跟随设置",
+          "light": "始终浅色",
+          "dark": "始终深色"
+        },
+        "accent": "强调色",
+        "colors": {
+          "light": "浅色配色",
+          "dark": "深色配色"
+        },
+        "background": "背景",
+        "surface": "卡片",
+        "text": "文字",
+        "readableHint": "必要时会自动调整文字颜色，确保在你的配色上清晰可读。",
+        "delete": "删除主题",
+        "deleteConfirm": "删除 {{name}}？"
+      }
     },
     "library": {
       "title": "媒体库",
@@ -1609,7 +1639,9 @@
       "clearProviderDownloads": "删除所有 {{provider}} 下载",
       "removeDownload": "移除下载 {{title}}",
       "reorderSource": "重新排序 {{name}}",
-      "sourceDetails": "关于 {{name}}"
+      "sourceDetails": "关于 {{name}}",
+      "themeCard": "{{name}} 主题",
+      "editColor": "{{name}}，{{value}}。编辑颜色"
     },
     "onboarding": {
       "serverOptions": "{{url}}的选项"

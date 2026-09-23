@@ -10,11 +10,6 @@ import type { ListDensity, RadiusPreset, SemanticThemeColors } from '@/constants
  * theme is a copy with fields changed, and a shared theme is this object
  * written to a file. Every hook that draws the app reads the active theme; none
  * reads the appearance settings directly.
- *
- * Today there is one built-in theme and the user's appearance settings are
- * applied over it (`themeFromSettings`), which draws exactly what the app drew
- * before this existed. Storing themes of their own is the next step, and it
- * changes where the theme comes from, not what reads it.
  */
 
 export type Scheme = 'light' | 'dark';
@@ -25,7 +20,16 @@ export type ThemePalette = Omit<SemanticThemeColors, 'themeColor'>;
 export interface Theme {
   id: string;
   name: string;
-  /** Both schemes, so a theme follows the system's light and dark like the app always has. */
+  /** The preset a custom theme was made from, so deleting it can go back there. */
+  basedOn?: string;
+  /**
+   * A theme that is only ever light or only ever dark. Absent, the theme
+   * follows the light/dark setting like the app always has. A dark-only theme
+   * has to say so rather than just carry two dark palettes, because the status
+   * bar, blur and keyboard read the scheme, not the colours.
+   */
+  scheme?: Scheme;
+  /** Both schemes, even for a fixed-scheme theme, so switching it back is never a blank. */
   palettes: Record<Scheme, ThemePalette>;
   accent: string;
   shape: {
@@ -41,8 +45,8 @@ export interface Theme {
   };
 }
 
-/** The appearance settings a theme is built from, until themes are stored themselves. */
-export interface ThemeSettings {
+/** The appearance settings a theme was built from before themes were stored: version 0 of `settingsAppearance`. */
+export interface ThemeSettingsV0 {
   themeColor?: string;
   radiusPreset?: RadiusPreset;
   listDensity?: ListDensity;
@@ -51,13 +55,11 @@ export interface ThemeSettings {
 }
 
 /**
- * The active theme: the built-in one with the user's appearance settings on top.
- *
- * A setting that is missing falls back to the theme's own value. A settings
- * blob written before a key existed reaches here without it, and `undefined`
- * would otherwise land in a style as a broken layout rather than a default.
+ * A theme from the settings that used to hold its parts: `base` with the old
+ * accent, corners, density, tint and dock on top. Only the upgrade from those
+ * settings uses it. A missing setting keeps the theme's own value.
  */
-export function themeFromSettings(settings: ThemeSettings, base: Theme): Theme {
+export function themeFromSettings(settings: ThemeSettingsV0, base: Theme): Theme {
   return {
     ...base,
     accent: settings.themeColor ?? base.accent,
@@ -72,6 +74,11 @@ export function themeFromSettings(settings: ThemeSettings, base: Theme): Theme {
         : settings.translucentDock ? 'translucent' : 'solid',
     },
   };
+}
+
+/** Which scheme a theme draws in, given what the light/dark setting resolved to. */
+export function schemeFor(theme: Theme, resolvedMode: Scheme): Scheme {
+  return theme.scheme ?? resolvedMode;
 }
 
 /** What `useTheme().colors` hands every component: one scheme's palette and the accent. */

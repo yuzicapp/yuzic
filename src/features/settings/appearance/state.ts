@@ -1,7 +1,10 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
 import { DEFAULT_LANGUAGE } from '@/features/settings/appearance/languages';
-import { themeColorPreset } from '@/constants/design';
 import type { ListDensity, RadiusPreset } from '@/constants/design';
+import { DEFAULT_THEME, PRESET_THEMES, normalizeTheme } from '@/features/theme/presets';
+import type { Theme } from '@/features/theme/theme';
+import { editActive, findTheme, type ThemeEdit } from './themeStore';
+
 
 /**
  * The collections that remember their own grid/list choice.
@@ -48,24 +51,19 @@ type AppLanguage = string;
 
 interface AppearanceSettingsState {
   themeMode: ThemeMode;
-  themeColor: string;
   /**
-   * Corner-radius preset. Live-reactive — components read scaled values via
-   * `useRadius()` and re-render on change. The static `radius` export in
-   * constants/design.ts continues to hold defaults for unmigrated surfaces.
+   * The theme the app is drawn with: a preset's id, or one of `customThemes`.
+   *
+   * The accent, corner preset, list density, cover tinting and translucent
+   * dock used to be settings of their own here. They are the theme's now, and
+   * the setters below edit the active theme rather than a loose field.
    */
-  radiusPreset: RadiusPreset;
+  activeThemeId: string;
   /**
-   * How much air sits between rows in a list. Live-reactive the same way the
-   * radius preset is — rows read it through `useListDensity()`.
+   * Themes the user made. Editing a preset makes one of these rather than
+   * changing the preset, so every shipped theme stays one tap away.
    */
-  listDensity: ListDensity;
-  /**
-   * Tint a detail screen with a colour taken from its cover art. On by
-   * default: it is most of what makes an album page look like that album.
-   * Off gives every screen the flat theme background instead.
-   */
-  coverAccentEnabled: boolean;
+  customThemes: Theme[];
   gridColumns: number;
   isGridView: boolean;
   /**
@@ -85,34 +83,22 @@ interface AppearanceSettingsState {
   playingBarAction: PlayingBarAction;
   showQualityBadge: boolean;
   showSourceHeaders: boolean;
-  /** Float the tab dock over the content behind a blur instead of having it
-   * take layout space. Off by default: it only shows on screens long enough
-   * to scroll under the dock, and it costs every list a taller bottom inset. */
-  translucentDock: boolean;
   language: AppLanguage;
   hapticsEnabled: boolean;
   /** When true, respect the system's reduce-motion setting; when false, always animate. */
   respectReducedMotion: boolean;
 }
 
-/** The accent a fresh install starts with — the first of the presets offered,
- *  so the swatch row and this default cannot disagree. No longer exported: the
- *  swatch row reads the list itself now. */
-const THEME_DEFAULT_COLOR: string = themeColorPreset[0];
-
 const initialState: AppearanceSettingsState = {
   themeMode: 'system',
-  themeColor: THEME_DEFAULT_COLOR,
-  radiusPreset: 'default',
-  listDensity: 'default',
-  coverAccentEnabled: true,
+  activeThemeId: DEFAULT_THEME.id,
+  customThemes: [],
   gridColumns: 3,
   isGridView: true,
   libraryViewModes: {},
   playingBarAction: 'skip',
   showQualityBadge: false,
   showSourceHeaders: true,
-  translucentDock: false,
   language: DEFAULT_LANGUAGE,
   hapticsEnabled: true,
   respectReducedMotion: true,
@@ -125,17 +111,58 @@ const appearanceSlice = createSlice({
     setThemeMode(state, action: PayloadAction<ThemeMode>) {
       state.themeMode = action.payload;
     },
-    setThemeColor(state, action: PayloadAction<string>) {
-      state.themeColor = action.payload;
+    /** Draw the app with a preset or a custom theme. An unknown id is ignored. */
+    setActiveTheme(state, action: PayloadAction<string>) {
+      if (findTheme(state, action.payload)) state.activeThemeId = action.payload;
     },
-    setRadiusPreset(state, action: PayloadAction<RadiusPreset>) {
-      state.radiusPreset = action.payload;
+    /**
+     * Change the active theme. A preset is copied into a custom theme first
+     * and the copy is changed, so the preset itself never moves.
+     */
+    editActiveTheme: {
+      reducer(state, action: PayloadAction<ThemeEdit, string, { copyId: string }>) {
+        editActive(state, action.payload, action.meta.copyId);
+      },
+      prepare: (edit: ThemeEdit) => ({ payload: edit, meta: { copyId: nanoid() } }),
     },
-    setListDensity(state, action: PayloadAction<ListDensity>) {
-      state.listDensity = action.payload;
+    renameTheme(state, action: PayloadAction<{ id: string; name: string }>) {
+      const theme = state.customThemes.find(t => t.id === action.payload.id);
+      const name = action.payload.name.trim();
+      if (theme && name) theme.name = name;
     },
-    setCoverAccentEnabled(state, action: PayloadAction<boolean>) {
-      state.coverAccentEnabled = action.payload;
+    /** Remove a custom theme. Deleting the active one falls back to the preset it came from. */
+    deleteTheme(state, action: PayloadAction<string>) {
+      const theme = state.customThemes.find(t => t.id === action.payload);
+      if (!theme) return;
+      state.customThemes = state.customThemes.filter(t => t.id !== action.payload);
+      if (state.activeThemeId === action.payload) {
+        const origin = PRESET_THEMES.find(p => p.id === theme.basedOn);
+        state.activeThemeId = origin ? origin.id : DEFAULT_THEME.id;
+      }
+    },
+    setThemeColor: {
+      reducer(state, action: PayloadAction<string, string, { copyId: string }>) {
+        editActive(state, { accent: action.payload }, action.meta.copyId);
+      },
+      prepare: (accent: string) => ({ payload: accent, meta: { copyId: nanoid() } }),
+    },
+    setRadiusPreset: {
+      reducer(state, action: PayloadAction<RadiusPreset, string, { copyId: string }>) {
+        editActive(state, { shape: { radius: action.payload } }, action.meta.copyId);
+      },
+      prepare: (radius: RadiusPreset) => ({ payload: radius, meta: { copyId: nanoid() } }),
+    },
+    setListDensity: {
+      reducer(state, action: PayloadAction<ListDensity, string, { copyId: string }>) {
+        editActive(state, { shape: { density: action.payload } }, action.meta.copyId);
+      },
+      prepare: (density: ListDensity) => ({ payload: density, meta: { copyId: nanoid() } }),
+    },
+    setCoverAccentEnabled: {
+      reducer(state, action: PayloadAction<boolean, string, { copyId: string }>) {
+        editActive(state, { surface: { coverTint: action.payload } }, action.meta.copyId);
+      },
+      prepare: (coverTint: boolean) => ({ payload: coverTint, meta: { copyId: nanoid() } }),
     },
     setGridColumns(state, action: PayloadAction<number>) {
       state.gridColumns = action.payload;
@@ -161,8 +188,11 @@ const appearanceSlice = createSlice({
     setShowSourceHeaders(state, action: PayloadAction<boolean>) {
       state.showSourceHeaders = action.payload;
     },
-    setTranslucentDock(state, action: PayloadAction<boolean>) {
-      state.translucentDock = action.payload;
+    setTranslucentDock: {
+      reducer(state, action: PayloadAction<boolean, string, { copyId: string }>) {
+        editActive(state, { components: { dock: action.payload ? 'translucent' : 'solid' } }, action.meta.copyId);
+      },
+      prepare: (translucent: boolean) => ({ payload: translucent, meta: { copyId: nanoid() } }),
     },
     setLanguage(state, action: PayloadAction<AppLanguage>) {
       state.language = action.payload;
@@ -178,6 +208,10 @@ const appearanceSlice = createSlice({
 
 export const {
   setThemeMode,
+  setActiveTheme,
+  editActiveTheme,
+  renameTheme,
+  deleteTheme,
   setThemeColor,
   setRadiusPreset,
   setListDensity,
@@ -208,17 +242,48 @@ interface AppearanceRootState {
 export const selectThemeMode = (state: AppearanceRootState): ThemeMode =>
   state.settingsAppearance.themeMode;
 
+const selectActiveThemeId = (state: AppearanceRootState) => state.settingsAppearance.activeThemeId;
+const selectCustomThemes = (state: AppearanceRootState) => state.settingsAppearance.customThemes;
+
+/**
+ * The theme the app is drawn with.
+ *
+ * Memoised on the stored theme, so it is the same object until the theme
+ * changes. A missing or unknown id falls back to the default theme, and a
+ * stored theme is completed from the default: one saved before a field
+ * existed must not reach a style as `undefined`.
+ */
+export const selectActiveTheme = createSelector(
+  [selectActiveThemeId, selectCustomThemes],
+  (id, customThemes): Theme => {
+    const preset = PRESET_THEMES.find(t => t.id === id);
+    if (preset) return preset;
+    // Only a stored theme can be missing a field; a preset is always whole.
+    const custom = customThemes?.find(t => t.id === id);
+    return custom ? normalizeTheme(custom) : DEFAULT_THEME;
+  },
+);
+
+/** Every theme the user can pick: the presets, then their own. */
+export const selectAllThemes = createSelector(
+  [selectCustomThemes],
+  (customThemes): { presets: Theme[]; custom: Theme[] } => ({
+    presets: PRESET_THEMES,
+    custom: (customThemes ?? []).map(normalizeTheme),
+  }),
+);
+
 export const selectThemeColor = (state: AppearanceRootState): string =>
-  state.settingsAppearance.themeColor;
+  selectActiveTheme(state).accent;
 
 export const selectRadiusPreset = (state: AppearanceRootState): RadiusPreset =>
-  state.settingsAppearance.radiusPreset;
+  selectActiveTheme(state).shape.radius;
 
 export const selectListDensity = (state: AppearanceRootState): ListDensity =>
-  state.settingsAppearance.listDensity;
+  selectActiveTheme(state).shape.density;
 
 export const selectCoverAccentEnabled = (state: AppearanceRootState): boolean =>
-  state.settingsAppearance.coverAccentEnabled;
+  selectActiveTheme(state).surface.coverTint;
 
 export const selectGridColumns = (state: AppearanceRootState): number =>
   state.settingsAppearance.gridColumns;
@@ -250,7 +315,7 @@ export const selectShowSourceHeaders = (state: AppearanceRootState): boolean =>
   state.settingsAppearance.showSourceHeaders;
 
 export const selectTranslucentDock = (state: AppearanceRootState): boolean =>
-  state.settingsAppearance.translucentDock;
+  selectActiveTheme(state).components.dock === 'translucent';
 
 export const selectLanguage = (state: AppearanceRootState): AppLanguage =>
   state.settingsAppearance.language;

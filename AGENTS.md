@@ -330,9 +330,13 @@ because both halves of each pair look reasonable in isolation.
   built by `useActiveTheme`). A theme is data: palettes for both schemes,
   accent, shape, surface and component choices, with the built-in ones in
   `features/theme/presets.ts`, the only file allowed to spell a theme colour
-  out. Nothing else reads the appearance settings that make up a theme;
-  `theme.test.ts` fails on a component that does, because it would ignore a
-  theme the day themes are stored on their own. A round control is the trap here:
+  out. Themes are stored in `settingsAppearance` (`activeThemeId`,
+  `customThemes`); editing a preset copies it rather than changing it, so a
+  preset is always one tap away. A theme's colours come from three picks per
+  scheme through `derivePalette`, which also pushes text until it reads, and
+  `theme.test.ts` holds every preset to the same contrast. Nothing reads the
+  settings that make up a theme except `useActiveTheme` and the appearance
+  editors; `theme.test.ts` fails on a component that does. A round control is the trap here:
   `radius.pill` is for the things whose roundness is what they *are* (an
   avatar, a status dot, a radio fill, a progress track, an artist's photo) and
   stays round at every preset, while a **control** merely drawn as a pill or a
