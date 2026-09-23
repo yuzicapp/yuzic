@@ -1433,7 +1433,8 @@
     "similarAlbums": "似ているアルバム"
   },
   "externalSourcePicker": {
-    "empty": "この項目を解決できるソースがありません。"
+    "empty": "この項目を解決できるソースがありません。",
+    "moreMatches_other": "ほかの候補 {{count}} 件"
   },
   "genreOptions": {
     "actions": {

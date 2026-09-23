@@ -17,6 +17,7 @@ import { currentMusicbrainzClient } from '@/providers/registry/musicbrainz'
 import { mapAlbum as mapMbAlbum } from '@/providers/integration/musicbrainz/mapAlbum'
 import { mapArtist as mapMbArtist } from '@/providers/integration/musicbrainz/mapArtist'
 import { mapSong as mapMbSong } from '@/providers/integration/musicbrainz/mapSong'
+import type { MbArtist, MbReleaseGroup } from '@/providers/integration/musicbrainz'
 import type { Album } from '@/domain/entities/Album'
 import type { ExternalIds } from '@/domain/identity/ExternalIds'
 import type { Artist } from '@/domain/entities/Artist'
@@ -36,6 +37,8 @@ export type SourceResolvedArtist = {
   id: string
   name: string
   coverUrl?: string
+  /** What tells this one apart from a namesake, where the source says. */
+  detail?: string
 }
 
 export type SourceResolvedAlbum = {
@@ -44,6 +47,7 @@ export type SourceResolvedAlbum = {
   title: string
   artist: string
   coverUrl?: string
+  year?: number
 }
 
 /** Which entity kinds a free-text search should ask a source for. */
@@ -111,9 +115,17 @@ type SourceDefinition = {
    * source headers call these directly, and nothing else resolves names.
    */
   resolveArtist(name: string): Promise<SourceResolvedArtist | null>
+  /**
+   * The best few matches for a name, best first, for the picker to offer
+   * when the first one is the wrong artist. `resolveArtist` is the first of
+   * these without the extra results.
+   */
+  resolveArtistCandidates(name: string, limit: number): Promise<SourceResolvedArtist[]>
   /** The id this source knows an artist by, from the ids a record carries. */
   artistIdOf(ids: ExternalIds): string | undefined
   resolveAlbum(artist: string, title: string): Promise<SourceResolvedAlbum | null>
+  /** As `resolveArtistCandidates`, for an album. */
+  resolveAlbumCandidates(artist: string, title: string, limit: number): Promise<SourceResolvedAlbum[]>
   fetchAlbum(id: string): Promise<AlbumDetail | null>
   fetchArtist(id: string, mbid?: string | null): Promise<SourceArtistDetail | null>
   fetchArtistAlbums(artistId: string, limit: number, artistName?: string): Promise<Album[]>
@@ -183,10 +195,39 @@ const deezerSource: SourceDefinition = {
     return { source: 'deezer', id: artist.nativeId, name: artist.name, coverUrl: urlFromCover(artist.cover) }
   },
 
+  async resolveArtistCandidates(name, limit) {
+    const artists = await searchDeezerArtists(name, limit)
+    return artists.map(artist => ({
+      source: 'deezer',
+      id: artist.nativeId,
+      name: artist.name,
+      coverUrl: urlFromCover(artist.cover),
+    }))
+  },
+
   async resolveAlbum(artist, title) {
     const album = await resolveDeezerAlbum(artist, title)
     if (!album) return null
     return { source: 'deezer', id: album.nativeId, title: album.title, artist: album.artist.name, coverUrl: urlFromCover(album.cover) }
+  },
+
+  async resolveAlbumCandidates(artist, title, limit) {
+    // The precise query first, as `resolveAlbum` does, then the loose one to
+    // make up the numbers: the precise one misses on any spelling difference.
+    const precise = await searchDeezerAlbums(`artist:"${artist}" album:"${title}"`, limit)
+    const loose = precise.length < limit ? await searchDeezerAlbums(`${artist} ${title}`, limit) : []
+    const seen = new Set<string>()
+    return [...precise, ...loose]
+      .filter(album => !seen.has(album.nativeId) && Boolean(seen.add(album.nativeId)))
+      .slice(0, limit)
+      .map(album => ({
+        source: 'deezer' as const,
+        id: album.nativeId,
+        title: album.title,
+        artist: album.artist.name,
+        coverUrl: urlFromCover(album.cover),
+        year: album.year,
+      }))
   },
 
   async fetchAlbum(id) {
@@ -251,6 +292,22 @@ const deezerSource: SourceDefinition = {
 
 const MB_PROVENANCE = integrationProvenance('musicbrainz')
 
+/**
+ * An artist's release groups, credited to that artist.
+ *
+ * The artist lookup's release groups come back with no `artist-credit`, so
+ * every album on a MusicBrainz artist page was by "Unknown Artist" with no id,
+ * and opening one searched for it under that name. The page knows whose
+ * albums these are; it says so.
+ */
+function creditedTo(artist: MbArtist): MbReleaseGroup[] {
+  return (artist['release-groups'] ?? []).map(rg => (
+    rg['artist-credit']?.length
+      ? rg
+      : { ...rg, 'artist-credit': [{ name: artist.name, artist: { id: artist.id, name: artist.name } }] }
+  ))
+}
+
 const musicbrainzSource: SourceDefinition = {
   id: 'musicbrainz',
   artistIdOf: ids => ids.mbid,
@@ -268,6 +325,31 @@ const musicbrainzSource: SourceDefinition = {
     if (!best) return null
     const artist = mapMbArtist(best, MB_PROVENANCE)
     return { source: 'musicbrainz', id: artist.nativeId, name: artist.name }
+  },
+
+  async resolveArtistCandidates(name, limit) {
+    const results = await currentMusicbrainzClient().searchArtist(name, limit)
+    return results.map(dto => {
+      const artist = mapMbArtist(dto, MB_PROVENANCE)
+      return { source: 'musicbrainz', id: artist.nativeId, name: artist.name, detail: dto.disambiguation || undefined }
+    })
+  },
+
+  async resolveAlbumCandidates(artist, title, limit) {
+    const results = await currentMusicbrainzClient().searchReleaseGroup(artist, title, limit)
+    return results.map(rg => {
+      const album = mapMbAlbum(rg, { provenance: MB_PROVENANCE })
+      return {
+        source: 'musicbrainz',
+        id: album.nativeId,
+        title: album.title,
+        // The credit on the match, not the name that was asked about: two
+        // candidates by different artists are the case the picker is for.
+        artist: rg['artist-credit']?.length ? album.artist.name : artist,
+        coverUrl: buildCover(album.cover, 'grid') ?? undefined,
+        year: album.year,
+      }
+    })
   },
 
   async resolveAlbum(artist, title) {
@@ -296,13 +378,13 @@ const musicbrainzSource: SourceDefinition = {
 
   async fetchArtistAlbums(artistId, limit) {
     const artist = await currentMusicbrainzClient().getArtistWithReleases(artistId)
-    const rgs = artist['release-groups'] ?? []
+    const rgs = creditedTo(artist)
     return rgs.slice(0, limit).map(rg => mapMbAlbum(rg, { provenance: MB_PROVENANCE }))
   },
 
   async fetchArtist(id) {
     const dto = await currentMusicbrainzClient().getArtistWithReleases(id)
-    const rgs = dto['release-groups'] ?? []
+    const rgs = creditedTo(dto)
     const albums = rgs
       .filter(rg => !rg['primary-type'] || rg['primary-type'] === 'Album')
       .map(rg => mapMbAlbum(rg, { provenance: MB_PROVENANCE }))
