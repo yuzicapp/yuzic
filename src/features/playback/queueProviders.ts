@@ -6,11 +6,11 @@ import type { SimilarityService } from '@/providers/registry/similarityService';
 
 // Tiered source for Smart Shuffle's one-shot injection and Autoplay's
 // queue-end extension: a similarity service's acoustic extension when one is
-// connected, otherwise the app's existing native similar-songs capability
+// connected, then the app's existing native similar-songs capability
 // (Navidrome's getSimilarSongs.view or Jellyfin/Emby's InstantMix, already
-// unified behind api.similar).
+// unified behind api.similar), then the library itself.
 export interface QueueFillProvider {
-  id: 'similarity-service' | 'native-similarity';
+  id: 'similarity-service' | 'native-similarity' | 'library';
   isAvailable(): boolean;
   fetchExtension(opts: {
     /**
@@ -19,7 +19,7 @@ export interface QueueFillProvider {
      * the similarity service indexes the active server's own item ids, and `getSimilarSongs`
      * queries the adapter — so this is `nativeId`, not identity.
      */
-    recentSongs: { nativeId: string }[];
+    recentSongs: { nativeId: string; artistName?: string }[];
     /**
      * What is already queued, keyed by identity rather than by native id. A
      * queue can hold tracks from more than one origin at once — imported local
@@ -78,6 +78,50 @@ export function createNativeSimilarityQueueFillProvider(api: ApiAdapter): QueueF
       if (!seed) return [];
       const similar = await api.similar.getSimilarSongs(seed.nativeId);
       return shuffleArray(similar.filter(s => !excludeIds.has(s.localId))).slice(0, count);
+    },
+  };
+}
+
+/**
+ * The last tier: more by the same artist, then anything from the library.
+ *
+ * Similar-songs is empty far more often than it looks. Navidrome answers it
+ * from Last.fm and returns nothing for a track Last.fm does not know, and a
+ * similarity service returns nothing for a track it has not analysed. With
+ * only those two tiers, one song played with Autoplay on was one song played:
+ * the fill came back empty and nothing asked again. This is what stops that.
+ * It is not similarity, which is why `relatedTo` never reaches it.
+ */
+export function createLibraryQueueFillProvider(api: ApiAdapter): QueueFillProvider {
+  return {
+    id: 'library',
+    isAvailable: () => Boolean(api.artists.getTopSongs || api.discovery),
+    fetchExtension: async ({ recentSongs, excludeIds, count }) => {
+      const artistName = recentSongs[recentSongs.length - 1]?.artistName;
+      // Each source failing on its own is fine; the other may still answer.
+      const [byArtist, anything] = await Promise.all([
+        artistName && api.artists.getTopSongs
+          ? api.artists.getTopSongs(artistName, count * 2).catch(() => [])
+          : Promise.resolve([]),
+        api.discovery
+          ? api.discovery.getRandomSongs({ size: count * 2 }).catch(() => [])
+          : Promise.resolve([]),
+      ]);
+      // Half the batch at most from the artist, so a long session drifts
+      // outward instead of playing one discography end to end.
+      const seen = new Set<LocalId>(excludeIds);
+      const take = (songs: Song[], limit: number): Song[] => {
+        const picked: Song[] = [];
+        for (const song of shuffleArray(songs)) {
+          if (picked.length >= limit) break;
+          if (seen.has(song.localId)) continue;
+          seen.add(song.localId);
+          picked.push(song);
+        }
+        return picked;
+      };
+      const fromArtist = take(byArtist, Math.ceil(count / 2));
+      return [...fromArtist, ...take(anything, count - fromArtist.length)];
     },
   };
 }
