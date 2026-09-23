@@ -30,7 +30,10 @@ export const ThemeGallery: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const router = useRouter();
-  const { colors, resolved } = useTheme();
+  // Each card in the scheme it would use if picked, which is the light/dark
+  // setting's answer, not the active theme's: a dark-only theme being active
+  // must not paint every other card dark.
+  const { colors, modeScheme } = useTheme();
   const { presets, custom } = useSelector(selectAllThemes);
   const active = useSelector(selectActiveTheme);
 
@@ -55,7 +58,7 @@ export const ThemeGallery: React.FC = () => {
           <ThemeCard
             key={theme.id}
             theme={theme}
-            scheme={schemeFor(theme, resolved)}
+            scheme={schemeFor(theme, modeScheme)}
             selected={theme.id === active.id}
             caption={caption(theme)}
             onPress={() => dispatch(setActiveTheme(theme.id))}

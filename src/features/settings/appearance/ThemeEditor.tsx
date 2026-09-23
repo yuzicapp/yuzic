@@ -123,8 +123,7 @@ const ThemeEditor: React.FC = () => {
         onSelect={id => setScheme(id as SchemeChoice)}
       />
 
-      <SettingsCardHeader subtle title={t('settings.appearance.editor.accent')} />
-      <SettingsCard>
+      <SettingsCard style={styles.accentCard}>
         <ColorRow
           label={t('settings.appearance.editor.accent')}
           value={theme.accent}
@@ -270,6 +269,9 @@ const styles = StyleSheet.create({
     height: 240,
     width: '100%',
     gap: spacing.md,
+  },
+  accentCard: {
+    marginTop: spacing.lg,
   },
   deleteCard: {
     marginTop: spacing.xl,
