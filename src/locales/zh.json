@@ -196,7 +196,11 @@
         "blur": "模糊",
         "dim": "遮罩",
         "pickFailed": "无法使用这张照片。"
-      }
+      },
+      "floatingDock": "悬浮底栏",
+      "floatingDockSubtext": "让标签栏脱离屏幕边缘悬浮显示。",
+      "tabLabels": "标签名称",
+      "tabLabelsSubtext": "在每个标签图标下显示名称。"
     },
     "library": {
       "title": "媒体库",

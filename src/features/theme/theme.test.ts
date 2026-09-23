@@ -34,7 +34,7 @@ describe('the default theme', () => {
   it('keeps the shape, surface and dock a fresh install always had', () => {
     expect(DEFAULT_THEME.shape).toEqual({ radius: 'default', density: 'default' });
     expect(DEFAULT_THEME.surface).toMatchObject({ coverTint: true, background: { kind: 'none' } });
-    expect(DEFAULT_THEME.components).toEqual({ dock: 'solid' });
+    expect(DEFAULT_THEME.components).toEqual({ dock: 'solid', dockShape: 'edge', tabLabels: false });
   });
 });
 

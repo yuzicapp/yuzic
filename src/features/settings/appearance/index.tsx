@@ -13,7 +13,7 @@ import { LanguageSelector } from './components/LanguageSelector';
 import { GridColumns } from './components/GridColumns';
 import { RadiusPresetSelector } from './components/RadiusPresetSelector';
 import { ListDensitySelector } from './components/ListDensitySelector';
-import { selectShowQualityBadge, selectShowSourceHeaders, selectHapticsEnabled, selectTranslucentDock, selectRespectReducedMotion, selectCoverAccentEnabled, setShowQualityBadge, setShowSourceHeaders, setHapticsEnabled, setTranslucentDock, setRespectReducedMotion, setCoverAccentEnabled } from '@/features/settings/appearance/state';
+import { selectShowQualityBadge, selectShowSourceHeaders, selectHapticsEnabled, selectTranslucentDock, selectRespectReducedMotion, selectCoverAccentEnabled, setShowQualityBadge, setShowSourceHeaders, setHapticsEnabled, setTranslucentDock, setRespectReducedMotion, setCoverAccentEnabled, selectActiveTheme, editTheme } from '@/features/settings/appearance/state';
 import { selectShowPlaybackSpeed, selectShowJumpButtons, selectShowVolumeSlider, selectShowRating, setShowPlaybackSpeed, setShowJumpButtons, setShowVolumeSlider, setShowRating } from '@/features/settings/playback/state';
 import { useRatingsAvailable } from '@/features/ratings/useRatingsAvailable';
 
@@ -26,6 +26,7 @@ const AppearanceSettings: React.FC = () => {
   const translucentDock = useSelector(selectTranslucentDock);
   const respectReducedMotion = useSelector(selectRespectReducedMotion);
   const coverAccentEnabled = useSelector(selectCoverAccentEnabled);
+  const { dockShape, tabLabels } = useSelector(selectActiveTheme).components;
   const showPlaybackSpeed = useSelector(selectShowPlaybackSpeed);
   const showJumpButtons = useSelector(selectShowJumpButtons);
   const showVolumeSlider = useSelector(selectShowVolumeSlider);
@@ -38,6 +39,12 @@ const AppearanceSettings: React.FC = () => {
   const toggleReducedMotion = useCallback((v: boolean) => { dispatch(setRespectReducedMotion(v)); }, [dispatch]);
   const toggleCoverAccent = useCallback((v: boolean) => { dispatch(setCoverAccentEnabled(v)); }, [dispatch]);
   const toggleTranslucentDock = useCallback((v: boolean) => { dispatch(setTranslucentDock(v)); }, [dispatch]);
+  const toggleFloatingDock = useCallback((v: boolean) => {
+    dispatch(editTheme({ components: { dockShape: v ? 'floating' : 'edge' } }));
+  }, [dispatch]);
+  const toggleTabLabels = useCallback((v: boolean) => {
+    dispatch(editTheme({ components: { tabLabels: v } }));
+  }, [dispatch]);
 
   const togglePlaybackSpeed = useCallback((v: boolean) => { dispatch(setShowPlaybackSpeed(v)); }, [dispatch]);
   const toggleJumpButtons = useCallback((v: boolean) => { dispatch(setShowJumpButtons(v)); }, [dispatch]);
@@ -87,6 +94,18 @@ const AppearanceSettings: React.FC = () => {
       onValueChange: toggleTranslucentDock,
     },
     {
+      label: t('settings.appearance.floatingDock'),
+      subtext: t('settings.appearance.floatingDockSubtext'),
+      value: dockShape === 'floating',
+      onValueChange: toggleFloatingDock,
+    },
+    {
+      label: t('settings.appearance.tabLabels'),
+      subtext: t('settings.appearance.tabLabelsSubtext'),
+      value: tabLabels,
+      onValueChange: toggleTabLabels,
+    },
+    {
       label: t('settings.appearance.haptics'),
       subtext: t('settings.appearance.hapticsSubtext'),
       value: hapticsEnabled,
@@ -98,7 +117,7 @@ const AppearanceSettings: React.FC = () => {
       value: respectReducedMotion,
       onValueChange: toggleReducedMotion,
     },
-  ], [t, translucentDock, hapticsEnabled, respectReducedMotion, toggleTranslucentDock, toggleHaptics, toggleReducedMotion]);
+  ], [t, translucentDock, dockShape, tabLabels, hapticsEnabled, respectReducedMotion, toggleTranslucentDock, toggleFloatingDock, toggleTabLabels, toggleHaptics, toggleReducedMotion]);
 
   const qualityBadgeItems = useMemo(() => [{
     label: t('settings.appearance.showQualityBadge'),

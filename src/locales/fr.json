@@ -196,7 +196,11 @@
         "blur": "Flou",
         "dim": "Assombrissement",
         "pickFailed": "Impossible d'utiliser cette photo."
-      }
+      },
+      "floatingDock": "Barre flottante",
+      "floatingDockSubtext": "Détacher la barre d'onglets des bords de l'écran.",
+      "tabLabels": "Noms des onglets",
+      "tabLabelsSubtext": "Afficher le nom de chaque onglet sous son icône."
     },
     "library": {
       "title": "Bibliothèque",

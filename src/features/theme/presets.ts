@@ -65,7 +65,7 @@ export const DEFAULT_THEME: Theme = {
   accent: themeColorPreset[0],
   shape: { radius: 'default', density: 'default' },
   surface: { coverTint: true, background: { kind: 'none' }, backgroundBlur: 24, backgroundDim: 0.6 },
-  components: { dock: 'solid' },
+  components: { dock: 'solid', dockShape: 'edge', tabLabels: false },
 };
 
 /** The colours a person picks. Everything else in a palette is worked out from them. */

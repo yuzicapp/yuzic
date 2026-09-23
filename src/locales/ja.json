@@ -196,7 +196,11 @@
         "blur": "ぼかし",
         "dim": "暗さ",
         "pickFailed": "この写真は使用できませんでした。"
-      }
+      },
+      "floatingDock": "フローティングドック",
+      "floatingDockSubtext": "タブバーを画面の端から浮かせて表示します。",
+      "tabLabels": "タブのラベル",
+      "tabLabelsSubtext": "各タブのアイコンの下に名前を表示します。"
     },
     "library": {
       "title": "ライブラリ",

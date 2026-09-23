@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
 import AppearanceSettings from './';
-import settingsAppearanceReducer, { selectTranslucentDock } from './state';
+import settingsAppearanceReducer, { selectActiveTheme, selectTranslucentDock } from './state';
 import settingsPlaybackReducer from '@/features/settings/playback/state';
 
 jest.mock('expo-router', () => ({
@@ -67,6 +67,8 @@ const SWITCH_ORDER = [
   'settings.appearance.showSourceHeaders',
   'settings.appearance.coverAccent',
   'settings.appearance.translucentDock',
+  'settings.appearance.floatingDock',
+  'settings.appearance.tabLabels',
   'settings.appearance.haptics',
   'settings.appearance.respectReducedMotion',
 ] as const;
@@ -125,5 +127,15 @@ describe('AppearanceSettings', () => {
     });
     // The dock is part of the theme now, so the switch edits the active theme.
     expect(selectTranslucentDock(store.getState())).toBe(true);
+  });
+
+  it('writes the dock shape and tab labels to the theme', async () => {
+    const store = makeStore();
+    const view = await renderScreen(store);
+
+    await fireEvent(switchFor(view, 'settings.appearance.floatingDock'), 'valueChange', true);
+    await fireEvent(switchFor(view, 'settings.appearance.tabLabels'), 'valueChange', true);
+
+    expect(selectActiveTheme(store.getState()).components).toMatchObject({ dockShape: 'floating', tabLabels: true });
   });
 });

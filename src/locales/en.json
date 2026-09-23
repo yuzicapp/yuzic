@@ -196,7 +196,11 @@
         "blur": "Blur",
         "dim": "Dim",
         "pickFailed": "Couldn't use that photo."
-      }
+      },
+      "floatingDock": "Floating dock",
+      "floatingDockSubtext": "Lift the tab bar off the screen's edges.",
+      "tabLabels": "Tab labels",
+      "tabLabelsSubtext": "Name each tab under its icon."
     },
     "library": {
       "title": "Library",

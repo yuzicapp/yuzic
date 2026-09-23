@@ -47,6 +47,10 @@ export interface Theme {
   };
   components: {
     dock: 'solid' | 'translucent';
+    /** Edge to edge along the bottom, or a rounded panel floating above it. */
+    dockShape: 'edge' | 'floating';
+    /** Names under the tab icons, for anyone who would rather read than recognise. */
+    tabLabels: boolean;
   };
 }
 
@@ -74,6 +78,7 @@ export function themeFromSettings(settings: ThemeSettingsV0, base: Theme): Theme
     },
     surface: { ...base.surface, coverTint: settings.coverAccentEnabled ?? base.surface.coverTint },
     components: {
+      ...base.components,
       dock: settings.translucentDock === undefined
         ? base.components.dock
         : settings.translucentDock ? 'translucent' : 'solid',
