@@ -187,11 +187,10 @@
         "reset": "色をリセット"
       },
       "background": {
-        "title": "背景",
         "subtitle": "アプリの背景に写真や再生中の曲を表示します。",
         "none": "なし",
         "image": "写真",
-        "cover": "再生中",
+        "cover": "ジャケット",
         "changePhoto": "別の写真を選ぶ",
         "blur": "ぼかし",
         "dim": "暗さ",

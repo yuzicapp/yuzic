@@ -67,8 +67,8 @@ export const BackgroundSelector: React.FC = () => {
   return (
     <>
       <SettingsIconSelectCard
-        title={t('settings.appearance.background.title')}
-        subtitle={t('settings.appearance.background.subtitle')}
+        // The page is already called Background; the card says what it does.
+        title={t('settings.appearance.background.subtitle')}
         items={OPTIONS.map(option => ({
           id: option.id,
           icon: option.icon,
@@ -76,6 +76,7 @@ export const BackgroundSelector: React.FC = () => {
         }))}
         selected={background.kind}
         onSelect={onSelect}
+        showLabels
       />
       {background.kind !== 'none' && (
         <SettingsCard>

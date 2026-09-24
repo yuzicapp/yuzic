@@ -44,7 +44,7 @@ describe('BackgroundSelector', () => {
     const { store, view } = setup(<BackgroundSelector />);
     const screen = await view;
 
-    await act(async () => { fireEvent.press(screen.getByLabelText('settings.appearance.background.image')); });
+    await act(async () => { fireEvent.press(screen.getByText('settings.appearance.background.image')); });
 
     expect(background(store)).toEqual({ kind: 'image', uri: 'file:///docs/theme/background-1.jpg' });
     expect(screen.getByText('settings.appearance.background.changePhoto')).toBeTruthy();
@@ -55,7 +55,7 @@ describe('BackgroundSelector', () => {
     const { store, view } = setup(<BackgroundSelector />);
     const screen = await view;
 
-    await act(async () => { fireEvent.press(screen.getByLabelText('settings.appearance.background.image')); });
+    await act(async () => { fireEvent.press(screen.getByText('settings.appearance.background.image')); });
 
     expect(background(store)).toEqual({ kind: 'none' });
   });
@@ -65,7 +65,7 @@ describe('BackgroundSelector', () => {
     store.dispatch(editTheme({ surface: { background: { kind: 'image', uri: 'file:///docs/theme/background-1.jpg' } } }));
     const screen = await view;
 
-    await act(async () => { fireEvent.press(screen.getByLabelText('settings.appearance.background.cover')); });
+    await act(async () => { fireEvent.press(screen.getByText('settings.appearance.background.cover')); });
 
     expect(background(store)).toEqual({ kind: 'cover' });
     expect(removeBackgroundImage).toHaveBeenCalledWith('file:///docs/theme/background-1.jpg');

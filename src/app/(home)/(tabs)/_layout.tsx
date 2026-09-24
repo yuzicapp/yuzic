@@ -64,6 +64,7 @@ function TabButton({
   inactiveColor: string;
   children: (color: string, strokeWidth: number) => React.ReactNode;
 }) {
+  const labelColor = useTheme().colors.secondary;
   return (
     <Touchable
       // With its name drawn under the icon the tab speaks for itself; a label
@@ -82,7 +83,10 @@ function TabButton({
       )}
       {label ? (
         <Text
-          style={[styles.tabLabel, { color: active ? activeColor : inactiveColor }]}
+          // Words need more contrast than a glyph does, most of all over a
+          // translucent dock on a pale cover, so an inactive name is drawn in
+          // the secondary text colour rather than the icon's subtext grey.
+          style={[styles.tabLabel, { color: active ? activeColor : labelColor }]}
           numberOfLines={1}
           maxFontSizeMultiplier={fontScaleCap.control}
         >

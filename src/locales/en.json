@@ -187,11 +187,10 @@
         "reset": "Reset colours"
       },
       "background": {
-        "title": "Background",
         "subtitle": "Draw the app over a photo or what's playing.",
         "none": "Plain",
         "image": "Photo",
-        "cover": "Now playing",
+        "cover": "Cover",
         "changePhoto": "Choose another photo",
         "blur": "Blur",
         "dim": "Dim",

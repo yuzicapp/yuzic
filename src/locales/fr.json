@@ -187,11 +187,10 @@
         "reset": "Réinitialiser les couleurs"
       },
       "background": {
-        "title": "Arrière-plan",
         "subtitle": "Afficher l'application sur une photo ou sur la lecture en cours.",
         "none": "Uni",
         "image": "Photo",
-        "cover": "Lecture en cours",
+        "cover": "Pochette",
         "changePhoto": "Choisir une autre photo",
         "blur": "Flou",
         "dim": "Assombrissement",

@@ -187,11 +187,10 @@
         "reset": "重置颜色"
       },
       "background": {
-        "title": "背景",
         "subtitle": "在照片或正在播放的内容上显示应用。",
         "none": "纯色",
         "image": "照片",
-        "cover": "正在播放",
+        "cover": "封面",
         "changePhoto": "选择其他照片",
         "blur": "模糊",
         "dim": "遮罩",

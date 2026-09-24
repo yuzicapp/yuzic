@@ -22,9 +22,14 @@ type Props = {
   items: IconSelectItem[];
   selected: string;
   onSelect: (id: string) => void;
+  /**
+   * Draw each option's name beside its glyph. For a short set whose glyphs do
+   * not say what they are on their own; a row of six has no room for words.
+   */
+  showLabels?: boolean;
 };
 
-const SettingsIconSelectCard: React.FC<Props> = ({ title, subtitle, items, selected, onSelect }) => {
+const SettingsIconSelectCard: React.FC<Props> = ({ title, subtitle, items, selected, onSelect, showLabels }) => {
   const { colors } = useTheme();
   const rad = useRadius();
 
@@ -42,7 +47,8 @@ const SettingsIconSelectCard: React.FC<Props> = ({ title, subtitle, items, selec
               <Touchable
                 key={item.id}
                 accessibilityRole="radio"
-                accessibilityLabel={item.label}
+                // A drawn name is read as it is; only a bare glyph needs a label.
+                accessibilityLabel={showLabels ? undefined : item.label}
                 accessibilityState={{ selected: active, checked: active }}
                 onPress={() => onSelect(item.id)}
                 style={[
@@ -57,6 +63,14 @@ const SettingsIconSelectCard: React.FC<Props> = ({ title, subtitle, items, selec
                 {React.cloneElement(item.icon, {
                   color: active ? onDark.text : colors.secondary,
                 })}
+                {showLabels && (
+                  <Text
+                    style={[styles.optionLabel, { color: active ? onDark.text : colors.secondary }]}
+                    numberOfLines={1}
+                  >
+                    {item.label}
+                  </Text>
+                )}
               </Touchable>
             );
           })}
@@ -88,9 +102,17 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    height: 40,
+    minHeight: 40,
     borderWidth: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.tight,
+    paddingHorizontal: spacing.sm,
+  },
+  optionLabel: {
+    ...typography.caption,
+    fontWeight: '600',
+    flexShrink: 1,
   },
 });

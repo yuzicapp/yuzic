@@ -32,6 +32,7 @@ export const PlayerLayoutSelector: React.FC = () => {
       }))}
       selected={selected}
       onSelect={id => dispatch(editTheme({ components: { playerLayout: id as Layout } }))}
+      showLabels
     />
   );
 };
