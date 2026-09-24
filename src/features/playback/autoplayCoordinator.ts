@@ -165,6 +165,7 @@ const keyOfResource = (resource: PlayableResource): string => entityKey(resource
     const request = buildFillRequest(deps.queue(), deps.currentIndex());
     let fetched: PlayableResource[] = [];
     let lastError: unknown = null;
+    let answered = false;
     for (const provider of deps.providers().filter(p => p.isAvailable())) {
       try {
         fetched = await fetchExtension(
@@ -173,6 +174,7 @@ const keyOfResource = (resource: PlayableResource): string => entityKey(resource
           deps.queue().map(resource => resource.song.localId),
           request.count
         );
+        answered = true;
       } catch (error) {
         lastError = error;
         deps.logWarning(`Queue fill from ${provider.id} failed`, error);
@@ -180,9 +182,11 @@ const keyOfResource = (resource: PlayableResource): string => entityKey(resource
       }
       if (fetched.length) break;
     }
-    // Every tier failing is still worth the caller's warning; every tier
-    // answering with nothing is just an empty result.
-    if (!fetched.length && lastError) throw lastError;
+    // Every tier failing is worth the caller's warning. A tier answering with
+    // nothing is not: the end of what the library can suggest is the ordinary
+    // end of a queue, and rethrowing an earlier tier's error over it made that
+    // log "Autoplay fill failed" on a night that worked exactly as designed.
+    if (!fetched.length && lastError && !answered) throw lastError;
     // The track the queue is continuing from, which is what a habit is
     // measured against — "you play B after A" needs to know what A was.
     const after = deps.queue()[deps.currentIndex()] ?? null;
@@ -198,8 +202,23 @@ const keyOfResource = (resource: PlayableResource): string => entityKey(resource
       if (filling) return;
       filling = true;
       try {
+        // What this fill is a continuation *of*. Asking the tiers takes
+        // several round trips, and a listener can start something else in
+        // that time — tap an album, switch server, clear the queue. The
+        // tracks coming back were chosen from the queue as it was, so
+        // appending them to whatever is playing now drops a stranger's
+        // records onto the end of it. Advancing a track is fine and common,
+        // which is why this asks whether the anchor is still *in* the queue
+        // rather than still current.
+        const anchor = deps.queue()[deps.currentIndex()] ?? null;
+
         const playable = await nextTracks();
         if (!playable.length) return;
+
+        if (anchor && !deps.queue().some(r => r.song.localId === anchor.song.localId)) {
+          deps.logWarning('Autoplay fill discarded: the queue it was filling is gone', null);
+          return;
+        }
 
         const insertAt = deps.queue().length;
         deps.setQueue([...deps.queue(), ...playable]);
