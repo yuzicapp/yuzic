@@ -13,6 +13,11 @@ jobs:
   build-ios:
     name: Build iOS
     runs-on: macos-26
+    outputs:
+      # The number App Store Connect actually gave this build, so the release
+      # can state it rather than leaving it in a log nobody opens. AGENTS:
+      # "a succeeded job is not a shipped release either".
+      build_number: ${{ steps.fastlane.outputs.build_number }}
 
     steps:
       - name: Checkout
@@ -93,7 +98,12 @@ jobs:
           APPSTORE_API_KEY_BASE64: ${{ secrets.APPSTORE_API_KEY_BASE64 }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           IOS_PROFILE_NAME: ${{ secrets.IOS_PROFILE_NAME }}
-        run: bundle exec fastlane ios ci_ios
+        id: fastlane
+        run: |
+          set -o pipefail
+          bundle exec fastlane ios ci_ios 2>&1 | tee /tmp/fastlane-ios.log
+          number=$(grep -o 'Using iOS build number: [0-9]*' /tmp/fastlane-ios.log | tail -1 | grep -o '[0-9]*$' || true)
+          echo "build_number=${number:-unknown}" >> "$GITHUB_OUTPUT"
 
       - name: Upload build log on failure
         if: failure()

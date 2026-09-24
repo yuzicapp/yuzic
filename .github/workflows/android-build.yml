@@ -12,6 +12,9 @@ jobs:
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
+    outputs:
+      # The code Play actually gave this build; see the iOS workflow.
+      version_code: ${{ steps.fastlane.outputs.version_code }}
 
     steps:
       - name: Checkout
@@ -73,7 +76,12 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
-        run: bundle exec fastlane android ci_android
+        id: fastlane
+        run: |
+          set -o pipefail
+          bundle exec fastlane android ci_android 2>&1 | tee /tmp/fastlane-android.log
+          code=$(grep -o 'Using Android version code: [0-9]*' /tmp/fastlane-android.log | tail -1 | grep -o '[0-9]*$' || true)
+          echo "version_code=${code:-unknown}" >> "$GITHUB_OUTPUT"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
