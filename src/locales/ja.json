@@ -176,7 +176,16 @@
       "homeSourcesListenbrainz": "ListenBrainz",
       "homeSourcesListenbrainzSubtext": "ListenBrainz の類似アーティストの棚を表示します。",
       "homeSourcesDeezer": "Deezer",
-      "homeSourcesDeezerSubtext": "Deezerのチャート・人気曲・類似アーティスト。"
+      "homeSourcesDeezerSubtext": "Deezerのチャート・人気曲・類似アーティスト。",
+      "palette": {
+        "light": "ライトの色",
+        "dark": "ダークの色",
+        "background": "背景",
+        "surface": "カード",
+        "text": "テキスト",
+        "readableHint": "文字が読みやすくなるよう、必要に応じて自動で調整されます。",
+        "reset": "色をリセット"
+      }
     },
     "library": {
       "title": "ライブラリ",
@@ -1610,7 +1619,8 @@
       "clearProviderDownloads": "{{provider}}のダウンロードをすべて削除",
       "removeDownload": "ダウンロード{{title}}を削除",
       "reorderSource": "{{name}}を並べ替え",
-      "sourceDetails": "{{name}}について"
+      "sourceDetails": "{{name}}について",
+      "editColor": "{{name}}、{{value}}。色を編集"
     },
     "onboarding": {
       "serverOptions": "{{url}}のオプション"

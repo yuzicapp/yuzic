@@ -1,10 +1,8 @@
 import React, { forwardRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { useSelector } from 'react-redux';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 
-import { selectThemeColor } from '@/features/settings/appearance/state';
 import { useTheme } from '@/features/theme/useTheme';
 import { useRadius } from '@/features/theme/useRadius';
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
@@ -42,8 +40,8 @@ type Props = {
  */
 const SingleSelectBottomSheet = forwardRef<BottomSheetModal, Props>(
   ({ selected, options, title, onSelect, testID }, ref) => {
-    const themeColor = useSelector(selectThemeColor);
     const { colors } = useTheme();
+    const themeColor = colors.themeColor;
     const rad = useRadius();
     const sheetBg = useOptionSheetBackground();
     const sheetContent = useOptionSheetContentStyle();

@@ -325,7 +325,17 @@ because both halves of each pair look reasonable in isolation.
 - **Appearance settings**: the scales a user can move — corner radius
   (`useRadius`) and list density (`useListDensity`) — are read through a hook,
   never imported statically, or the surface silently opts out of the setting
-  and the preset reads as half-applied. A round control is the trap here:
+  and the preset reads as half-applied. Those hooks, `useTheme` and cover
+  tinting all read one object, the theme (`features/theme/theme.ts`, read
+  through `useActiveTheme`): palettes for both schemes, accent, shape, surface
+  and component choices. There is one theme, stored in `settingsAppearance`
+  and edited in place by every appearance setting; there are no presets to
+  pick between. Its colours come from three picks per scheme through
+  `derivePalette` (`features/theme/presets.ts`, the only file allowed to spell
+  a theme colour out), which also pushes text until it reads. Nothing reads
+  the settings that make up the theme except `useActiveTheme` and the
+  appearance editors; `theme.test.ts` fails on a component that does.
+  A round control is the trap here:
   `radius.pill` is for the things whose roundness is what they *are* (an
   avatar, a status dot, a radio fill, a progress track, an artist's photo) and
   stays round at every preset, while a **control** merely drawn as a pill or a

@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/features/theme/useTheme';
 import { selectEqualizerGains, setEqualizerGains } from '@/features/settings/playback/state';
-import { selectThemeColor } from '@/features/settings/appearance/state';
 import { useRadius } from '@/features/theme/useRadius';
 import SettingsCard from '../../components/SettingsCard';
 import { withAlpha } from '@/features/theme/coverAccent';
@@ -30,7 +29,7 @@ const Equalizer: React.FC = () => {
   const { colors } = useTheme();
   const rad = useRadius();
   const gains = useSelector(selectEqualizerGains);
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = colors.themeColor;
 
   const activePreset = useMemo(() => matchPreset(presetToBands(gains)), [gains]);
   const isFlat = useMemo(() => gains.every(gain => gain === 0), [gains]);

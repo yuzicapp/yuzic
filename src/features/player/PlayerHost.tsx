@@ -7,7 +7,6 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import ImageColors from 'react-native-image-colors';
-import { useSelector } from 'react-redux';
 
 import { ACCENT_CACHE_MAX, createAccentCache, pickAccent, toWashAccent } from '@/features/theme/coverAccent';
 import {
@@ -18,7 +17,7 @@ import {
 import { MediaImage } from '@/components/MediaImage';
 import { buildCover } from '@/providers/registry/covers';
 import { prefetchCovers } from '@/features/artwork/imageCache';
-import { selectCoverAccentEnabled } from '@/features/settings/appearance/state';
+import { useActiveTheme } from '@/features/theme/useActiveTheme';
 import PlayingScreen from '@/features/player/PlayingScreen';
 import PlayingBackground from '@/features/player/components/PlayingBackground';
 import { useRadius } from '@/features/theme/useRadius';
@@ -64,7 +63,7 @@ export default function PlayerHost() {
   const { currentSong, currentIndex, repeatMode } = usePlayingState();
   const { getQueue } = usePlayingActions();
   const queueVersion = usePlayingQueueVersion();
-  const coverAccentEnabled = useSelector(selectCoverAccentEnabled);
+  const coverAccentEnabled = useActiveTheme().surface.coverTint;
   const rad = useRadius();
 
   const [currentGradient, setCurrentGradient] = useState<[string, string]>([onDark.background, onDark.background]);

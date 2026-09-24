@@ -20,7 +20,6 @@ import {
   useOptionSheetBackground,
   useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives';
-import { selectThemeColor } from '@/features/settings/appearance/state';
 import { useDlnaDiscovery, type DiscoveredDevice } from '@/features/player/useDlnaDiscovery';
 import { usePlaybackSink } from '@/features/player/PlaybackSinkContext';
 import { useJukeboxAvailability } from '@/features/player/useJukeboxAvailability';
@@ -41,7 +40,7 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const rad = useRadius();
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = colors.themeColor;
   const sheetBg = useOptionSheetBackground();
   const sheetContent = useOptionSheetContentStyle();
   const { devices, isScanning, isProbing, scan, probeManual } = useDlnaDiscovery();

@@ -1,11 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Radio } from 'lucide-react-native';
-import { useSelector } from 'react-redux';
 
 import { onDark } from '@/constants/design';
-import { selectThemeColor } from '@/features/settings/appearance/state';
 import { useRadius } from '@/features/theme/useRadius';
+import { useTheme } from '@/features/theme/useTheme';
 
 /**
  * The artwork a live stream doesn't have.
@@ -21,7 +20,7 @@ import { useRadius } from '@/features/theme/useRadius';
  * bar and at full width on the player.
  */
 const ThemedRadioCover = ({ size, rounded }: { size?: number; rounded?: number }) => {
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = useTheme().colors.themeColor;
   const rad = useRadius();
 
   const isGrid = size === undefined;

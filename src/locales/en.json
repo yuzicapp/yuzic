@@ -176,7 +176,16 @@
       "homeSourcesListenbrainz": "ListenBrainz",
       "homeSourcesListenbrainzSubtext": "Show ListenBrainz similar-artist shelves.",
       "homeSourcesDeezer": "Deezer",
-      "homeSourcesDeezerSubtext": "Deezer charts, top tracks, and similar artists."
+      "homeSourcesDeezerSubtext": "Deezer charts, top tracks, and similar artists.",
+      "palette": {
+        "light": "Light colours",
+        "dark": "Dark colours",
+        "background": "Background",
+        "surface": "Cards",
+        "text": "Text",
+        "readableHint": "Text is adjusted if needed so it stays readable on your colours.",
+        "reset": "Reset colours"
+      }
     },
     "library": {
       "title": "Library",
@@ -1606,7 +1615,8 @@
       "clearProviderDownloads": "Delete all {{provider}} downloads",
       "removeDownload": "Remove download {{title}}",
       "reorderSource": "Reorder {{name}}",
-      "sourceDetails": "About {{name}}"
+      "sourceDetails": "About {{name}}",
+      "editColor": "{{name}}, {{value}}. Edit colour"
     },
     "onboarding": {
       "serverOptions": "Options for {{url}}"

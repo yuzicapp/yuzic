@@ -16,9 +16,7 @@ import {
   BottomSheetFlatList,
 } from '@gorhom/bottom-sheet';
 import { X, Search, Plus, Check } from 'lucide-react-native';
-import { useSelector } from 'react-redux';
 import { notify } from '@/components/toast';
-import { selectThemeColor } from '@/features/settings/appearance/state';
 import type { Playlist } from '@/domain/entities/Playlist';
 import type { Song } from '@/domain/entities/Song';
 import { MediaImage } from './MediaImage';
@@ -49,7 +47,7 @@ const PlaylistList = forwardRef<BottomSheetModal, PlaylistListProps>(
     const { colors } = useTheme();
     const rad = useRadius();
     const isOffline = useIsOffline();
-    const themeColor = useSelector(selectThemeColor);
+    const themeColor = colors.themeColor;
     const insets = useSafeAreaInsets();
 
     const { playlists: allPlaylists } = usePlaylists();

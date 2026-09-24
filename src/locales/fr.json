@@ -176,7 +176,16 @@
       "homeSourcesListenbrainz": "ListenBrainz",
       "homeSourcesListenbrainzSubtext": "Afficher les rayons d'artistes similaires de ListenBrainz.",
       "homeSourcesDeezer": "Deezer",
-      "homeSourcesDeezerSubtext": "Charts Deezer, top titres et artistes similaires."
+      "homeSourcesDeezerSubtext": "Charts Deezer, top titres et artistes similaires.",
+      "palette": {
+        "light": "Couleurs claires",
+        "dark": "Couleurs sombres",
+        "background": "Arrière-plan",
+        "surface": "Cartes",
+        "text": "Texte",
+        "readableHint": "Le texte est ajusté si besoin pour rester lisible sur vos couleurs.",
+        "reset": "Réinitialiser les couleurs"
+      }
     },
     "library": {
       "title": "Bibliothèque",
@@ -1616,7 +1625,8 @@
       "clearProviderDownloads": "Supprimer tous les téléchargements {{provider}}",
       "removeDownload": "Supprimer le téléchargement {{title}}",
       "reorderSource": "Réorganiser {{name}}",
-      "sourceDetails": "À propos de {{name}}"
+      "sourceDetails": "À propos de {{name}}",
+      "editColor": "{{name}}, {{value}}. Modifier la couleur"
     },
     "onboarding": {
       "serverOptions": "Options pour {{url}}"

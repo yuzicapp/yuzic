@@ -1,4 +1,5 @@
 import { fontScaleCap, onDark } from '@/constants/design';
+import { useTheme } from '@/features/theme/useTheme';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useSelector } from 'react-redux';
@@ -6,7 +7,6 @@ import { useSelector } from 'react-redux';
 import { useApi } from '@/providers/registry/useApi';
 import { useAppActive } from '@/features/connectivity/useAppActive';
 import { selectActiveServerId } from '@/state/redux/selectors/serversSelectors';
-import { selectThemeColor } from '@/features/settings/appearance/state';
 /**
  * The signed-in user's profile picture, or their initial in a coloured disc.
  *
@@ -36,7 +36,7 @@ export default function UserAvatar({
   style?: StyleProp<ViewStyle>;
 }) {
   const api = useApi();
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = useTheme().colors.themeColor;
   // Rebuild when the server changes: the URL carries that server's host and
   // credentials, so a stale one would draw the previous account's picture.
   const activeServerId = useSelector(selectActiveServerId);

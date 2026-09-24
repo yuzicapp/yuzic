@@ -1,10 +1,9 @@
 import { iconSize, onDark, onDarkAlpha, spacing, stateLayer, typography, veil } from '@/constants/design';
+import { useTheme } from '@/features/theme/useTheme';
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Gauge } from 'lucide-react-native';
-import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { selectThemeColor } from '@/features/settings/appearance/state';
 import { usePlayingActions, usePlayingState } from '@/features/playback/PlayingContext';
 import { DEFAULT_SPEEDS, MAX_SPEED, MIN_SPEED, speedProfileFor } from '@/features/playback/speedProfile';
 import Touchable from '@/components/Touchable';
@@ -18,7 +17,7 @@ type Props = { contentWidth: number };
 
 export default function PlaybackSpeedCard({ contentWidth }: Props) {
   const { t } = useTranslation();
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = useTheme().colors.themeColor;
   const rad = useRadius();
   const { playbackSpeed, currentSong } = usePlayingState();
   const { setPlaybackSpeed } = usePlayingActions();

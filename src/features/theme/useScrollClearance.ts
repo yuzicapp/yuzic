@@ -1,9 +1,8 @@
 import { useContext } from 'react';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
-import { useSelector } from 'react-redux';
 
 import { spacing } from '@/constants/design';
-import { selectTranslucentDock } from '@/features/settings/appearance/state';
+import { useActiveTheme } from './useActiveTheme';
 
 /**
  * How much room a scrolling list should leave at its bottom.
@@ -29,7 +28,7 @@ export function resolveBottomOverlayHeight(
 }
 
 export function useBottomOverlayHeight(): number {
-  const translucent = useSelector(selectTranslucentDock);
+  const translucent = useActiveTheme().components.dock === 'translucent';
   // Null outside a tab navigator — modals and the onboarding stack render
   // without a dock, so nothing overlays their content.
   const tabBarHeight = useContext(BottomTabBarHeightContext);

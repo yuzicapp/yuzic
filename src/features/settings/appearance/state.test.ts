@@ -1,45 +1,98 @@
-import {
+import reducer, {
+  editTheme,
+  resetPalettes,
+  selectActiveTheme,
   selectCoverAccentEnabled,
   selectListDensity,
   selectRadiusPreset,
+  selectThemeColor,
+  selectTranslucentDock,
+  setCoverAccentEnabled,
+  setRadiusPreset,
+  setThemeColor,
+  setTranslucentDock,
 } from './state'
+import { migrateAppearance } from './themeStore'
+import { DEFAULT_THEME } from '@/features/theme/presets'
 
-/**
- * These selectors used to fall back with `??` because a user
- * upgrading could have a settings blob written before the key existed.
- * Under this slice's own storage namespace there is no such blob — a fresh
- * `initialState` always supplies every key, and redux-persist's default
- * merge fills in anything a persisted payload doesn't have — so the
- * fallback moved into `initialState` and the selectors now read straight
- * through. These pin the values `initialState` supplies and that a chosen
- * value overrides it, which is what the `??` version used to guarantee.
- */
-function stateWith(settingsAppearance: Record<string, unknown>) {
-  return { settingsAppearance } as any
-}
+const fresh = () => reducer(undefined, { type: '@@init' })
+const root = (settingsAppearance: ReturnType<typeof fresh>) => ({ settingsAppearance })
 
-describe('appearance selectors', () => {
-  it('reads the shipped default for each', () => {
-    expect(selectRadiusPreset(stateWith({ radiusPreset: 'default' }))).toBe('default')
-    expect(selectListDensity(stateWith({ listDensity: 'default' }))).toBe('default')
-    expect(selectCoverAccentEnabled(stateWith({ coverAccentEnabled: true }))).toBe(true)
+describe('the theme', () => {
+  it('is the default look on a fresh install', () => {
+    expect(selectActiveTheme(root(fresh()))).toEqual(DEFAULT_THEME)
+    expect(selectRadiusPreset(root(fresh()))).toBe('default')
+    expect(selectListDensity(root(fresh()))).toBe('default')
+    expect(selectCoverAccentEnabled(root(fresh()))).toBe(true)
+    expect(selectTranslucentDock(root(fresh()))).toBe(false)
   })
 
-  it('returns what the user chose once they have chosen it', () => {
-    const chosen = stateWith({
-      radiusPreset: 'rounded',
-      listDensity: 'compact',
-      coverAccentEnabled: false,
+  it('is the same object until it changes, so nothing redraws for nothing', () => {
+    const state = fresh()
+    expect(selectActiveTheme(root(state))).toBe(selectActiveTheme(root({ ...state })))
+  })
+
+  it('takes every setter as an edit of the one theme', () => {
+    let state = reducer(fresh(), setThemeColor('#123456'))
+    state = reducer(state, setRadiusPreset('sharp'))
+    state = reducer(state, setCoverAccentEnabled(false))
+    state = reducer(state, setTranslucentDock(true))
+
+    expect(selectThemeColor(root(state))).toBe('#123456')
+    expect(selectRadiusPreset(root(state))).toBe('sharp')
+    expect(selectCoverAccentEnabled(root(state))).toBe(false)
+    expect(selectTranslucentDock(root(state))).toBe(true)
+  })
+
+  it('merges a palette edit into one scheme and leaves the rest alone', () => {
+    const state = reducer(fresh(), editTheme({ palettes: { dark: { background: '#101010' } } }))
+    const theme = selectActiveTheme(root(state))
+
+    expect(theme.palettes.dark.background).toBe('#101010')
+    expect(theme.palettes.dark.text).toBe(DEFAULT_THEME.palettes.dark.text)
+    expect(theme.palettes.light).toEqual(DEFAULT_THEME.palettes.light)
+  })
+
+  it('resets the colours without touching the accent', () => {
+    let state = reducer(fresh(), editTheme({ accent: '#123456', palettes: { dark: { background: '#101010' } } }))
+    state = reducer(state, resetPalettes())
+
+    expect(selectActiveTheme(root(state)).palettes).toEqual(DEFAULT_THEME.palettes)
+    expect(selectThemeColor(root(state))).toBe('#123456')
+  })
+})
+
+describe('upgrading from the old appearance settings', () => {
+  it('keeps every choice someone made, over the default look', () => {
+    const migrated = migrateAppearance({
+      themeMode: 'dark', themeColor: '#0be881', radiusPreset: 'rounded', listDensity: 'compact',
+      coverAccentEnabled: false, translucentDock: true, hapticsEnabled: false,
     })
-    expect(selectRadiusPreset(chosen)).toBe('rounded')
-    expect(selectListDensity(chosen)).toBe('compact')
-    expect(selectCoverAccentEnabled(chosen)).toBe(false)
+
+    expect(migrated.theme).toMatchObject({
+      accent: '#0be881',
+      shape: { radius: 'rounded', density: 'compact' },
+      surface: { coverTint: false },
+      components: { dock: 'translucent' },
+    })
+    expect(migrated.theme.palettes).toEqual(DEFAULT_THEME.palettes)
+    expect(migrated).toMatchObject({ themeMode: 'dark', hapticsEnabled: false })
+    expect(migrated).not.toHaveProperty('themeColor')
   })
 
-  it('keeps a stored `false` off rather than defaulting it back on', () => {
-    // `??` and `||` differ exactly here, and the toggle that will not stay
-    // off is the bug this guards — coverAccentEnabled reads straight
-    // through now, so this is really pinning that nothing coerces `false`.
-    expect(selectCoverAccentEnabled(stateWith({ coverAccentEnabled: false }))).toBe(false)
+  it('carries the active theme across from a build that stored several', () => {
+    const migrated = migrateAppearance({
+      activeThemeId: 'custom-1',
+      customThemes: [{ ...DEFAULT_THEME, id: 'custom-1', accent: '#abcdef' }],
+    })
+
+    expect(migrated.theme.accent).toBe('#abcdef')
+    expect(migrated).not.toHaveProperty('customThemes')
+    expect(migrated).not.toHaveProperty('activeThemeId')
+  })
+
+  it('leaves an already-upgraded blob alone', () => {
+    const current = fresh()
+    expect(migrateAppearance(current)).toBe(current)
   })
 })

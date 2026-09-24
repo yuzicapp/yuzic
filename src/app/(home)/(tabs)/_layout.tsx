@@ -3,7 +3,6 @@ import { Tabs } from 'expo-router';
 import { StyleSheet, View, Platform, type LayoutChangeEvent } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSelector } from 'react-redux';
 import { Home, Library, Search } from 'lucide-react-native';
 import { StackActions } from '@react-navigation/native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -14,7 +13,7 @@ import PlayingBar from '@/features/player/playingBar/PlayingBar';
 import Touchable from '@/components/Touchable';
 import { setToastClearance } from '@/components/toast/clearance';
 import { useTheme } from '@/features/theme/useTheme';
-import { selectThemeColor, selectTranslucentDock } from '@/features/settings/appearance/state';
+import { useActiveTheme } from '@/features/theme/useActiveTheme';
 import { contentWidth, iconSize, spacing } from '@/constants/design';
 
 /**
@@ -82,8 +81,8 @@ function TabButton({
 function TabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const { colors, isDarkMode } = useTheme();
-  const themeColor = useSelector(selectThemeColor);
-  const translucent = useSelector(selectTranslucentDock);
+  const themeColor = colors.themeColor;
+  const translucent = useActiveTheme().components.dock === 'translucent';
   const { t } = useTranslation();
 
   // react-navigation only measures the tab bar it renders itself. A custom one

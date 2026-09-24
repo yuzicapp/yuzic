@@ -1,4 +1,5 @@
 import { onDark, shadow, spacing, typography } from '@/constants/design';
+import { useTheme } from '@/features/theme/useTheme';
 import React, { useState } from 'react';
 import {
     View,
@@ -13,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 import { setHasSeenGetStarted, selectHasSeenGetStarted } from '@/features/settings/onboarding/state';
-import { selectThemeColor } from '@/features/settings/appearance/state';
 import { useTranslation } from 'react-i18next';
 import { useRadius } from '@/features/theme/useRadius';
 import { useWindowLayout } from '@/features/layout/useWindowLayout';
@@ -35,7 +35,7 @@ const WELCOME_ICON_HEIGHT_SHARE = 0.22;
 export default function Home() {
     const { t } = useTranslation();
     const router = useRouter();
-    const themeColor = useSelector(selectThemeColor);
+    const themeColor = useTheme().colors.themeColor;
     const dispatch = useDispatch();
     const rad = useRadius();
     const [isPressed, setIsPressed] = useState(false);

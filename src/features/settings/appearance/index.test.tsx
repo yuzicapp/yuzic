@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
 import AppearanceSettings from './';
-import settingsAppearanceReducer from './state';
+import settingsAppearanceReducer, { selectTranslucentDock } from './state';
 import settingsPlaybackReducer from '@/features/settings/playback/state';
 
 jest.mock('expo-router', () => ({
@@ -116,9 +116,10 @@ describe('AppearanceSettings', () => {
     await fireEvent(switchFor(view, 'settings.appearance.respectReducedMotion'), 'valueChange', false);
 
     expect(store.getState().settingsAppearance).toMatchObject({
-      translucentDock: true,
       hapticsEnabled: false,
       respectReducedMotion: false,
     });
+    // The dock is part of the theme now, so the switch edits the active theme.
+    expect(selectTranslucentDock(store.getState())).toBe(true);
   });
 });

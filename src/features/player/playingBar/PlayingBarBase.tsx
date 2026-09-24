@@ -26,7 +26,7 @@ import {
 } from '@/features/player/PlayerExpansion';
 import { settleFromBar } from '@/features/player/settle';
 import { useTheme } from '@/features/theme/useTheme';
-import { selectPlayingBarAction, selectThemeColor } from '@/features/settings/appearance/state';
+import { selectPlayingBarAction } from '@/features/settings/appearance/state';
 
 import { usePlayingBarAction } from './actions/usePlayingBarAction';
 import ProgressBarStrip from './ProgressBarStrip';
@@ -55,7 +55,7 @@ const BAR_MIN_OPACITY = 0.02;
 export default function PlayingBarBase() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = colors.themeColor;
   const actionMode = useSelector(selectPlayingBarAction);
   const { height } = useWindowDimensions();
 
