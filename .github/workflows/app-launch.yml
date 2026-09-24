@@ -16,8 +16,12 @@ name: App launches (iOS Simulator)
 on:
   push:
     branches: [master, dev]
+    paths-ignore: ['**/*.md', 'docs/**', '.maestro/**', 'fastlane/**']
   pull_request:
     branches: [master, dev]
+    # A documentation change cannot stop the app launching, and this job is
+    # thirty-odd minutes of somebody's runner.
+    paths-ignore: ['**/*.md', 'docs/**', '.maestro/**', 'fastlane/**']
 
 concurrency:
   group: app-launch-${{ github.ref }}
@@ -27,7 +31,7 @@ jobs:
   launch:
     name: Build and launch
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -60,6 +64,19 @@ jobs:
           cd ios
           pod install --repo-update
 
+      # The Xcode build is 37 of this job's 40 minutes from cold, and almost
+      # all of it is pods and generated React Native sources that only change
+      # when a dependency does. Keyed on the lockfiles for that reason; a miss
+      # is the cold build, which is what the timeout allows for.
+      - name: Cache the build
+        uses: actions/cache@v4
+        with:
+          path: ios/build
+          key: ios-build-${{ hashFiles('ios/Podfile.lock', 'package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            ios-build-${{ hashFiles('ios/Podfile.lock', 'package-lock.json') }}-
+            ios-build-
+
       # Release, and ad-hoc signed, for the same reasons as the E2E build:
       # Release embeds the bundle so no Metro is involved, and an unsigned app
       # is refused the keychain by the simulator's securityd (-34018), which
@@ -77,6 +94,8 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=YES \
             DEBUG_INFORMATION_FORMAT=dwarf \
+            ONLY_ACTIVE_ARCH=YES \
+            COMPILER_INDEX_STORE_ENABLE=NO \
             build \
             > /tmp/xcodebuild-launch.log 2>&1 || {
               echo "::error::Simulator build failed — last 100 lines follow, full log uploaded."
