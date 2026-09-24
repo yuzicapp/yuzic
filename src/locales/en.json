@@ -1443,7 +1443,9 @@
     "notFound": "Couldn't find this in any connected source."
   },
   "externalSourcePicker": {
-    "empty": "No sources could resolve this item."
+    "empty": "No sources could resolve this item.",
+    "moreMatches_one": "{{count}} more match",
+    "moreMatches_other": "{{count}} more matches"
   },
   "radio": {
     "title": "Radio",

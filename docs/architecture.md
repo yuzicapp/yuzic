@@ -643,7 +643,11 @@ answer that, and which one a job uses depends on how many providers can do it.
   transfer came from, and `cancelQueueItem`). Autoplay and Smart Shuffle fill
   come from `features/playback/queueProviders.ts` (the similarity service —
   AudioMuse, declared in `providers/registry/similarityService.ts` — first, the
-  server's own similar songs as the fallback). Scrobbling routes through
+  server's own similar songs next, then the seed artist's top songs and random
+  library tracks). Each tier is asked in turn until one answers, because
+  similar songs comes back empty for any track its source does not know, and an
+  empty fill on the last track ends the queue. Play Similar stops at the
+  similarity tiers. Scrobbling routes through
   `state/redux/selectors/scrobbleRoutingSelectors.ts` and the offline mutation
   queue. Playlist generation is `features/playlist/generateSimilarPlaylist.ts`.
   External-source name resolution is `features/sources/registry.ts`.

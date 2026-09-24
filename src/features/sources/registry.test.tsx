@@ -83,3 +83,58 @@ describe('sources as providers', () => {
     }
   });
 });
+
+describe('MusicBrainz candidates and artist pages', () => {
+  const client = {
+    searchArtist: jest.fn(),
+    searchReleaseGroup: jest.fn(),
+    getArtistWithReleases: jest.fn(),
+  };
+  const musicbrainz = ALL_SOURCES.find(s => s.id === 'musicbrainz')!;
+
+  beforeEach(() => {
+    jest.spyOn(require('@/providers/registry/musicbrainz'), 'currentMusicbrainzClient')
+      .mockReturnValue(client);
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('offers every match with what tells namesakes apart', async () => {
+    client.searchArtist.mockResolvedValue([
+      { id: 'mb-1', name: 'Nirvana', disambiguation: 'US grunge band' },
+      { id: 'mb-2', name: 'Nirvana', disambiguation: 'UK 60s band' },
+    ]);
+
+    const candidates = await musicbrainz.resolveArtistCandidates('Nirvana', 5);
+
+    expect(client.searchArtist).toHaveBeenCalledWith('Nirvana', 5);
+    expect(candidates.map(c => [c.id, c.detail])).toEqual([
+      ['mb-1', 'US grunge band'],
+      ['mb-2', 'UK 60s band'],
+    ]);
+  });
+
+  it('names each album candidate by its own credit, not by the name asked about', async () => {
+    client.searchReleaseGroup.mockResolvedValue([
+      { id: 'rg-1', title: 'Bleach', 'first-release-date': '1989-06-15', 'artist-credit': [{ artist: { id: 'mb-1', name: 'Nirvana' } }] },
+      { id: 'rg-2', title: 'Bleach', 'artist-credit': [{ artist: { id: 'mb-9', name: 'Tribute Band' } }] },
+    ]);
+
+    const candidates = await musicbrainz.resolveAlbumCandidates('Nirvana', 'Bleach', 5);
+
+    expect(candidates.map(c => [c.artist, c.year])).toEqual([['Nirvana', 1989], ['Tribute Band', undefined]]);
+  });
+
+  it('credits an artist page\'s albums to that artist', async () => {
+    // The lookup's release groups carry no credit, so these were all by
+    // "Unknown Artist" and opening one searched under that name.
+    client.getArtistWithReleases.mockResolvedValue({
+      id: 'mb-1',
+      name: 'Nirvana',
+      'release-groups': [{ id: 'rg-1', title: 'Bleach', 'primary-type': 'Album' }],
+    });
+
+    const detail = await musicbrainz.fetchArtist('mb-1');
+
+    expect(detail?.albums[0].artist).toMatchObject({ nativeId: 'mb-1', name: 'Nirvana' });
+  });
+});

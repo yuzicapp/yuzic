@@ -127,7 +127,10 @@ export function createAutoplayCoordinator(deps: AutoplayDeps): AutoplayCoordinat
     count: number
   ): Promise<PlayableResource[]> => {
     const extension = await provider.fetchExtension({
-      recentSongs: recentSongs.map(entry => ({ nativeId: entry.song.nativeId })),
+      recentSongs: recentSongs.map(entry => ({
+        nativeId: entry.song.nativeId,
+        artistName: entry.song.artist?.name,
+      })),
       excludeIds: new Set([...excludeLocalIds].filter((id): id is LocalId => Boolean(id))),
       count,
     });
@@ -150,17 +153,36 @@ export function createAutoplayCoordinator(deps: AutoplayDeps): AutoplayCoordinat
  */
 const keyOfResource = (resource: PlayableResource): string => entityKey(resource.song);
 
-/** The tracks both features start from, or an empty list if there is nothing to add. */
+/**
+ * The tracks both features start from, or an empty list if there is nothing to add.
+ *
+ * Every tier is asked in turn until one answers with something playable. This
+ * used to ask only the first, and an empty answer from it ended the queue:
+ * similar-songs is empty for any track its source does not know, and on the
+ * last track of a queue nothing ever asks again.
+ */
   const nextTracks = async (): Promise<PlayableResource[]> => {
-    const provider = resolveQueueFillProvider(deps.providers());
-    if (!provider) return [];
     const request = buildFillRequest(deps.queue(), deps.currentIndex());
-    const fetched = await fetchExtension(
-      provider,
-      request.recentResources,
-      deps.queue().map(resource => resource.song.localId),
-      request.count
-    );
+    let fetched: PlayableResource[] = [];
+    let lastError: unknown = null;
+    for (const provider of deps.providers().filter(p => p.isAvailable())) {
+      try {
+        fetched = await fetchExtension(
+          provider,
+          request.recentResources,
+          deps.queue().map(resource => resource.song.localId),
+          request.count
+        );
+      } catch (error) {
+        lastError = error;
+        deps.logWarning(`Queue fill from ${provider.id} failed`, error);
+        continue;
+      }
+      if (fetched.length) break;
+    }
+    // Every tier failing is still worth the caller's warning; every tier
+    // answering with nothing is just an empty result.
+    if (!fetched.length && lastError) throw lastError;
     // The track the queue is continuing from, which is what a habit is
     // measured against — "you play B after A" needs to know what A was.
     const after = deps.queue()[deps.currentIndex()] ?? null;

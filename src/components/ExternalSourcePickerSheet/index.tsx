@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useTranslation } from 'react-i18next'
@@ -16,7 +16,7 @@ import {
 } from '@/components/options/OptionSheetPrimitives'
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import Touchable from '@/components/Touchable';
-import { iconSize, spacing, typography } from '@/constants/design';
+import { controlSize, iconSize, spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 
 type PickerItemAlbum = SourceResolvedAlbum & { kind: 'album' }
@@ -31,6 +31,12 @@ type Props = {
 
 const COVER_SIZE = 48
 
+/** What a row says under its name: who made an album and when, or how to tell an artist from a namesake. */
+function sublabelOf(item: PickerItem): string | undefined {
+  if (item.kind === 'artist') return item.detail
+  return [item.artist, item.year].filter(Boolean).join(' · ') || undefined
+}
+
 const ExternalSourcePickerSheet = forwardRef<BottomSheetModal, Props>(
   ({ items, isLoading, onSelect }, ref) => {
     const { t } = useTranslation()
@@ -38,6 +44,10 @@ const ExternalSourcePickerSheet = forwardRef<BottomSheetModal, Props>(
     const sheetBg = useOptionSheetBackground()
     const sheetContent = useOptionSheetContentStyle()
     const rad = useRadius()
+    // Each source shows its best match; the rest wait behind a row, so the
+    // sheet stays a choice between sources until a listener asks for more.
+    const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set())
+    useEffect(() => { setExpanded(new Set()) }, [items])
 
     const grouped = items.reduce<Record<string, PickerItem[]>>((acc, item) => {
       if (!acc[item.source]) acc[item.source] = []
@@ -71,13 +81,16 @@ const ExternalSourcePickerSheet = forwardRef<BottomSheetModal, Props>(
           {!isLoading && Object.entries(grouped).map(([sourceId, sourceItems], groupIndex) => {
             const meta = getSourceMeta(sourceId)
             const sourceLabel = meta?.label ?? sourceId
+            const isExpanded = expanded.has(sourceId)
+            const shown = isExpanded ? sourceItems : sourceItems.slice(0, 1)
+            const hidden = sourceItems.length - shown.length
             return (
               <View key={sourceId}>
                 {groupIndex > 0 && <OptionSheetDivider />}
                 <OptionSheetSectionLabel label={sourceLabel} />
-                {sourceItems.map((item, i) => {
+                {shown.map((item, i) => {
                   const label = item.kind === 'album' ? item.title : item.name
-                  const sublabel = item.kind === 'album' ? (item as SourceResolvedAlbum).artist : undefined
+                  const sublabel = sublabelOf(item)
                   const isArtist = item.kind === 'artist'
                   return (
                     <Touchable
@@ -103,6 +116,16 @@ const ExternalSourcePickerSheet = forwardRef<BottomSheetModal, Props>(
                     </Touchable>
                   )
                 })}
+                {hidden > 0 && (
+                  <Touchable
+                    style={styles.more}
+                    onPress={() => setExpanded(prev => new Set(prev).add(sourceId))}
+                  >
+                    <Text style={[styles.moreText, { color: colors.subtext }]}>
+                      {t('externalSourcePicker.moreMatches', { count: hidden })}
+                    </Text>
+                  </Touchable>
+                )}
               </View>
             )
           })}
@@ -138,6 +161,14 @@ const styles = StyleSheet.create({
   },
   optionText: {
     flex: 1,
+  },
+  more: {
+    minHeight: controlSize.minimumTarget,
+    justifyContent: 'center',
+  },
+  moreText: {
+    ...typography.rowSubtitle,
+    fontWeight: '600',
   },
   title: {
     ...typography.rowTitle,
