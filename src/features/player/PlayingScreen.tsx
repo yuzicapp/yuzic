@@ -26,16 +26,15 @@ import LyricsPreviewCard from './components/LyricsPreviewCard';
 import OutputDeviceSheet from './components/OutputDeviceSheet';
 import AboutTheArtistCard from './components/AboutTheArtistCard';
 import SleepTimerSheet from './components/SleepTimerSheet';
-import SleepTimerIndicator from './components/SleepTimerIndicator';
+import PlayingHeader from './components/PlayingHeader';
 import { setSleepTimerPlaybackRate } from './sleepTimer';
 import PlaybackSpeedCard from './components/PlaybackSpeedCard';
 import VolumeCard from './components/VolumeCard';
 import { useDragToClose } from './useDragToClose';
 import { usePlayingTransitions, type PlayingViewMode } from './usePlayingTransitions';
-import { ChevronDown, Ellipsis } from 'lucide-react-native';
 import { useSheetRef } from '@/components/useSheetRef';
 import Touchable from '@/components/Touchable';
-import { contentWidth, hitSlopFor, iconSize, onDark, spacing } from '@/constants/design';
+import { contentWidth, onDark, spacing } from '@/constants/design';
 import { useWindowLayout } from '@/features/layout/useWindowLayout';
 import { cappedContentWidth } from '@/features/layout/windowClass';
 import { playerLayout } from './playerLayout';
@@ -214,45 +213,13 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
                                     when there is a screen of height beneath
                                     it and a quarter of a landscape window
                                     when there is not. */}
-                                <View
-                                    style={[
-                                        styles.header,
-                                        {
-                                            paddingTop: insets.top,
-                                            paddingBottom: landscape || layout.inline || layout.bleed ? spacing.md : spacing.xxxl,
-                                        },
-                                    ]}
-                                >
-                                    <Touchable
-                                        testID="playing-close"
-                                        accessibilityRole="button"
-                                        accessibilityLabel={t('a11y.player.close')}
-                                        onPress={onClose}
-                                        style={styles.headerButton}
-                                        hitSlop={hitSlopFor(40)}
-                                    >
-                                        <ChevronDown size={iconSize.large} color={onDark.text} />
-                                    </Touchable>
-
-                                    {/* A running sleep timer says so beside the
-                                        ⋯ that sets it, rather than adding a
-                                        third control to the transport row. */}
-                                    <View style={styles.headerRight}>
-                                        <SleepTimerIndicator
-                                            onPress={() => sleepTimerSheetRef.current?.present()}
-                                        />
-
-                                        <Touchable
-                                            accessibilityRole="button"
-                                            accessibilityLabel={t('a11y.player.songOptions')}
-                                            onPress={() => songOptionsRef.current?.present()}
-                                            style={styles.headerButton}
-                                            hitSlop={hitSlopFor(40)}
-                                        >
-                                            <Ellipsis size={iconSize.header} color={onDark.text} />
-                                        </Touchable>
-                                    </View>
-                                </View>
+                                <PlayingHeader
+                                    paddingTop={insets.top}
+                                    paddingBottom={landscape || layout.inline || layout.bleed ? spacing.md : spacing.xxxl}
+                                    onClose={onClose}
+                                    onOpenSleepTimer={() => sleepTimerSheetRef.current?.present()}
+                                    onOpenSongOptions={() => songOptionsRef.current?.present()}
+                                />
 
                                 <View style={layout.inline ? styles.topContent : styles.centerContent}>
                                     <PlayingMain
@@ -373,24 +340,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-    },
-    header: {
-        width: '100%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.lg,
-    },
-    headerButton: {
-        width: 40,
-        height: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    headerRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
     },
     bottomControlsRow: {
         flexDirection: 'row',
