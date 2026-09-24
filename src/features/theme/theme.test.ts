@@ -12,12 +12,17 @@ describe('the default theme', () => {
    * was meant to change nothing anyone can see, so every value is pinned
    * rather than compared against the new file, which would pass by definition.
    */
+  /**
+   * `onThemeColor` is no longer pinned here: it is derived from whichever
+   * accent is in use rather than stored, so that a pale one does not get white
+   * labels it cannot carry. `what sits on the accent` below covers it.
+   */
   it('draws exactly the colours the app drew before', () => {
     expect(colorsFor(DEFAULT_THEME, 'light')).toMatchObject({
       themeColor: themeColorPreset[0],
       background: '#F2F2F7', card: '#fff', text: '#000', secondary: '#111', subtext: '#555',
       border: '#ccc', muted: '#eee', placeholder: '#999', overlay: 'rgba(242,242,247,0.92)',
-      statusSurface: 'rgba(0,0,0,0.05)', onThemeColor: '#fff', success: '#34C759', warning: '#FF9500',
+      statusSurface: 'rgba(0,0,0,0.05)', success: '#34C759', warning: '#FF9500',
       error: '#FF3B30', destructive: '#FF3B30', destructiveSurface: '#fff1f0',
       destructiveBorder: '#ead4d2', destructiveOnSurface: '#c7342f', toastSurface: '#ffffff',
     });
@@ -25,7 +30,7 @@ describe('the default theme', () => {
       themeColor: themeColorPreset[0],
       background: '#000', card: '#222', text: '#f2f2f2', secondary: '#dcdcdc', subtext: '#aaa',
       border: '#444', muted: '#333', placeholder: '#666', overlay: 'rgba(0,0,0,0.82)',
-      statusSurface: 'rgba(255,255,255,0.07)', onThemeColor: '#fff', success: '#34C759', warning: '#FF9500',
+      statusSurface: 'rgba(255,255,255,0.07)', success: '#34C759', warning: '#FF9500',
       error: '#FF453A', destructive: '#FF453A', destructiveSurface: 'rgba(255,69,58,0.12)',
       destructiveBorder: 'rgba(255,69,58,0.35)', destructiveOnSurface: '#ffb4ad', toastSurface: '#2f2f31',
     });
@@ -137,5 +142,33 @@ describe('whether the screens are drawn dark', () => {
 
     expect(drawsDark(colorsFor(blackLight, 'light'))).toBe(true);
     expect(drawsDark(colorsFor(whiteDark, 'dark'))).toBe(false);
+  });
+});
+
+describe('what sits on the accent', () => {
+  const themeWith = (accent: string) => ({ ...DEFAULT_THEME, accent });
+
+  it('darkens the label on a pale accent rather than leaving white on yellow', () => {
+    const colors = colorsFor(themeWith('#ffd32a'), 'light');
+
+    expect(contrast(colors.onThemeColor, '#ffd32a')).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('keeps white where white already reads — the default accent', () => {
+    const colors = colorsFor(themeWith('#ff7f7f'), 'light');
+
+    expect(contrast(colors.onThemeColor, '#ff7f7f')).toBeGreaterThan(
+      contrast('#ff7f7f', '#ff7f7f'),
+    );
+  });
+
+  it('answers for an accent taken from a cover, which can be any colour', () => {
+    for (const accent of ['#ffffff', '#000000', '#7f8c8d', '#00ff00']) {
+      const colors = colorsFor(themeWith(accent), 'dark');
+
+      // 3:1 is the floor for the large, bold text these fills carry; the
+      // helper returns its best compromise when nothing clears 4.5.
+      expect(contrast(colors.onThemeColor, accent)).toBeGreaterThanOrEqual(3);
+    }
   });
 });

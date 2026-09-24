@@ -14,6 +14,7 @@ import { iconSize, spacing } from '@/constants/design'
 import CollectionActions from './CollectionActions'
 import DownloadedHeader from '@/features/downloads/DownloadedHeader'
 import LibraryList from './LibraryList'
+import { useLibraryRefresh } from './useLibraryRefresh'
 import LoadingLibraryList from './Loading'
 import { useLibraryItems } from './useLibraryItems'
 import { useSortLabels } from './useSortLabels'
@@ -78,6 +79,7 @@ const LibraryCollectionScreen: React.FC = () => {
   const { type, sort } = params
   const { t } = useTranslation()
   const { colors } = useTheme()
+  const refresh = useLibraryRefresh()
   const sortLabels = useSortLabels()
 
   const [sortOrder, setSortOrder] = useState<SortOrder>(
@@ -148,6 +150,7 @@ const LibraryCollectionScreen: React.FC = () => {
           onSortChange={setSortOrder}
           sortLabel={sortLabels[sortOrder]}
           header={header}
+          refresh={refresh}
         />
       )}
     </SafeAreaView>
