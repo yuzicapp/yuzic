@@ -18,6 +18,13 @@ import SettingsDivider from '../../components/SettingsDivider';
 const KEYS = ['background', 'surface', 'text'] as const;
 
 /**
+ * The picker's handles, smaller than the library's default. A handle is
+ * centred on the edge of its panel, so at either end half of it hangs past
+ * the panel; the default hung past the card's corner too.
+ */
+export const PICKER_THUMB = 24;
+
+/**
  * The app's colours, for whichever of light and dark is showing.
  *
  * A person picks three colours and the rest of the palette is worked out from
@@ -111,7 +118,7 @@ const ColorRow: React.FC<ColorRowProps> = ({ label, value, open, onToggle, onCha
       </Touchable>
       {open && (
         <View style={styles.picker}>
-          <ColorPicker value={value} onCompleteJS={c => onChange(c.hex.slice(0, 7))} style={styles.pickerInner}>
+          <ColorPicker value={value} onCompleteJS={c => onChange(c.hex.slice(0, 7))} style={styles.pickerInner} thumbSize={PICKER_THUMB}>
             <Panel1 />
             <HueSlider />
           </ColorPicker>
