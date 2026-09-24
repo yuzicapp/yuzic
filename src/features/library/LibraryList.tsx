@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react'
-import { StyleSheet, useWindowDimensions, View } from 'react-native'
+import { RefreshControl, StyleSheet, useWindowDimensions, View } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -15,6 +15,7 @@ import SortBottomSheet from './components/SortBottomSheet'
 import { useSheetRef } from '@/components/useSheetRef'
 import type { LibraryCollectionType, LibraryItem, SortOrder } from './librarySort'
 import { useScrollClearance } from '@/features/theme/useScrollClearance'
+import { useTheme } from '@/features/theme/useTheme'
 
 type Props = {
   items: LibraryItem[]
@@ -26,6 +27,10 @@ type Props = {
   /** Which collection this is, so grid-or-list is remembered per kind rather
    *  than once for all of them. Null for a list that isn't one of them. */
   collection?: LibraryCollectionType | null
+  /** Pull-to-refresh, for the lists whose contents come from the server.
+   *  Omitted by a list built from something else — Recently played is the
+   *  device's own history, and a pull on it would ask the server nothing. */
+  refresh?: { refreshing: boolean; onRefresh: () => void }
 }
 
 /**
@@ -41,8 +46,10 @@ const LibraryList: React.FC<Props> = ({
   sortLabel,
   header,
   collection = null,
+  refresh,
 }) => {
   const scrollClearance = useScrollClearance()
+  const { colors } = useTheme()
   const dispatch = useDispatch()
   const isGridView = useSelector(selectLibraryViewMode(collection))
   const gridColumns = useGridColumns()
@@ -145,6 +152,20 @@ const LibraryList: React.FC<Props> = ({
           styles.list,
           { paddingHorizontal: gutter, paddingBottom: scrollClearance },
         ]}
+        refreshControl={
+          refresh
+            ? (
+              <RefreshControl
+                refreshing={refresh.refreshing}
+                onRefresh={refresh.onRefresh}
+                // The list is drawn on the app's background, which the theme
+                // owns, so the spinner takes the accent rather than iOS grey.
+                tintColor={colors.themeColor}
+                colors={[colors.themeColor]}
+              />
+            )
+            : undefined
+        }
         showsVerticalScrollIndicator={false}
       />
 

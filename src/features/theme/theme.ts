@@ -1,5 +1,5 @@
 import type { ListDensity, RadiusPreset, SemanticThemeColors } from '@/constants/design';
-import { isDark } from './color';
+import { ensureContrast, isDark } from './color';
 
 /**
  * The theme is data: everything about how the app looks, in one object.
@@ -99,9 +99,26 @@ export function themeFromSettings(settings: ThemeSettingsV0, base: Theme): Theme
   };
 }
 
+/**
+ * What goes on top of the accent — a label on a filled button, a glyph on a
+ * filled tab.
+ *
+ * The palettes carry white, which is right for most accents and wrong for the
+ * pale ones: the shipped yellow left its button labels at about 1.3:1, and an
+ * accent taken from a cover can land anywhere. So it is decided against the
+ * accent actually in use rather than stored, and `ensureContrast` falls back
+ * to whichever of black and white reads best when neither clears the bar.
+ */
+const ON_ACCENT_CONTRAST = 4.5;
+
 /** What `useTheme().colors` hands every component: one scheme's palette and the accent. */
 export function colorsFor(theme: Theme, scheme: Scheme): SemanticThemeColors {
-  return { themeColor: theme.accent, ...theme.palettes[scheme] };
+  const palette = theme.palettes[scheme];
+  return {
+    themeColor: theme.accent,
+    ...palette,
+    onThemeColor: ensureContrast(palette.onThemeColor, [theme.accent], ON_ACCENT_CONTRAST),
+  };
 }
 
 /**
