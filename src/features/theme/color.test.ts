@@ -38,6 +38,17 @@ describe('contrast', () => {
 });
 
 describe('ensureContrast', () => {
+  it('finds a grey that reads on black and on white, rather than white on the white', () => {
+    const fixed = ensureContrast('#000000', ['#000000', '#ffffff'], 4.5);
+    expect(contrast(fixed, '#000000')).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(fixed, '#ffffff')).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('settles for what reads best when nothing reaches the bar on both', () => {
+    const fixed = ensureContrast('#000000', ['#000000', '#ffffff'], 7);
+    expect(Math.min(contrast(fixed, '#000000'), contrast(fixed, '#ffffff'))).toBeGreaterThan(4);
+  });
+
   it('leaves a colour that already reads exactly as picked', () => {
     expect(ensureContrast('#000000', ['#ffffff'], 4.5)).toBe('#000000');
   });
