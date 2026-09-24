@@ -7,8 +7,11 @@
  * allowlist shrink-only rather than a place things quietly accumulate.
  *
  * The allowlist held the measured state of the tree when the gates went in.
- * Every section has since been emptied, so there is no file and any violation
- * fails. It is not an exemption anyone is entitled to add to.
+ * Every section was since emptied, and it is not an exemption anyone is
+ * entitled to add to. The one exception is `file-shape`, which holds two files
+ * by decision (2026-09-23): the autoplay coordinator and the sources registry
+ * grew past their line limits, and splitting them only to fit was judged to
+ * cost more than the limit protects.
  */
 import { readFileSync, writeFileSync, rmSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

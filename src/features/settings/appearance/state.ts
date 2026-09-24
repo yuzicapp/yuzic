@@ -1,7 +1,10 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DEFAULT_LANGUAGE } from '@/features/settings/appearance/languages';
-import { themeColorPreset } from '@/constants/design';
 import type { ListDensity, RadiusPreset } from '@/constants/design';
+import { DEFAULT_THEME, normalizeTheme } from '@/features/theme/presets';
+import type { Theme } from '@/features/theme/theme';
+import { applyThemeEdit, type ThemeEdit } from './themeStore';
+
 
 /**
  * The collections that remember their own grid/list choice.
@@ -48,24 +51,19 @@ type AppLanguage = string;
 
 interface AppearanceSettingsState {
   themeMode: ThemeMode;
-  themeColor: string;
   /**
-   * Corner-radius preset. Live-reactive — components read scaled values via
-   * `useRadius()` and re-render on change. The static `radius` export in
-   * constants/design.ts continues to hold defaults for unmigrated surfaces.
+   * How the app looks: palettes, accent, corners, density, cover tint, dock.
+   *
+   * These used to be settings of their own here. They are the theme's now, and
+   * the setters below edit it in place.
    */
-  radiusPreset: RadiusPreset;
+  theme: Theme;
   /**
-   * How much air sits between rows in a list. Live-reactive the same way the
-   * radius preset is — rows read it through `useListDensity()`.
+   * The accent taken from the cover of what is playing, while the theme asks
+   * for one. Runtime only: it is left out of storage, since it is only ever
+   * true of the track playing now.
    */
-  listDensity: ListDensity;
-  /**
-   * Tint a detail screen with a colour taken from its cover art. On by
-   * default: it is most of what makes an album page look like that album.
-   * Off gives every screen the flat theme background instead.
-   */
-  coverAccentEnabled: boolean;
+  liveAccent: string | null;
   gridColumns: number;
   isGridView: boolean;
   /**
@@ -85,34 +83,22 @@ interface AppearanceSettingsState {
   playingBarAction: PlayingBarAction;
   showQualityBadge: boolean;
   showSourceHeaders: boolean;
-  /** Float the tab dock over the content behind a blur instead of having it
-   * take layout space. Off by default: it only shows on screens long enough
-   * to scroll under the dock, and it costs every list a taller bottom inset. */
-  translucentDock: boolean;
   language: AppLanguage;
   hapticsEnabled: boolean;
   /** When true, respect the system's reduce-motion setting; when false, always animate. */
   respectReducedMotion: boolean;
 }
 
-/** The accent a fresh install starts with — the first of the presets offered,
- *  so the swatch row and this default cannot disagree. No longer exported: the
- *  swatch row reads the list itself now. */
-const THEME_DEFAULT_COLOR: string = themeColorPreset[0];
-
 const initialState: AppearanceSettingsState = {
   themeMode: 'system',
-  themeColor: THEME_DEFAULT_COLOR,
-  radiusPreset: 'default',
-  listDensity: 'default',
-  coverAccentEnabled: true,
+  theme: DEFAULT_THEME,
+  liveAccent: null,
   gridColumns: 3,
   isGridView: true,
   libraryViewModes: {},
   playingBarAction: 'skip',
   showQualityBadge: false,
   showSourceHeaders: true,
-  translucentDock: false,
   language: DEFAULT_LANGUAGE,
   hapticsEnabled: true,
   respectReducedMotion: true,
@@ -125,17 +111,29 @@ const appearanceSlice = createSlice({
     setThemeMode(state, action: PayloadAction<ThemeMode>) {
       state.themeMode = action.payload;
     },
+    /** Change any part of the theme. */
+    editTheme(state, action: PayloadAction<ThemeEdit>) {
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), action.payload);
+    },
+    /** Put the colours back to the default, leaving the accent and everything else. */
+    resetPalettes(state) {
+      state.theme = { ...normalizeTheme(state.theme), palettes: DEFAULT_THEME.palettes };
+    },
+    /** Picking an accent is choosing one, so it stops following the cover. */
     setThemeColor(state, action: PayloadAction<string>) {
-      state.themeColor = action.payload;
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), { accent: action.payload, accentFromCover: false });
+    },
+    setLiveAccent(state, action: PayloadAction<string | null>) {
+      state.liveAccent = action.payload;
     },
     setRadiusPreset(state, action: PayloadAction<RadiusPreset>) {
-      state.radiusPreset = action.payload;
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), { shape: { radius: action.payload } });
     },
     setListDensity(state, action: PayloadAction<ListDensity>) {
-      state.listDensity = action.payload;
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), { shape: { density: action.payload } });
     },
     setCoverAccentEnabled(state, action: PayloadAction<boolean>) {
-      state.coverAccentEnabled = action.payload;
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), { surface: { coverTint: action.payload } });
     },
     setGridColumns(state, action: PayloadAction<number>) {
       state.gridColumns = action.payload;
@@ -162,7 +160,9 @@ const appearanceSlice = createSlice({
       state.showSourceHeaders = action.payload;
     },
     setTranslucentDock(state, action: PayloadAction<boolean>) {
-      state.translucentDock = action.payload;
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), {
+        components: { dock: action.payload ? 'translucent' : 'solid' },
+      });
     },
     setLanguage(state, action: PayloadAction<AppLanguage>) {
       state.language = action.payload;
@@ -178,6 +178,9 @@ const appearanceSlice = createSlice({
 
 export const {
   setThemeMode,
+  editTheme,
+  resetPalettes,
+  setLiveAccent,
   setThemeColor,
   setRadiusPreset,
   setListDensity,
@@ -208,17 +211,37 @@ interface AppearanceRootState {
 export const selectThemeMode = (state: AppearanceRootState): ThemeMode =>
   state.settingsAppearance.themeMode;
 
+/** The theme as saved, before a live accent is put in. For the one hook that follows the cover. */
+export const selectStoredTheme = (state: AppearanceRootState) => state.settingsAppearance.theme;
+const selectLiveAccent = (state: AppearanceRootState) => state.settingsAppearance.liveAccent;
+
+/**
+ * The theme the app is drawn with.
+ *
+ * Memoised on the stored theme and the live accent, so it is the same object
+ * until either changes. With `accentFromCover` on, the live accent stands in
+ * for the theme's own. It is completed from the default: one saved before a field existed
+ * must not reach a style as `undefined`.
+ */
+export const selectActiveTheme = createSelector(
+  [selectStoredTheme, selectLiveAccent],
+  (stored, liveAccent): Theme => {
+    const theme = stored ? normalizeTheme(stored) : DEFAULT_THEME;
+    return theme.accentFromCover && liveAccent ? { ...theme, accent: liveAccent } : theme;
+  },
+);
+
 export const selectThemeColor = (state: AppearanceRootState): string =>
-  state.settingsAppearance.themeColor;
+  selectActiveTheme(state).accent;
 
 export const selectRadiusPreset = (state: AppearanceRootState): RadiusPreset =>
-  state.settingsAppearance.radiusPreset;
+  selectActiveTheme(state).shape.radius;
 
 export const selectListDensity = (state: AppearanceRootState): ListDensity =>
-  state.settingsAppearance.listDensity;
+  selectActiveTheme(state).shape.density;
 
 export const selectCoverAccentEnabled = (state: AppearanceRootState): boolean =>
-  state.settingsAppearance.coverAccentEnabled;
+  selectActiveTheme(state).surface.coverTint;
 
 export const selectGridColumns = (state: AppearanceRootState): number =>
   state.settingsAppearance.gridColumns;
@@ -250,7 +273,7 @@ export const selectShowSourceHeaders = (state: AppearanceRootState): boolean =>
   state.settingsAppearance.showSourceHeaders;
 
 export const selectTranslucentDock = (state: AppearanceRootState): boolean =>
-  state.settingsAppearance.translucentDock;
+  selectActiveTheme(state).components.dock === 'translucent';
 
 export const selectLanguage = (state: AppearanceRootState): AppLanguage =>
   state.settingsAppearance.language;

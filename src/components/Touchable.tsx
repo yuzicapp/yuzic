@@ -80,12 +80,18 @@ export function rippleFor(
  */
 const Touchable = React.forwardRef<React.ComponentRef<typeof Pressable>, TouchableProps>(
   function Touchable({ style, feedback = 'row', rippleRadius, disabled, ...rest }, ref) {
-    const { isDarkMode } = useTheme()
+    const { isDarkMode, colorKey } = useTheme()
 
     const ripple = rippleFor(feedback, disabled === true, isDarkMode, rippleRadius)
 
     return (
       <Pressable
+        // Remounted when the colours change. On Android the native view of a
+        // Pressable kept the background it was mounted with: a theme or
+        // light/dark switch rendered the new colour in JS and the old one on
+        // screen, until something else remounted it. Colours change rarely,
+        // so a remount is the cheap and certain answer.
+        key={colorKey}
         ref={ref}
         disabled={disabled}
         android_ripple={ripple}

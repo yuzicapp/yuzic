@@ -1,11 +1,10 @@
+import { useTheme } from '@/features/theme/useTheme';
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Volume2, VolumeX, Volume1 } from 'lucide-react-native';
-import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
-import { selectThemeColor } from '@/features/settings/appearance/state';
 import { usePlayingActions, usePlayingState } from '@/features/playback/PlayingContext';
 import { usePlaybackSink } from '@/features/player/PlaybackSinkContext';
 import { iconSize, onDark, onDarkAlpha, spacing, typography, veil } from '@/constants/design';
@@ -26,7 +25,7 @@ type Props = { contentWidth: number };
  */
 export default function VolumeCard({ contentWidth }: Props) {
   const { t } = useTranslation();
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = useTheme().colors.themeColor;
   const rad = useRadius();
   const { volume: playerVolume } = usePlayingState();
   const { setVolume } = usePlayingActions();

@@ -176,7 +176,56 @@
       "homeSourcesListenbrainz": "ListenBrainz",
       "homeSourcesListenbrainzSubtext": "Show ListenBrainz similar-artist shelves.",
       "homeSourcesDeezer": "Deezer",
-      "homeSourcesDeezerSubtext": "Deezer charts, top tracks, and similar artists."
+      "homeSourcesDeezerSubtext": "Deezer charts, top tracks, and similar artists.",
+      "palette": {
+        "light": "Light colours",
+        "dark": "Dark colours",
+        "background": "Background",
+        "surface": "Cards",
+        "text": "Text",
+        "readableHint": "Text is adjusted if needed so it stays readable on your colours.",
+        "reset": "Reset colours"
+      },
+      "background": {
+        "subtitle": "Draw the app over a photo or what's playing.",
+        "none": "Plain",
+        "image": "Photo",
+        "cover": "Cover",
+        "changePhoto": "Choose another photo",
+        "blur": "Blur",
+        "dim": "Dim",
+        "pickFailed": "Couldn't use that photo.",
+        "everyTab": "Behind every tab",
+        "everyTabSubtext": "Home, Search and Library. Off, just Home."
+      },
+      "floatingDock": "Floating dock",
+      "floatingDockSubtext": "Lift the tab bar off the screen's edges.",
+      "tabLabels": "Tab labels",
+      "tabLabelsSubtext": "Name each tab under its icon.",
+      "textSize": {
+        "title": "Text size",
+        "small": "Small",
+        "default": "Default",
+        "large": "Large",
+        "larger": "Larger",
+        "restart": "The new size applies the next time Yuzic starts."
+      },
+      "accentFromCover": "Accent from what's playing",
+      "accentFromCoverSubtext": "The accent changes with each cover. Picking a colour turns this off.",
+      "playerLayout": {
+        "title": "Player layout",
+        "subtitle": "How much room the cover takes.",
+        "artwork": "Artwork",
+        "compact": "Compact",
+        "fullWidth": "Full width"
+      },
+      "sections": {
+        "colours": "Colours",
+        "background": "Background",
+        "player": "Player",
+        "layout": "Layout and text",
+        "dock": "Dock and feel"
+      }
     },
     "library": {
       "title": "Library",
@@ -1443,7 +1492,9 @@
     "notFound": "Couldn't find this in any connected source."
   },
   "externalSourcePicker": {
-    "empty": "No sources could resolve this item."
+    "empty": "No sources could resolve this item.",
+    "moreMatches_one": "{{count}} more match",
+    "moreMatches_other": "{{count}} more matches"
   },
   "radio": {
     "title": "Radio",

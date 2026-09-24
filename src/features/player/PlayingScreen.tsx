@@ -26,19 +26,19 @@ import LyricsPreviewCard from './components/LyricsPreviewCard';
 import OutputDeviceSheet from './components/OutputDeviceSheet';
 import AboutTheArtistCard from './components/AboutTheArtistCard';
 import SleepTimerSheet from './components/SleepTimerSheet';
-import SleepTimerIndicator from './components/SleepTimerIndicator';
+import PlayingHeader from './components/PlayingHeader';
 import { setSleepTimerPlaybackRate } from './sleepTimer';
 import PlaybackSpeedCard from './components/PlaybackSpeedCard';
 import VolumeCard from './components/VolumeCard';
 import { useDragToClose } from './useDragToClose';
 import { usePlayingTransitions, type PlayingViewMode } from './usePlayingTransitions';
-import { ChevronDown, Ellipsis } from 'lucide-react-native';
 import { useSheetRef } from '@/components/useSheetRef';
 import Touchable from '@/components/Touchable';
-import { contentWidth, hitSlopFor, iconSize, onDark, spacing } from '@/constants/design';
+import { contentWidth, onDark, spacing } from '@/constants/design';
 import { useWindowLayout } from '@/features/layout/useWindowLayout';
 import { cappedContentWidth } from '@/features/layout/windowClass';
 import { playerLayout } from './playerLayout';
+import { useActiveTheme } from '@/features/theme/useActiveTheme';
 
 interface PlayingScreenProps {
     onClose: () => void;
@@ -119,14 +119,18 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
     }, []);
 
     const { width, height, landscape } = useWindowLayout();
-    const layout = playerLayout({ width, height, landscape });
+    const variant = useActiveTheme().components.playerLayout;
+    const layout = playerLayout({ width, height, landscape }, variant);
     // Everything under the player — the lyrics preview, the speed and volume
     // cards, the artist card — lines up with the player above it, which in
     // the split shape is the cover and the column together rather than just
     // the column.
     const columnWidth = layout.rowWidth;
     const queueWidth = cappedContentWidth(width - spacing.xl, contentWidth.readable);
-    const playerMinHeight = height - insets.top - insets.bottom;
+    // The full player fills the first screen and the rest waits below it. The
+    // compact one is only as tall as it is, so the lyrics preview and the
+    // cards follow straight on: that is what a smaller cover is for.
+    const playerMinHeight = variant === 'compact' ? undefined : height - insets.top - insets.bottom;
 
     const dragToClose = useDragToClose(expansion, scrollY, height);
 
@@ -158,11 +162,21 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
             <View style={styles.container}>
                 <View style={styles.playerArea}>
 
-                    <StatusBar
-                        barStyle="light-content"
-                        backgroundColor="transparent"
-                        translucent
-                    />
+                    {/*
+                      Only while the player is open. The screen mounts early,
+                      before it is first opened, and stays mounted after it
+                      closes, so an unconditional light bar outranked the app's
+                      own and left white icons on every light screen whenever a
+                      track was loaded. Unmounted, the bar falls back to the
+                      app's own style.
+                    */}
+                    {isOpen && (
+                        <StatusBar
+                            barStyle="light-content"
+                            backgroundColor="transparent"
+                            translucent
+                        />
+                    )}
                     {queueMounted && (
                         <Animated.View
                             style={[queueStyle, { alignItems: 'center', justifyContent: 'flex-start' }]}
@@ -199,47 +213,15 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
                                     when there is a screen of height beneath
                                     it and a quarter of a landscape window
                                     when there is not. */}
-                                <View
-                                    style={[
-                                        styles.header,
-                                        {
-                                            paddingTop: insets.top,
-                                            paddingBottom: landscape ? spacing.md : spacing.xxxl,
-                                        },
-                                    ]}
-                                >
-                                    <Touchable
-                                        testID="playing-close"
-                                        accessibilityRole="button"
-                                        accessibilityLabel={t('a11y.player.close')}
-                                        onPress={onClose}
-                                        style={styles.headerButton}
-                                        hitSlop={hitSlopFor(40)}
-                                    >
-                                        <ChevronDown size={iconSize.large} color={onDark.text} />
-                                    </Touchable>
+                                <PlayingHeader
+                                    paddingTop={insets.top}
+                                    paddingBottom={landscape || layout.inline || layout.bleed ? spacing.md : spacing.xxxl}
+                                    onClose={onClose}
+                                    onOpenSleepTimer={() => sleepTimerSheetRef.current?.present()}
+                                    onOpenSongOptions={() => songOptionsRef.current?.present()}
+                                />
 
-                                    {/* A running sleep timer says so beside the
-                                        ⋯ that sets it, rather than adding a
-                                        third control to the transport row. */}
-                                    <View style={styles.headerRight}>
-                                        <SleepTimerIndicator
-                                            onPress={() => sleepTimerSheetRef.current?.present()}
-                                        />
-
-                                        <Touchable
-                                            accessibilityRole="button"
-                                            accessibilityLabel={t('a11y.player.songOptions')}
-                                            onPress={() => songOptionsRef.current?.present()}
-                                            style={styles.headerButton}
-                                            hitSlop={hitSlopFor(40)}
-                                        >
-                                            <Ellipsis size={iconSize.header} color={onDark.text} />
-                                        </Touchable>
-                                    </View>
-                                </View>
-
-                                <View style={styles.centerContent}>
+                                <View style={layout.inline ? styles.topContent : styles.centerContent}>
                                     <PlayingMain
                                         layout={layout}
                                         onPressArtist={navigateToArtist}
@@ -350,27 +332,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    // The compact player starts under the header rather than floating in the
+    // middle of a screen it no longer fills.
+    topContent: {
+        alignItems: 'center',
+    },
     container: {
         flex: 1,
         alignItems: 'center',
-    },
-    header: {
-        width: '100%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.lg,
-    },
-    headerButton: {
-        width: 40,
-        height: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    headerRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
     },
     bottomControlsRow: {
         flexDirection: 'row',

@@ -1,9 +1,8 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { StyleSheet, View, Platform, type LayoutChangeEvent } from 'react-native';
+import { StyleSheet, Text, View, Platform, type LayoutChangeEvent } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSelector } from 'react-redux';
 import { Home, Library, Search } from 'lucide-react-native';
 import { StackActions } from '@react-navigation/native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -14,8 +13,9 @@ import PlayingBar from '@/features/player/playingBar/PlayingBar';
 import Touchable from '@/components/Touchable';
 import { setToastClearance } from '@/components/toast/clearance';
 import { useTheme } from '@/features/theme/useTheme';
-import { selectThemeColor, selectTranslucentDock } from '@/features/settings/appearance/state';
-import { contentWidth, iconSize, spacing } from '@/constants/design';
+import { useActiveTheme } from '@/features/theme/useActiveTheme';
+import { cappedTypography, contentWidth, fontScaleCap, iconSize, shadow, spacing } from '@/constants/design';
+import { useRadius } from '@/features/theme/useRadius';
 
 /**
  * The tab bar is a real react-navigation bottom tab bar now: the tab-tracking
@@ -35,12 +35,17 @@ import { contentWidth, iconSize, spacing } from '@/constants/design';
 // when tabs are added or reordered.
 export const unstable_settings = { anchor: '(home)' };
 
-/** Active and inactive icon weights. The active tab is the theme colour at a
- * heavier stroke, so it differs in shape as well as hue — colour on its own
- * would be the only thing distinguishing it. */
 /** Enough to read as glass without turning the tabs into mush over busy art. */
 const DOCK_BLUR_INTENSITY = 60;
 
+/**
+ * Active and inactive icon weights. The tabs are drawn in the text colours,
+ * not the accent: the accent can be anything a person picked, or change with
+ * every cover, and the tabs are where you are rather than something to press
+ * for an effect. So the active tab is the text colour at a heavier stroke,
+ * the others the subtext colour, and the difference is weight as well as
+ * shade, never colour alone.
+ */
 const STROKE_ACTIVE = 2.4;
 const STROKE_INACTIVE = 1.75;
 
@@ -48,6 +53,7 @@ function TabButton({
   onPress,
   active,
   accessibilityLabel,
+  label,
   testID,
   activeColor,
   inactiveColor,
@@ -56,6 +62,8 @@ function TabButton({
   onPress: () => void;
   active: boolean;
   accessibilityLabel: string;
+  /** Drawn under the icon when tab labels are on. */
+  label?: string;
   testID: string;
   activeColor: string;
   inactiveColor: string;
@@ -63,7 +71,9 @@ function TabButton({
 }) {
   return (
     <Touchable
-      accessibilityLabel={accessibilityLabel}
+      // With its name drawn under the icon the tab speaks for itself; a label
+      // would only be a second copy of the same word.
+      accessibilityLabel={label ? undefined : accessibilityLabel}
       accessibilityRole="tab"
       accessibilityState={{ selected: active }}
       testID={testID}
@@ -75,6 +85,16 @@ function TabButton({
         active ? activeColor : inactiveColor,
         active ? STROKE_ACTIVE : STROKE_INACTIVE
       )}
+      {label ? (
+        <Text
+          // The same colour as its icon, so a tab reads as one thing.
+          style={[styles.tabLabel, { color: active ? activeColor : inactiveColor }, active && styles.tabLabelActive]}
+          numberOfLines={1}
+          maxFontSizeMultiplier={fontScaleCap.control}
+        >
+          {label}
+        </Text>
+      ) : null}
     </Touchable>
   );
 }
@@ -82,8 +102,10 @@ function TabButton({
 function TabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const { colors, isDarkMode } = useTheme();
-  const themeColor = useSelector(selectThemeColor);
-  const translucent = useSelector(selectTranslucentDock);
+  const { dock, dockShape, tabLabels } = useActiveTheme().components;
+  const translucent = dock === 'translucent';
+  const floating = dockShape === 'floating';
+  const rad = useRadius();
   const { t } = useTranslation();
 
   // react-navigation only measures the tab bar it renders itself. A custom one
@@ -94,15 +116,19 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   // Toasts live above the navigator and cannot read its context, so the dock
   // tells them too — see `components/toast/clearance.ts`.
   React.useEffect(() => () => setToastClearance(null), []);
+  // Floating, the panel sits a margin above the bottom edge, and what content
+  // has to clear is the panel and that margin together.
+  const floatingMargin = Math.max(insets.bottom, spacing.sm);
   const handleLayout = React.useCallback(
     (e: LayoutChangeEvent) => {
-      onHeightChange?.(e.nativeEvent.layout.height);
-      setToastClearance(e.nativeEvent.layout.height);
+      const height = e.nativeEvent.layout.height + (floating ? floatingMargin : 0);
+      onHeightChange?.(height);
+      setToastClearance(height);
     },
-    [onHeightChange]
+    [onHeightChange, floating, floatingMargin]
   );
 
-  const activeColor = themeColor;
+  const activeColor = colors.text;
   const inactiveColor = colors.subtext;
 
   // Each tab is a Stack group — `(home)`, `(search)`, `(library)`.
@@ -152,6 +178,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
           onPress={() => go('(home)')}
           active={focusedRouteName === '(home)'}
           accessibilityLabel={t('tabs.home')}
+          label={tabLabels ? t('tabs.home') : undefined}
           testID="home-tab"
           activeColor={activeColor}
           inactiveColor={inactiveColor}
@@ -164,6 +191,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
           onPress={() => go('(search)')}
           active={focusedRouteName === '(search)'}
           accessibilityLabel={t('tabs.search')}
+          label={tabLabels ? t('tabs.search') : undefined}
           testID="search-tab"
           activeColor={activeColor}
           inactiveColor={inactiveColor}
@@ -176,6 +204,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
           onPress={() => go('(library)')}
           active={focusedRouteName === '(library)'}
           accessibilityLabel={t('tabs.library')}
+          label={tabLabels ? t('tabs.library') : undefined}
           testID="library-tab"
           activeColor={activeColor}
           inactiveColor={inactiveColor}
@@ -188,7 +217,14 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
     </View>
   );
 
-  const padding = { paddingBottom: Math.max(insets.bottom, 8) };
+  // Floating, the panel stops short of the home indicator and the screen
+  // edges, so the inset becomes its margin and it needs only its own padding.
+  const padding = floating
+    ? { paddingBottom: spacing.sm, marginBottom: floatingMargin }
+    : { paddingBottom: Math.max(insets.bottom, 8) };
+  const shape = floating
+    ? [styles.floatingPanel, { borderRadius: rad.panel }]
+    : null;
 
   // One surface, edge to edge. The now-playing row and the tab row are two
   // rows of the same dock rather than a card parked on a slab. The dock sits
@@ -205,17 +241,20 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
         onLayout={handleLayout}
         intensity={DOCK_BLUR_INTENSITY}
         tint={isDarkMode ? 'dark' : 'light'}
-        style={[styles.panel, styles.floating, padding]}
+        style={[styles.panel, styles.floating, shape, floating && styles.clipped, padding]}
       >
         {rows}
       </BlurView>
     );
   }
 
+  // Floating is over the content as well, like glass, but opaque: content
+  // scrolls on underneath it, which is what makes it float rather than sit
+  // on a strip of its own. Screens reserve the height via useScrollClearance.
   return (
     <View
       onLayout={handleLayout}
-      style={[styles.panel, padding, { backgroundColor: colors.card }]}
+      style={[styles.panel, floating && styles.floating, shape, padding, { backgroundColor: colors.card }]}
     >
       {rows}
     </View>
@@ -261,6 +300,24 @@ const styles = StyleSheet.create({
   tabRow: {
     flexDirection: 'row',
     paddingTop: spacing.md,
+  },
+  // Lifted off the page the way a toast is, since it floats the way one does.
+  floatingPanel: {
+    marginHorizontal: spacing.md,
+    ...shadow.toast,
+  },
+  // Glass has to be clipped to the rounded corners itself, or the blur shows
+  // square past them; a shadow cannot survive that clip on iOS, and glass does
+  // not need one.
+  clipped: {
+    overflow: 'hidden',
+  },
+  tabLabel: {
+    ...cappedTypography.control.micro,
+    marginTop: spacing.xxs,
+  },
+  tabLabelActive: {
+    fontWeight: '600',
   },
   tab: {
     flex: 1,

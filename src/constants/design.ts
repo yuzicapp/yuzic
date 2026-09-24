@@ -152,7 +152,8 @@ export function scaleRadius(base: number, preset: RadiusPreset): number {
 }
 
 /** The type scale lives in its own module; re-exported here so every style keeps one import. */
-export { cappedTypography, fontScaleCap, typography, withScaledLeading } from './typography';
+export { cappedTypography, fontScaleCap, startupTextScale, typography, withScaledLeading } from './typography';
+export { TEXT_SCALES } from './startupTextScale';
 
 /** The window scale does too — breakpoints and the caps a column is held to. */
 export { breakpoint, contentWidth } from './window';

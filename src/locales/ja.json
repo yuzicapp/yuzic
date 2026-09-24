@@ -176,7 +176,56 @@
       "homeSourcesListenbrainz": "ListenBrainz",
       "homeSourcesListenbrainzSubtext": "ListenBrainz の類似アーティストの棚を表示します。",
       "homeSourcesDeezer": "Deezer",
-      "homeSourcesDeezerSubtext": "Deezerのチャート・人気曲・類似アーティスト。"
+      "homeSourcesDeezerSubtext": "Deezerのチャート・人気曲・類似アーティスト。",
+      "palette": {
+        "light": "ライトの色",
+        "dark": "ダークの色",
+        "background": "背景",
+        "surface": "カード",
+        "text": "テキスト",
+        "readableHint": "文字が読みやすくなるよう、必要に応じて自動で調整されます。",
+        "reset": "色をリセット"
+      },
+      "background": {
+        "subtitle": "アプリの背景に写真や再生中の曲を表示します。",
+        "none": "なし",
+        "image": "写真",
+        "cover": "ジャケット",
+        "changePhoto": "別の写真を選ぶ",
+        "blur": "ぼかし",
+        "dim": "暗さ",
+        "pickFailed": "この写真は使用できませんでした。",
+        "everyTab": "すべてのタブに表示",
+        "everyTabSubtext": "ホーム・検索・ライブラリ。オフのときはホームのみ。"
+      },
+      "floatingDock": "フローティングドック",
+      "floatingDockSubtext": "タブバーを画面の端から浮かせて表示します。",
+      "tabLabels": "タブのラベル",
+      "tabLabelsSubtext": "各タブのアイコンの下に名前を表示します。",
+      "textSize": {
+        "title": "文字サイズ",
+        "small": "小",
+        "default": "標準",
+        "large": "大",
+        "larger": "特大",
+        "restart": "新しいサイズは次回 Yuzic を起動したときに適用されます。"
+      },
+      "accentFromCover": "再生中の曲からアクセント",
+      "accentFromCoverSubtext": "アクセントがジャケットごとに変わります。色を選ぶとオフになります。",
+      "playerLayout": {
+        "title": "プレーヤーのレイアウト",
+        "subtitle": "ジャケットの表示サイズ。",
+        "artwork": "ジャケット",
+        "compact": "コンパクト",
+        "fullWidth": "全幅"
+      },
+      "sections": {
+        "colours": "色",
+        "background": "背景",
+        "player": "プレーヤー",
+        "layout": "レイアウトと文字",
+        "dock": "ドックと操作感"
+      }
     },
     "library": {
       "title": "ライブラリ",
@@ -1433,7 +1482,8 @@
     "similarAlbums": "似ているアルバム"
   },
   "externalSourcePicker": {
-    "empty": "この項目を解決できるソースがありません。"
+    "empty": "この項目を解決できるソースがありません。",
+    "moreMatches_other": "ほかの候補 {{count}} 件"
   },
   "genreOptions": {
     "actions": {

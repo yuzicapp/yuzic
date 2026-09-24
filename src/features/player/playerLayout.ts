@@ -22,6 +22,16 @@ export type PlayerLayout = {
   rowWidth: number
   /** Between the cover and the column. Zero when they are not side by side. */
   columnGap: number
+  /**
+   * The compact player: a small cover beside the title, with the progress bar
+   * and transport full width below, instead of a cover above everything.
+   */
+  inline: boolean
+  /**
+   * The full-width player: the cover runs to both edges of the window with
+   * square corners, and only the column below it keeps the page inset.
+   */
+  bleed: boolean
 }
 
 /**
@@ -65,6 +75,18 @@ const COVER_HEIGHT_SHARE: Record<PlayerLayoutMode, number> = {
 }
 
 /**
+ * The compact player's cover, beside the title: a share of the column, capped
+ * so it stays a thumbnail on a tablet rather than growing back into a poster.
+ */
+const INLINE_COVER = { share: 0.3, max: 128 }
+
+/** Which player the theme asks for. Only the stacked shape has a compact form. */
+type PlayerLayoutVariant = 'artwork' | 'compact' | 'fullWidth'
+
+/** How much of the window's height a full-width cover may take before it is capped. */
+const BLEED_HEIGHT_SHARE = 0.55
+
+/**
  * How the player lays itself out in this window.
  *
  * Landscape decides the mode, not the size class: a 667pt iPhone SE on its
@@ -72,11 +94,14 @@ const COVER_HEIGHT_SHARE: Record<PlayerLayoutMode, number> = {
  * times more width than height, which is the only fact the player cares
  * about.
  */
-export function playerLayout(window: {
-  width: number
-  height: number
-  landscape: boolean
-}): PlayerLayout {
+export function playerLayout(
+  window: {
+    width: number
+    height: number
+    landscape: boolean
+  },
+  variant: PlayerLayoutVariant = 'artwork',
+): PlayerLayout {
   // Floored, because every size below is derived from it and a window
   // narrower than its own insets would otherwise hand the layout a negative
   // square. Nothing renders at 40pt, but nothing should return -8 either.
@@ -84,12 +109,21 @@ export function playerLayout(window: {
 
   if (!window.landscape) {
     const columnWidth = cappedContentWidth(available, contentWidth.player)
+    const inline = variant === 'compact'
+    const bleed = variant === 'fullWidth'
+    const coverSize = inline
+      ? Math.min(Math.round(columnWidth * INLINE_COVER.share), INLINE_COVER.max)
+      : bleed
+        ? squareArtSize(window.width, window.height * BLEED_HEIGHT_SHARE)
+        : squareArtSize(columnWidth, window.height * COVER_HEIGHT_SHARE.stacked)
     return {
       mode: 'stacked',
-      coverSize: squareArtSize(columnWidth, window.height * COVER_HEIGHT_SHARE.stacked),
+      coverSize,
       columnWidth,
       rowWidth: columnWidth,
       columnGap: 0,
+      inline,
+      bleed,
     }
   }
 
@@ -114,5 +148,7 @@ export function playerLayout(window: {
     // shrink to them or the whole thing sits off-centre.
     rowWidth: coverSize + SPLIT_GAP + columnWidth,
     columnGap: SPLIT_GAP,
+    inline: false,
+    bleed: false,
   }
 }

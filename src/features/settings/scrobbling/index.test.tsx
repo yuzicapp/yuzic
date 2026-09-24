@@ -26,6 +26,11 @@ jest.mock('@/providers/registry/useApi', () => ({
   useApi: () => ({ songs: { scrobbleKind: 'scrobble' } }),
 }));
 
+// The shared settings chrome draws with the theme, which this test does not set up.
+jest.mock('@/features/theme/useActiveTheme', () => ({
+  useActiveTheme: () => jest.requireActual('@/features/theme/presets').DEFAULT_THEME,
+}));
+
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
   useSelector: (selector: string) => {

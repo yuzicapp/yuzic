@@ -4,6 +4,7 @@ import { notify } from '@/components/toast';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import ExternalSourcePickerSheet, { type PickerItem } from '@/components/ExternalSourcePickerSheet';
 import { useEnabledExternalSources, type SourceResolvedAlbum, type SourceResolvedArtist } from './registry';
+import { CANDIDATES_PER_SOURCE, knownAlbumRoute, knownArtistRoute, pickFrom, providerIdOf } from './resolutionRoutes';
 import { useAlbums } from '@/features/album/useAlbums';
 import { useArtists } from '@/features/artist/useArtists';
 import { matchAlbumToLibrary, matchArtistToLibrary } from '@/features/library/matchToLibrary';
@@ -11,11 +12,6 @@ import type { Album } from '@/domain/entities/Album';
 import type { Artist } from '@/domain/entities/Artist';
 
 const NO_SOURCE_TOAST = 'Enable an external source in Settings to browse this content.';
-
-/** The provider id an already-external record was browsed through, if it says. */
-function providerIdOf(item: Album | Artist): string | undefined {
-  return item.provenance.origin === 'integration' ? item.provenance.providerId : undefined;
-}
 
 type ResolutionContextType = {
   resolveAndNavigateToAlbum: (item: Album) => void;
@@ -57,6 +53,13 @@ export function ExternalResolutionProvider({ children }: { children: React.React
       return;
     }
 
+    // Browsed through a source already: open it there, no search needed.
+    const known = knownAlbumRoute(item, enabledSources);
+    if (known) {
+      router.push({ pathname: '/albumView', params: known });
+      return;
+    }
+
     const providerId = providerIdOf(item);
 
     if (enabledSources.length === 0) {
@@ -71,19 +74,19 @@ export function ExternalResolutionProvider({ children }: { children: React.React
     }
 
     // Resolve across all enabled sources
-    const results = (await Promise.all(
-      enabledSources.map(s => s.resolveAlbum(item.artist.name, item.title).catch(() => null))
-    )).filter(Boolean) as SourceResolvedAlbum[];
+    const { direct, all } = pickFrom<SourceResolvedAlbum>(await Promise.all(
+      enabledSources.map(s => s.resolveAlbumCandidates(item.artist.name, item.title, CANDIDATES_PER_SOURCE).catch(() => []))
+    ));
 
-    if (results.length === 0) {
+    if (all.length === 0) {
       notify.error('This album could not be found on any enabled source.');
       return;
     }
-    if (results.length === 1) {
-      router.push({ pathname: '/albumView', params: { source: results[0].source, albumId: results[0].id, artist: results[0].artist, title: results[0].title } });
+    if (direct) {
+      router.push({ pathname: '/albumView', params: { source: direct.source, albumId: direct.id, artist: direct.artist, title: direct.title } });
       return;
     }
-    setAlbumPickerItems(results.map(r => ({ ...r, kind: 'album' as const })));
+    setAlbumPickerItems(all.map(r => ({ ...r, kind: 'album' as const })));
     albumPickerRef.current?.present();
   }, [albums, enabledSources, router]);
 
@@ -95,31 +98,39 @@ export function ExternalResolutionProvider({ children }: { children: React.React
       return;
     }
 
-    const providerId = providerIdOf(item);
+    // The record says which artist it is: go there rather than asking.
+    const known = knownArtistRoute(item, enabledSources);
+    if (known) {
+      router.push({ pathname: '/artistView', params: known });
+      return;
+    }
 
     if (enabledSources.length === 0) {
       notify.error(NO_SOURCE_TOAST);
       return;
     }
 
-    if (enabledSources.length === 1 && (!providerId || enabledSources[0].id === providerId)) {
-      router.push({ pathname: '/artistView', params: { source: providerId ?? enabledSources[0].id, artistId: enabledSources[0].artistIdOf(item.externalIds), mbid: item.externalIds.mbid ?? item.nativeId, name: item.name } });
+    if (enabledSources.length === 1) {
+      // No id for it (that is `knownArtistRoute`), so the screen resolves the
+      // name. `mbid` only when the record has one: a native id is some other
+      // origin's, and sending it as an mbid looks up nobody.
+      router.push({ pathname: '/artistView', params: { source: enabledSources[0].id, mbid: item.externalIds.mbid, name: item.name } });
       return;
     }
 
-    const results = (await Promise.all(
-      enabledSources.map(s => s.resolveArtist(item.name).catch(() => null))
-    )).filter(Boolean) as SourceResolvedArtist[];
+    const { direct, all } = pickFrom<SourceResolvedArtist>(await Promise.all(
+      enabledSources.map(s => s.resolveArtistCandidates(item.name, CANDIDATES_PER_SOURCE).catch(() => []))
+    ));
 
-    if (results.length === 0) {
+    if (all.length === 0) {
       notify.error('This artist could not be found on any enabled source.');
       return;
     }
-    if (results.length === 1) {
-      router.push({ pathname: '/artistView', params: { source: results[0].source, artistId: results[0].id, name: results[0].name } });
+    if (direct) {
+      router.push({ pathname: '/artistView', params: { source: direct.source, artistId: direct.id, name: direct.name } });
       return;
     }
-    setArtistPickerItems(results.map(r => ({ ...r, kind: 'artist' as const })));
+    setArtistPickerItems(all.map(r => ({ ...r, kind: 'artist' as const })));
     artistPickerRef.current?.present();
   }, [artists, enabledSources, router]);
 

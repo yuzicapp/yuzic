@@ -6,7 +6,7 @@ import { Check } from 'lucide-react-native';
 
 import { useTheme } from '@/features/theme/useTheme';
 import { iconSize, listDensity, spacing, type ListDensity, typography } from '@/constants/design';
-import { selectListDensity, selectThemeColor, setListDensity } from '@/features/settings/appearance/state';
+import { selectListDensity, setListDensity } from '@/features/settings/appearance/state';
 import { useRadius } from '@/features/theme/useRadius';
 import Touchable from '@/components/Touchable';
 import SettingsCardHeader from '../../components/SettingsCardHeader';
@@ -33,7 +33,7 @@ export const ListDensitySelector: React.FC = () => {
   const { colors } = useTheme();
   const rad = useRadius();
   const selected = useSelector(selectListDensity);
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = colors.themeColor;
 
   const handleSelect = useCallback((density: ListDensity) => {
     if (density === selected) return;

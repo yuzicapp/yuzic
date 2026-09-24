@@ -10,7 +10,8 @@
  * from the entity's own `provenance`/`isOwned` rather than inferred from its
  * title.
  */
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { useSelector } from 'react-redux';
 import type { Playlist } from '@/domain/entities/Playlist';
 import type { Song } from '@/domain/entities/Song';
@@ -67,6 +68,21 @@ export function usePlaylistScreenModel(params: PlaylistRouteParams): PlaylistScr
     // an offline open shows the playlist and an empty list, as before.
     fallbackValue: fallbackPlaylist,
   });
+
+  // Ask the server again each time the screen is opened.
+  //
+  // The list of playlists is refreshed on focus by the route (`syncPlaylists`),
+  // but a playlist's *tracks* live in this query, at the catalog's
+  // `staleTime: Infinity` — so a song added from another client, or from the
+  // server's own web UI, never appeared until the half-hourly sync came round.
+  // Offline the refetch is skipped: the cached detail is already the answer.
+  const { refetch } = query.query;
+  const offline = query.isOffline || query.serverUnreachable;
+  useFocusEffect(
+    useCallback(() => {
+      if (!offline && serverId && id) void refetch();
+    }, [offline, serverId, id, refetch]),
+  );
 
   const playlist = query.data?.playlist ?? null;
   const songs = query.data?.songs ?? [];

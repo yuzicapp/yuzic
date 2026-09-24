@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
-import { ScrollView, StyleSheet } from 'react-native'
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { ScreenBackground } from '@/features/theme/ScreenBackground'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useScrollToTop } from '@react-navigation/native'
@@ -14,6 +15,7 @@ import TabHeader from '@/components/TabHeader'
 import StatusBanner from '@/components/StatusBanner'
 import LibraryEntryRows from '@/features/library/LibraryEntryRows'
 import { useScrollClearance } from '@/features/theme/useScrollClearance'
+import { useLibraryRefresh } from '@/features/library/useLibraryRefresh'
 import { iconSize, spacing } from '@/constants/design'
 import { CloudOff } from 'lucide-react-native'
 
@@ -37,6 +39,7 @@ export default function LibraryScreen() {
   const username = activeServer?.username
   const { openAccountSheet } = useAccountSheet()
   const serverReachable = useServerReachable()
+  const { refreshing, onRefresh } = useLibraryRefresh()
 
   const scrollRef = useRef<ScrollView>(null)
   useScrollToTop(scrollRef)
@@ -47,6 +50,7 @@ export default function LibraryScreen() {
       edges={['top']}
       style={[styles.screen, { backgroundColor: colors.background }]}
     >
+      <ScreenBackground screen="library" />
       <TabHeader
         title={t('library.title')}
         username={username}
@@ -56,6 +60,14 @@ export default function LibraryScreen() {
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={{ paddingBottom: scrollClearance }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.themeColor}
+            colors={[colors.themeColor]}
+          />
+        }
         showsVerticalScrollIndicator={false}
       >
         {!serverReachable && (

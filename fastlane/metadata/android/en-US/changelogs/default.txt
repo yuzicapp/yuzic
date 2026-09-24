@@ -1,8 +1,9 @@
-Your library, properly in the car.
+Make the app look the way you want it.
 
-- CarPlay, Android Auto and Android Automotive show tabs: Recent, Favorites, Playlists, Albums, Downloads
-- Shuffle any album or playlist from the car
-- Search and voice in Android Auto and Automotive
-- The car works with the app closed, and carries on where you left off
-- Offline, the car shows only downloaded songs, and they play
-- Covers show in the car for servers that need a login
+- Set your own background, card and text colours, for light and dark
+- Draw the app over a photo or the cover that's playing, with blur and dim
+- Float the tab bar off the edges, make it translucent, name the tabs
+- Bigger or smaller text throughout
+- A compact player layout, so lyrics and more start sooner
+- The accent can follow each cover
+- Pull down on your library to ask the server right now

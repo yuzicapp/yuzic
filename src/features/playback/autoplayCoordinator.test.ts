@@ -54,7 +54,7 @@ const resource = (nativeId: string): PlayableResource => ({
 });
 
 interface ProviderCall {
-  recentSongs: { nativeId: string }[];
+  recentSongs: { nativeId: string; artistName?: string }[];
   excludeIds: string[];
   count: number;
 }
@@ -67,6 +67,11 @@ function harness(over: Partial<{
   noProvider: boolean;
   listener: AutoplayDeps['listener'];
   fails: boolean;
+  /** Tiers asked after the default one, in order. */
+  fallbacks: QueueFillProvider[];
+  /** Runs inside the provider's fetch, for the things a listener can do while
+   *  one is in flight — starting a different album, say. */
+  duringFetch: (replaceQueue: (next: PlayableResource[]) => void) => void;
 }> = {}) {
   let queue = over.queue ?? [resource('1'), resource('2'), resource('3')];
   let segments = over.segments ?? [];
@@ -85,6 +90,7 @@ function harness(over: Partial<{
         excludeIds: [...excludeIds],
         count,
       });
+      over.duringFetch?.(next => { queue = next; });
       if (over.fails) throw new Error('provider is down');
       return over.returns ?? [song('90'), song('91')];
     },
@@ -98,7 +104,7 @@ function harness(over: Partial<{
 
   const deps: AutoplayDeps = {
     backend: () => backend,
-    providers: () => (over.noProvider ? [] : [provider]),
+    providers: () => (over.noProvider ? [] : [provider, ...(over.fallbacks ?? [])]),
     queue: () => queue,
     setQueue: next => { queue = next; },
     segments: () => segments,
@@ -138,6 +144,11 @@ function harness(over: Partial<{
 }
 
 const ids = (queue: PlayableResource[]) => queue.map(r => r.song.nativeId);
+
+const tier = (
+  id: QueueFillProvider['id'],
+  fetchExtension: QueueFillProvider['fetchExtension'],
+): QueueFillProvider => ({ id, isAvailable: () => true, fetchExtension });
 
 describe('topping the queue up', () => {
   it('appends the new tracks to the queue and the player', async () => {
@@ -235,7 +246,55 @@ describe('topping the queue up', () => {
 
     await expect(h.coordinator.fillQueueIfLow()).resolves.toBeUndefined();
 
-    expect(h.warnings).toEqual(['Autoplay fill failed']);
+    expect(h.warnings).toEqual(['Queue fill from similarity-service failed', 'Autoplay fill failed']);
+  });
+
+  it('asks the next tier when the first answers with nothing', async () => {
+    // Similar-songs is empty for any track its source does not know. Stopping
+    // there ended the queue after one song with Autoplay on.
+    const fallback = tier('library', async () => [song('50')]);
+    const h = harness({ returns: [], fallbacks: [fallback] });
+
+    await h.coordinator.fillQueueIfLow();
+
+    expect(ids(h.queue)).toEqual(['1', '2', '3', '50']);
+  });
+
+  it('asks the next tier when the first fails', async () => {
+    const fallback = tier('library', async () => [song('50')]);
+    const h = harness({ fails: true, fallbacks: [fallback] });
+
+    await h.coordinator.fillQueueIfLow();
+
+    expect(ids(h.queue)).toEqual(['1', '2', '3', '50']);
+    expect(h.warnings).toEqual(['Queue fill from similarity-service failed']);
+  });
+
+  it('stops at the first tier that answers', async () => {
+    const fallback = tier('library', jest.fn(async () => [song('50')]));
+    const h = harness({ fallbacks: [fallback] });
+
+    await h.coordinator.fillQueueIfLow();
+
+    expect(fallback.fetchExtension).not.toHaveBeenCalled();
+  });
+
+  it('skips a tier that is not available', async () => {
+    const off = { ...tier('native-similarity', jest.fn(async () => [song('60')])), isAvailable: () => false };
+    const h = harness({ returns: [], fallbacks: [off, tier('library', async () => [song('50')])] });
+
+    await h.coordinator.fillQueueIfLow();
+
+    expect(off.fetchExtension).not.toHaveBeenCalled();
+    expect(ids(h.queue)).toEqual(['1', '2', '3', '50']);
+  });
+
+  it('sends the seed artist, which the library tier needs', async () => {
+    const h = harness();
+
+    await h.coordinator.fillQueueIfLow();
+
+    expect(h.providerCalls[0].recentSongs[0]).toEqual({ nativeId: '1', artistName: 'Artist' });
   });
 
   it('releases the guard after a failure, so autoplay is not dead for the session', async () => {
@@ -245,6 +304,40 @@ describe('topping the queue up', () => {
     await h.coordinator.fillQueueIfLow();
 
     expect(h.providerCalls).toHaveLength(2);
+  });
+});
+
+describe('a queue that moved while the fill was in flight', () => {
+  /**
+   * Asking the tiers is several round trips, and the library tier answers on
+   * nearly every server — so the window is real and the tracks coming back
+   * were chosen from a queue that may no longer be playing. Appending them
+   * anyway put the previous album's artist on the end of the one the listener
+   * had just started.
+   */
+  it('drops the fill when the listener has started something else', async () => {
+    const h = harness({
+      duringFetch: replaceQueue => replaceQueue([resource('B1'), resource('B2')]),
+    });
+
+    await h.coordinator.fillQueueIfLow();
+
+    expect(ids(h.queue)).toEqual(['B1', 'B2']);
+    expect(h.engineCalls).toEqual([]);
+    expect(h.warnings.join(' ')).toContain('discarded');
+  });
+
+  it('still fills when the queue merely advanced a track under it', async () => {
+    const h = harness({
+      queue: [resource('1'), resource('2'), resource('3')],
+      // The same queue, one track longer: what a listener adding a song does.
+      duringFetch: replaceQueue =>
+        replaceQueue([resource('1'), resource('2'), resource('3'), resource('4')]),
+    });
+
+    await h.coordinator.fillQueueIfLow();
+
+    expect(ids(h.queue)).toEqual(['1', '2', '3', '4', '90', '91']);
   });
 });
 
@@ -318,7 +411,7 @@ describe('play similar', () => {
     await h.coordinator.relatedTo(song('7'), 20);
 
     expect(h.providerCalls[0]).toEqual({
-      recentSongs: [{ nativeId: '7' }],
+      recentSongs: [{ nativeId: '7', artistName: 'Artist' }],
       excludeIds: [makeLocalId('song', provenance, '7')],
       count: 20,
     });

@@ -4,6 +4,7 @@ import { View, TextInput, StyleSheet, ScrollView } from 'react-native';
 import { CloudOff, SlidersHorizontal, Search as SearchIcon, X } from 'lucide-react-native';
 import { useScrollToTop } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScreenBackground } from '@/features/theme/ScreenBackground';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
 
@@ -36,6 +37,7 @@ const Search = () => {
 
   return (
     <SafeAreaView testID="search-screen" edges={['top']} style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScreenBackground screen="search" />
       <TabHeader title={t('search.title')} username={m.username} onAccountPress={m.openAccountSheet} />
       <View style={styles.headerRow}>
         <View style={[styles.searchContainer, { backgroundColor: colors.muted, borderRadius: rad.md }]}>

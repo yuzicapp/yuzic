@@ -1,0 +1,6 @@
+{
+  "file-shape": [
+    "src/features/playback/autoplayCoordinator.ts",
+    "src/features/sources/registry.ts"
+  ]
+}

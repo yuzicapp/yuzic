@@ -1,58 +1,49 @@
 import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import { useSelector } from 'react-redux';
-import { selectThemeMode, selectThemeColor } from '@/features/settings/appearance/state';
-import { statusColor, type SemanticThemeColors } from '@/constants/design';
+import { selectThemeMode } from '@/features/settings/appearance/state';
+import type { SemanticThemeColors } from '@/constants/design';
+import { colorsFor, drawsDark } from './theme';
+import { useActiveTheme } from './useActiveTheme';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 type ResolvedTheme = 'light' | 'dark';
 
 export const useTheme = () => {
   const mode = useSelector(selectThemeMode) as ThemeMode;
-  const themeColor = useSelector(selectThemeColor);
+  const theme = useActiveTheme();
 
   const systemScheme = useColorScheme() as ResolvedTheme | null;
 
+  // Anything but an explicit light or dark follows the system, so a missing or
+  // unknown stored mode still lands on a palette.
   const resolved: ResolvedTheme =
-    mode === 'system' ? systemScheme ?? 'light' : mode;
-
-  const isDarkMode = resolved === 'dark';
+    mode === 'light' || mode === 'dark' ? mode : systemScheme ?? 'light';
 
   const colors = useMemo<SemanticThemeColors>(
-    () => ({
-      themeColor,
-      background: isDarkMode ? '#000' : '#F2F2F7',
-      card: isDarkMode ? '#222' : '#fff',
-      text: isDarkMode ? '#f2f2f2' : '#000',
-      secondary: isDarkMode ? '#dcdcdc' : '#111',
-      subtext: isDarkMode ? '#aaa' : '#555',
-      border: isDarkMode ? '#444' : '#ccc',
-      muted: isDarkMode ? '#333' : '#eee',
-      placeholder: isDarkMode ? '#666' : '#999',
-      overlay: isDarkMode ? 'rgba(0,0,0,0.82)' : 'rgba(242,242,247,0.92)',
-      statusSurface: isDarkMode ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
-      onThemeColor: '#fff',
-      success: '#34C759',
-      warning: '#FF9500',
-      error: isDarkMode ? '#FF453A' : '#FF3B30',
-      destructive: isDarkMode ? '#FF453A' : '#FF3B30',
-      // Soft red info-card tint, dark-mode aware.
-      destructiveSurface: isDarkMode ? 'rgba(255,69,58,0.12)' : '#fff1f0',
-      destructiveBorder: isDarkMode ? 'rgba(255,69,58,0.35)' : '#ead4d2',
-      destructiveOnSurface: isDarkMode ? '#ffb4ad' : '#c7342f',
-      warningText: statusColor.warningText,
-      // A step brighter than `card` (#222) in dark so a toast floats clear of
-      // the playing bar / tab bar instead of blending into them; in light it
-      // stays white but leans on its shadow + border for separation.
-      toastSurface: isDarkMode ? '#2f2f31' : '#ffffff',
-    }),
-    [isDarkMode, themeColor]
+    () => colorsFor(theme, resolved),
+    [theme, resolved]
   );
+
+  // From the palette, not the mode; see `drawsDark`. `resolved` stays the mode,
+  // which is which palette is showing.
+  const isDarkMode = drawsDark(colors);
+
+  // Every colour in one string, which changes when something drawn would.
+  // `Touchable` keys on it; see there for why. The accent taken from the
+  // cover is left out: it changes on every track, and remounting every
+  // pressable in the app per track to repaint the few filled with the accent
+  // would cancel presses on screens nothing had changed on.
+  const colorKey = useMemo(() => {
+    const { themeColor, ...palette } = colors;
+    return [...Object.values(palette), theme.accentFromCover ? 'cover' : themeColor].join('|');
+  }, [colors, theme.accentFromCover]);
 
   return {
     mode,
     resolved,
     isDarkMode,
     colors,
+    colorKey,
   };
 };

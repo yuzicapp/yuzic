@@ -6,6 +6,7 @@ import {
   resolveQueueFillProvider,
   createNativeSimilarityQueueFillProvider,
   createSimilarityServiceQueueFillProvider,
+  createLibraryQueueFillProvider,
   type QueueFillProvider,
 } from './queueProviders';
 
@@ -177,5 +178,65 @@ describe('createSimilarityServiceQueueFillProvider', () => {
     const [opts] = similarity.similarTrackIds.mock.calls[0] as unknown as [{ limit: number }];
     expect(opts.limit).toBeGreaterThan(3);
     expect(result.length).toBe(3);
+  });
+});
+
+describe('createLibraryQueueFillProvider', () => {
+  const seed = { nativeId: 'seed', artistName: 'Artist' };
+
+  it('is unavailable on a server with neither top songs nor random songs', () => {
+    expect(createLibraryQueueFillProvider(fakeApi()).isAvailable()).toBe(false);
+  });
+
+  it('takes at most half the batch from the seed artist and fills the rest from the library', async () => {
+    const getTopSongs = jest.fn(async () => ['a1', 'a2', 'a3', 'a4'].map(song));
+    const getRandomSongs = jest.fn(async () => ['r1', 'r2', 'r3', 'r4'].map(song));
+    const api = fakeApi({
+      artists: { list: jest.fn(), get: jest.fn(), getTopSongs },
+      discovery: { getRandomSongs, getNowPlaying: jest.fn() },
+    });
+
+    const result = await createLibraryQueueFillProvider(api).fetchExtension({
+      recentSongs: [seed],
+      excludeIds: new Set(),
+      count: 4,
+    });
+
+    expect(getTopSongs).toHaveBeenCalledWith('Artist', 8);
+    // Shuffled within each source, so assert on the split rather than the order.
+    const picked = result.map(s => s.nativeId);
+    expect(picked).toHaveLength(4);
+    expect(picked.slice(0, 2).every(id => id.startsWith('a'))).toBe(true);
+    expect(picked.slice(2).every(id => id.startsWith('r'))).toBe(true);
+  });
+
+  it('skips what is already queued and never returns a track twice', async () => {
+    const api = fakeApi({
+      artists: { list: jest.fn(), get: jest.fn(), getTopSongs: jest.fn(async () => [song('a1'), song('dup')]) },
+      discovery: { getRandomSongs: jest.fn(async () => [song('dup'), song('queued'), song('r1')]), getNowPlaying: jest.fn() },
+    });
+
+    const result = await createLibraryQueueFillProvider(api).fetchExtension({
+      recentSongs: [seed],
+      excludeIds: new Set([idOf('queued')]),
+      count: 10,
+    });
+
+    expect(result.map(s => s.nativeId).sort()).toEqual(['a1', 'dup', 'r1']);
+  });
+
+  it('still answers from the library when the artist lookup fails', async () => {
+    const api = fakeApi({
+      artists: { list: jest.fn(), get: jest.fn(), getTopSongs: jest.fn(async () => { throw new Error('down'); }) },
+      discovery: { getRandomSongs: jest.fn(async () => [song('r1')]), getNowPlaying: jest.fn() },
+    });
+
+    const result = await createLibraryQueueFillProvider(api).fetchExtension({
+      recentSongs: [seed],
+      excludeIds: new Set(),
+      count: 4,
+    });
+
+    expect(result.map(s => s.nativeId)).toEqual(['r1']);
   });
 });

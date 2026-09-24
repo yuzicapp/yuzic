@@ -13,6 +13,11 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
+// The shared settings chrome draws with the theme, which this test does not set up.
+jest.mock('@/features/theme/useActiveTheme', () => ({
+  useActiveTheme: () => jest.requireActual('@/features/theme/presets').DEFAULT_THEME,
+}));
+
 jest.mock('react-redux', () => ({
   shallowEqual: () => true,
   // The screen asks for every declared integration's connected state at once;

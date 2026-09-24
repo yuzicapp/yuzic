@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import ImageColors from 'react-native-image-colors'
 
 import { onDark } from '@/constants/design'
 import { buildCover } from '@/providers/registry/covers'
-import { selectCoverAccentEnabled } from '@/features/settings/appearance/state';
+import { useActiveTheme } from './useActiveTheme';
 import type { CoverSource } from '@/domain/entities/Cover';
 import { ACCENT_CACHE_MAX, createAccentCache, pickAccent, toWashAccent } from './coverAccent'
 
@@ -22,7 +21,7 @@ const accents = createAccentCache<string>(ACCENT_CACHE_MAX)
  * discarded.
  */
 export function useCoverAccent(cover: CoverSource | undefined): string | null {
-  const enabled = useSelector(selectCoverAccentEnabled)
+  const enabled = useActiveTheme().surface.coverTint
   const [accent, setAccent] = useState<string | null>(null)
 
   useEffect(() => {

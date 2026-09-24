@@ -1,0 +1,174 @@
+import fs from 'fs';
+import path from 'path';
+
+import { themeColorPreset } from '@/constants/design';
+import { contrast } from './color';
+import { DEFAULT_THEME, derivePalette, normalizeTheme } from './presets';
+import { colorsFor, drawsDark, themeFromSettings } from './theme';
+
+describe('the default theme', () => {
+  /**
+   * The palettes `useTheme` wrote inline before themes were data. Moving them
+   * was meant to change nothing anyone can see, so every value is pinned
+   * rather than compared against the new file, which would pass by definition.
+   */
+  /**
+   * `onThemeColor` is no longer pinned here: it is derived from whichever
+   * accent is in use rather than stored, so that a pale one does not get white
+   * labels it cannot carry. `what sits on the accent` below covers it.
+   */
+  it('draws exactly the colours the app drew before', () => {
+    expect(colorsFor(DEFAULT_THEME, 'light')).toMatchObject({
+      themeColor: themeColorPreset[0],
+      background: '#F2F2F7', card: '#fff', text: '#000', secondary: '#111', subtext: '#555',
+      border: '#ccc', muted: '#eee', placeholder: '#999', overlay: 'rgba(242,242,247,0.92)',
+      statusSurface: 'rgba(0,0,0,0.05)', success: '#34C759', warning: '#FF9500',
+      error: '#FF3B30', destructive: '#FF3B30', destructiveSurface: '#fff1f0',
+      destructiveBorder: '#ead4d2', destructiveOnSurface: '#c7342f', toastSurface: '#ffffff',
+    });
+    expect(colorsFor(DEFAULT_THEME, 'dark')).toMatchObject({
+      themeColor: themeColorPreset[0],
+      background: '#000', card: '#222', text: '#f2f2f2', secondary: '#dcdcdc', subtext: '#aaa',
+      border: '#444', muted: '#333', placeholder: '#666', overlay: 'rgba(0,0,0,0.82)',
+      statusSurface: 'rgba(255,255,255,0.07)', success: '#34C759', warning: '#FF9500',
+      error: '#FF453A', destructive: '#FF453A', destructiveSurface: 'rgba(255,69,58,0.12)',
+      destructiveBorder: 'rgba(255,69,58,0.35)', destructiveOnSurface: '#ffb4ad', toastSurface: '#2f2f31',
+    });
+  });
+
+  it('keeps the shape, surface and dock a fresh install always had', () => {
+    expect(DEFAULT_THEME.shape).toEqual({ radius: 'default', density: 'default', textScale: 1 });
+    expect(DEFAULT_THEME.surface).toMatchObject({ coverTint: true, background: { kind: 'none' } });
+    expect(DEFAULT_THEME.components).toEqual({ dock: 'solid', dockShape: 'edge', tabLabels: false, playerLayout: 'artwork' });
+  });
+});
+
+describe('themeFromSettings', () => {
+  it('applies each appearance setting to its place in the theme', () => {
+    const theme = themeFromSettings({
+      themeColor: '#123456',
+      radiusPreset: 'sharp',
+      listDensity: 'compact',
+      coverAccentEnabled: false,
+      translucentDock: true,
+    }, DEFAULT_THEME);
+
+    expect(theme.accent).toBe('#123456');
+    expect(theme.shape).toEqual({ radius: 'sharp', density: 'compact', textScale: 1 });
+    expect(theme.surface.coverTint).toBe(false);
+    expect(theme.components.dock).toBe('translucent');
+    expect(colorsFor(theme, 'dark').themeColor).toBe('#123456');
+  });
+
+  it('falls back to the theme for a setting written before its key existed', () => {
+    expect(themeFromSettings({}, DEFAULT_THEME)).toEqual(DEFAULT_THEME);
+  });
+
+  it('leaves the palettes alone', () => {
+    expect(themeFromSettings({ themeColor: '#123456' }, DEFAULT_THEME).palettes).toBe(DEFAULT_THEME.palettes);
+  });
+});
+
+/**
+ * The settings that make up a theme are read in one place.
+ *
+ * Only `useActiveTheme` builds the theme, and only the appearance editors read
+ * the raw values, to show what is selected. A component reading one directly
+ * draws the setting rather than the theme, and would silently ignore a theme
+ * the moment themes are stored on their own.
+ */
+describe('derivePalette', () => {
+  it('keeps text as picked when it already reads', () => {
+    expect(derivePalette({ background: '#000000', surface: '#111111', text: '#ffffff' }).text).toBe('#ffffff');
+  });
+
+  it('rescues text that would not read', () => {
+    const palette = derivePalette({ background: '#f0f0f0', surface: '#ffffff', text: '#cccccc' });
+    expect(contrast(palette.text, '#ffffff')).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('normalizeTheme', () => {
+  it('completes a theme saved before a field existed', () => {
+    const old = { accent: '#123456', palettes: { dark: { background: '#101010' } } } as never;
+    const theme = normalizeTheme(old);
+    expect(theme.palettes.dark.background).toBe('#101010');
+    expect(theme.palettes.dark.text).toBe(DEFAULT_THEME.palettes.dark.text);
+    expect(theme.shape).toEqual(DEFAULT_THEME.shape);
+    expect(theme.components).toEqual(DEFAULT_THEME.components);
+  });
+});
+
+describe('who reads the theme settings', () => {
+  const SRC = path.resolve(__dirname, '../..');
+  const THEME_SELECTORS = /\bselect(ThemeColor|RadiusPreset|ListDensity|CoverAccentEnabled|TranslucentDock)\b/;
+  const ALLOWED = [
+    'features/theme/useActiveTheme.ts',
+    'features/settings/appearance/state.ts',
+    'features/settings/appearance/useAppearanceToggles.ts',
+    'features/settings/appearance/components/ThemeColor.tsx',
+    'features/settings/appearance/components/RadiusPresetSelector.tsx',
+    'features/settings/appearance/components/ListDensitySelector.tsx',
+  ];
+
+  function sourceFiles(dir: string): string[] {
+    return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) return sourceFiles(full);
+      return /\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name) ? [full] : [];
+    });
+  }
+
+  it('is only the active theme and the appearance editors', () => {
+    const readers = sourceFiles(SRC)
+      .filter(file => THEME_SELECTORS.test(fs.readFileSync(file, 'utf8')))
+      // Written with `/`, like the list above, whatever the platform says.
+      .map(file => path.relative(SRC, file).split(path.sep).join('/'))
+      .filter(file => !ALLOWED.includes(file));
+
+    expect(readers).toEqual([]);
+  });
+});
+
+describe('whether the screens are drawn dark', () => {
+  it('follows the modes for the default theme', () => {
+    expect(drawsDark(colorsFor(DEFAULT_THEME, 'light'))).toBe(false);
+    expect(drawsDark(colorsFor(DEFAULT_THEME, 'dark'))).toBe(true);
+  });
+
+  it('follows the background when a palette is given the other shade', () => {
+    const blackLight = { ...DEFAULT_THEME, palettes: { ...DEFAULT_THEME.palettes, light: derivePalette({ background: '#000000', surface: '#111111', text: '#ffffff' }) } };
+    const whiteDark = { ...DEFAULT_THEME, palettes: { ...DEFAULT_THEME.palettes, dark: derivePalette({ background: '#ffffff', surface: '#f4f4f4', text: '#000000' }) } };
+
+    expect(drawsDark(colorsFor(blackLight, 'light'))).toBe(true);
+    expect(drawsDark(colorsFor(whiteDark, 'dark'))).toBe(false);
+  });
+});
+
+describe('what sits on the accent', () => {
+  const themeWith = (accent: string) => ({ ...DEFAULT_THEME, accent });
+
+  it('darkens the label on a pale accent rather than leaving white on yellow', () => {
+    const colors = colorsFor(themeWith('#ffd32a'), 'light');
+
+    expect(contrast(colors.onThemeColor, '#ffd32a')).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('keeps white where white already reads — the default accent', () => {
+    const colors = colorsFor(themeWith('#ff7f7f'), 'light');
+
+    expect(contrast(colors.onThemeColor, '#ff7f7f')).toBeGreaterThan(
+      contrast('#ff7f7f', '#ff7f7f'),
+    );
+  });
+
+  it('answers for an accent taken from a cover, which can be any colour', () => {
+    for (const accent of ['#ffffff', '#000000', '#7f8c8d', '#00ff00']) {
+      const colors = colorsFor(themeWith(accent), 'dark');
+
+      // 3:1 is the floor for the large, bold text these fills carry; the
+      // helper returns its best compromise when nothing clears 4.5.
+      expect(contrast(colors.onThemeColor, accent)).toBeGreaterThanOrEqual(3);
+    }
+  });
+});

@@ -432,19 +432,37 @@ hide on a preview, which is still seekable) lives beside that control.
 
 `src/features/library/useSync.ts` is the single library-sync path. It fetches lists
 (albums, artists, playlists, tracks, starred, genres) from the active server,
-pushes them into a mix of react-query and redux (library slice + libraryStarred
-slice), and stamps `lastSyncedAt` when successful. Every "the library is out of
-date" path routes through here:
+writes them to the same query-cache keys the screens read, and stamps
+`lastSyncedAt` when successful. Every "the library is out of date" path routes
+through here:
 
-- App start (`HomeScreen` fires `sync()` if `syncOnAppStart` is on)
 - App foreground (`HomeLayout` fires `sync()` on `AppState.change → active`)
-- Server switch (`HomeLayout` clears library slices and fires `sync()`)
+- Server switch (`HomeLayout` fires `sync()`)
 - Post-download completion (`DownloadersQueueContext` fires `sync(true)` twice
   after a rescan nudge)
 - Manual refresh (Settings → Library → last-synced row, `sync(true)`)
+- **Pull-to-refresh on the library** (`useLibraryRefresh`, on the library index
+  and every collection list, `sync(true)`)
 
-Home's pull-to-refresh is *not* one of them: it bumps a `refreshKey` that
-reshuffles Home's own shelves and never touches the catalog.
+That last one exists because the screens never refetch on their own. They read
+at `staleTime: Infinity`, so between syncs the app cannot notice anything — a
+playlist made on the server while the app was open did not appear, and the only
+way to ask was to background the app for half an hour or dig into Settings. A
+pull is the way to say *now*; the throttle stays where it is, because it is what
+keeps the app off a server's back the rest of the time.
+
+Two adjacent things that look like refreshes and are not:
+
+- **Home's pull-to-refresh** bumps a `refreshKey` that reshuffles Home's own
+  shelves and never touches the catalog.
+- **"Scan library"** in the account sheet calls `api.auth.startScan()`, which
+  asks the *server* to rescan its files. It does not refresh the app, and the
+  results only arrive on a later sync.
+
+A playlist's own screen is the one detail screen that refetches on focus
+(`usePlaylistScreenModel`), because its tracks are not in the catalog's playlist
+record: without it, a song added from another client stayed invisible until the
+next sync.
 
 `sync(force?: boolean)` throttles at 30 minutes by default; `force=true`
 bypasses that throttle, and bypasses nothing else — every run that gets past it
@@ -643,7 +661,11 @@ answer that, and which one a job uses depends on how many providers can do it.
   transfer came from, and `cancelQueueItem`). Autoplay and Smart Shuffle fill
   come from `features/playback/queueProviders.ts` (the similarity service —
   AudioMuse, declared in `providers/registry/similarityService.ts` — first, the
-  server's own similar songs as the fallback). Scrobbling routes through
+  server's own similar songs next, then the seed artist's top songs and random
+  library tracks). Each tier is asked in turn until one answers, because
+  similar songs comes back empty for any track its source does not know, and an
+  empty fill on the last track ends the queue. Play Similar stops at the
+  similarity tiers. Scrobbling routes through
   `state/redux/selectors/scrobbleRoutingSelectors.ts` and the offline mutation
   queue. Playlist generation is `features/playlist/generateSimilarPlaylist.ts`.
   External-source name resolution is `features/sources/registry.ts`.
@@ -866,6 +888,39 @@ average completion and the hour histogram. Tune these *against a week of real
 data*, not against argument. The ordering matters: a constant defended before
 it is measured is one that gets defended afterwards because it already shipped.
 
+## 12. The theme — one object, derived palettes
+
+The app's look is data: a single `Theme` in the appearance slice, edited by
+`editTheme` and read through `useActiveTheme()`. It holds the accent, a light
+and a dark palette, shape (corner radius, list density, text size), surface
+(background source, blur, dim, cover tint) and components (dock shape,
+tab labels, player layout).
+
+Three rules keep it honest.
+
+**A palette is derived, not typed in.** `derivePalette` takes the three
+colours a person actually picks — background, card, text — and works out the
+rest: borders, muted fills, placeholders, overlays. `ensureContrast` then
+pushes text until it reads against both the page and a card, falling back to
+whichever of black and white reads best when nothing clears the bar. That is
+why picking one colour changes several: the other values are functions of it.
+
+**"Dark" is the background's shade, not the mode.** `drawsDark(colors)` reads
+the resolved background's luminance, because a person may give the *light*
+palette a black background. The status bar, the dock's blur tint, ripples and
+skeletons all follow that rather than `useColorScheme()` — getting this wrong
+is invisible in tests and obvious on a phone: a dark status bar on a black
+page has no pixels at all.
+
+**What sits on the accent is decided against the accent.** `colorsFor`
+derives `onThemeColor` rather than storing it, because a stored white failed
+on five of the six shipped accents (yellow at 1.44:1) and an accent taken
+from a cover can be any colour.
+
+Read a theme value through `useActiveTheme()`/`useTheme()`, never at module
+import time: a static read cannot change when the theme does, and the whole
+point of this is that it changes.
+
 ## Where things live
 
 ```
@@ -937,7 +992,8 @@ src/features/           — one directory per feature: its screen, components,
                           DownloadContext, and the offline mutation queue that
                           replays scrobbles and edits made without a connection
   sources/              — external catalog registry (Deezer, MB)
-  theme/                — useTheme, useRadius, useListDensity, cover accent
+  theme/                — the theme (one editable object), derived palettes,
+                          useTheme/useActiveTheme, cover accent, backgrounds
   connectivity/         — offline and server-reachability state
   artwork/              — cover URLs for every provider, and the image cache
 

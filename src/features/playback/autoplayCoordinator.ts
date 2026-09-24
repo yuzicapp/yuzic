@@ -127,7 +127,10 @@ export function createAutoplayCoordinator(deps: AutoplayDeps): AutoplayCoordinat
     count: number
   ): Promise<PlayableResource[]> => {
     const extension = await provider.fetchExtension({
-      recentSongs: recentSongs.map(entry => ({ nativeId: entry.song.nativeId })),
+      recentSongs: recentSongs.map(entry => ({
+        nativeId: entry.song.nativeId,
+        artistName: entry.song.artist?.name,
+      })),
       excludeIds: new Set([...excludeLocalIds].filter((id): id is LocalId => Boolean(id))),
       count,
     });
@@ -150,17 +153,40 @@ export function createAutoplayCoordinator(deps: AutoplayDeps): AutoplayCoordinat
  */
 const keyOfResource = (resource: PlayableResource): string => entityKey(resource.song);
 
-/** The tracks both features start from, or an empty list if there is nothing to add. */
+/**
+ * The tracks both features start from, or an empty list if there is nothing to add.
+ *
+ * Every tier is asked in turn until one answers with something playable. This
+ * used to ask only the first, and an empty answer from it ended the queue:
+ * similar-songs is empty for any track its source does not know, and on the
+ * last track of a queue nothing ever asks again.
+ */
   const nextTracks = async (): Promise<PlayableResource[]> => {
-    const provider = resolveQueueFillProvider(deps.providers());
-    if (!provider) return [];
     const request = buildFillRequest(deps.queue(), deps.currentIndex());
-    const fetched = await fetchExtension(
-      provider,
-      request.recentResources,
-      deps.queue().map(resource => resource.song.localId),
-      request.count
-    );
+    let fetched: PlayableResource[] = [];
+    let lastError: unknown = null;
+    let answered = false;
+    for (const provider of deps.providers().filter(p => p.isAvailable())) {
+      try {
+        fetched = await fetchExtension(
+          provider,
+          request.recentResources,
+          deps.queue().map(resource => resource.song.localId),
+          request.count
+        );
+        answered = true;
+      } catch (error) {
+        lastError = error;
+        deps.logWarning(`Queue fill from ${provider.id} failed`, error);
+        continue;
+      }
+      if (fetched.length) break;
+    }
+    // Every tier failing is worth the caller's warning. A tier answering with
+    // nothing is not: the end of what the library can suggest is the ordinary
+    // end of a queue, and rethrowing an earlier tier's error over it made that
+    // log "Autoplay fill failed" on a night that worked exactly as designed.
+    if (!fetched.length && lastError && !answered) throw lastError;
     // The track the queue is continuing from, which is what a habit is
     // measured against — "you play B after A" needs to know what A was.
     const after = deps.queue()[deps.currentIndex()] ?? null;
@@ -176,8 +202,23 @@ const keyOfResource = (resource: PlayableResource): string => entityKey(resource
       if (filling) return;
       filling = true;
       try {
+        // What this fill is a continuation *of*. Asking the tiers takes
+        // several round trips, and a listener can start something else in
+        // that time — tap an album, switch server, clear the queue. The
+        // tracks coming back were chosen from the queue as it was, so
+        // appending them to whatever is playing now drops a stranger's
+        // records onto the end of it. Advancing a track is fine and common,
+        // which is why this asks whether the anchor is still *in* the queue
+        // rather than still current.
+        const anchor = deps.queue()[deps.currentIndex()] ?? null;
+
         const playable = await nextTracks();
         if (!playable.length) return;
+
+        if (anchor && !deps.queue().some(r => r.song.localId === anchor.song.localId)) {
+          deps.logWarning('Autoplay fill discarded: the queue it was filling is gone', null);
+          return;
+        }
 
         const insertAt = deps.queue().length;
         deps.setQueue([...deps.queue(), ...playable]);

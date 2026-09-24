@@ -176,7 +176,56 @@
       "homeSourcesListenbrainz": "ListenBrainz",
       "homeSourcesListenbrainzSubtext": "Afficher les rayons d'artistes similaires de ListenBrainz.",
       "homeSourcesDeezer": "Deezer",
-      "homeSourcesDeezerSubtext": "Charts Deezer, top titres et artistes similaires."
+      "homeSourcesDeezerSubtext": "Charts Deezer, top titres et artistes similaires.",
+      "palette": {
+        "light": "Couleurs claires",
+        "dark": "Couleurs sombres",
+        "background": "Arrière-plan",
+        "surface": "Cartes",
+        "text": "Texte",
+        "readableHint": "Le texte est ajusté si besoin pour rester lisible sur vos couleurs.",
+        "reset": "Réinitialiser les couleurs"
+      },
+      "background": {
+        "subtitle": "Afficher l'application sur une photo ou sur la lecture en cours.",
+        "none": "Uni",
+        "image": "Photo",
+        "cover": "Pochette",
+        "changePhoto": "Choisir une autre photo",
+        "blur": "Flou",
+        "dim": "Assombrissement",
+        "pickFailed": "Impossible d'utiliser cette photo.",
+        "everyTab": "Derrière chaque onglet",
+        "everyTabSubtext": "Accueil, Recherche et Bibliothèque. Désactivé : l'accueil seulement."
+      },
+      "floatingDock": "Barre flottante",
+      "floatingDockSubtext": "Détacher la barre d'onglets des bords de l'écran.",
+      "tabLabels": "Noms des onglets",
+      "tabLabelsSubtext": "Afficher le nom de chaque onglet sous son icône.",
+      "textSize": {
+        "title": "Taille du texte",
+        "small": "Petite",
+        "default": "Par défaut",
+        "large": "Grande",
+        "larger": "Très grande",
+        "restart": "La nouvelle taille s'appliquera au prochain démarrage de Yuzic."
+      },
+      "accentFromCover": "Accent selon la lecture",
+      "accentFromCoverSubtext": "L'accent change avec chaque pochette. Choisir une couleur désactive cette option.",
+      "playerLayout": {
+        "title": "Disposition du lecteur",
+        "subtitle": "La place qu'occupe la pochette.",
+        "artwork": "Pochette",
+        "compact": "Compact",
+        "fullWidth": "Pleine largeur"
+      },
+      "sections": {
+        "colours": "Couleurs",
+        "background": "Arrière-plan",
+        "player": "Lecteur",
+        "layout": "Disposition et texte",
+        "dock": "Barre et sensations"
+      }
     },
     "library": {
       "title": "Bibliothèque",
@@ -1438,7 +1487,9 @@
     "similarAlbums": "Albums similaires"
   },
   "externalSourcePicker": {
-    "empty": "Aucune source n'a pu résoudre cet élément."
+    "empty": "Aucune source n'a pu résoudre cet élément.",
+    "moreMatches_one": "{{count}} autre résultat",
+    "moreMatches_other": "{{count}} autres résultats"
   },
   "genreOptions": {
     "actions": {

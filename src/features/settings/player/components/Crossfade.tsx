@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/features/theme/useTheme';
 import { selectCrossfadeSeconds, selectCrossfadeAlways, setCrossfadeSeconds, setCrossfadeAlways } from '@/features/settings/playback/state';
-import { selectThemeColor } from '@/features/settings/appearance/state';
 import { spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import SettingsCard from '../../components/SettingsCard';
@@ -26,7 +25,7 @@ const Crossfade: React.FC = () => {
   const rad = useRadius();
   const seconds = useSelector(selectCrossfadeSeconds);
   const always = useSelector(selectCrossfadeAlways);
-  const themeColor = useSelector(selectThemeColor);
+  const themeColor = colors.themeColor;
 
   const off = seconds <= 0;
 

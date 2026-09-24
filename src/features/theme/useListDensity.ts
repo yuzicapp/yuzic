@@ -1,7 +1,5 @@
-import { useSelector } from 'react-redux';
-
-import { listDensity, type ListDensity } from '@/constants/design';
-import { selectListDensity } from '@/features/settings/appearance/state';
+import { listDensity } from '@/constants/design';
+import { useActiveTheme } from './useActiveTheme';
 
 /**
  * The vertical rhythm a list row should use, for the density the user picked.
@@ -16,6 +14,5 @@ import { selectListDensity } from '@/features/settings/appearance/state';
  * nothing moves until the user asks it to.
  */
 export function useListDensity() {
-  const density = useSelector(selectListDensity) as ListDensity;
-  return listDensity[density];
+  return listDensity[useActiveTheme().shape.density];
 }

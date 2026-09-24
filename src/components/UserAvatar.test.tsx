@@ -13,11 +13,16 @@ jest.mock('@/providers/registry/useApi', () => ({
 }));
 
 jest.mock('react-redux', () => ({
-  useSelector: (selector: string) => selector === 'themeColor' ? '#123456' : 'server-1',
+  useSelector: () => 'server-1',
 }));
 
+jest.mock('@/features/theme/useActiveTheme', () => {
+  const { DEFAULT_THEME } = jest.requireActual('@/features/theme/presets');
+  return { useActiveTheme: () => ({ ...DEFAULT_THEME, accent: '#123456' }) };
+});
+
 jest.mock('@/features/settings/appearance/state', () => ({
-  selectThemeColor: 'themeColor',
+  selectThemeMode: 'themeMode',
 }));
 
 jest.mock('@/state/redux/selectors/serversSelectors', () => ({
