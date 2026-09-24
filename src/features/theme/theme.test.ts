@@ -4,7 +4,7 @@ import path from 'path';
 import { themeColorPreset } from '@/constants/design';
 import { contrast } from './color';
 import { DEFAULT_THEME, derivePalette, normalizeTheme } from './presets';
-import { colorsFor, themeFromSettings } from './theme';
+import { colorsFor, drawsDark, themeFromSettings } from './theme';
 
 describe('the default theme', () => {
   /**
@@ -122,5 +122,20 @@ describe('who reads the theme settings', () => {
       .filter(file => !ALLOWED.includes(file));
 
     expect(readers).toEqual([]);
+  });
+});
+
+describe('whether the screens are drawn dark', () => {
+  it('follows the modes for the default theme', () => {
+    expect(drawsDark(colorsFor(DEFAULT_THEME, 'light'))).toBe(false);
+    expect(drawsDark(colorsFor(DEFAULT_THEME, 'dark'))).toBe(true);
+  });
+
+  it('follows the background when a palette is given the other shade', () => {
+    const blackLight = { ...DEFAULT_THEME, palettes: { ...DEFAULT_THEME.palettes, light: derivePalette({ background: '#000000', surface: '#111111', text: '#ffffff' }) } };
+    const whiteDark = { ...DEFAULT_THEME, palettes: { ...DEFAULT_THEME.palettes, dark: derivePalette({ background: '#ffffff', surface: '#f4f4f4', text: '#000000' }) } };
+
+    expect(drawsDark(colorsFor(blackLight, 'light'))).toBe(true);
+    expect(drawsDark(colorsFor(whiteDark, 'dark'))).toBe(false);
   });
 });

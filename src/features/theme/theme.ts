@@ -1,4 +1,5 @@
 import type { ListDensity, RadiusPreset, SemanticThemeColors } from '@/constants/design';
+import { isDark } from './color';
 
 /**
  * The theme is data: everything about how the app looks, in one object.
@@ -101,4 +102,15 @@ export function themeFromSettings(settings: ThemeSettingsV0, base: Theme): Theme
 /** What `useTheme().colors` hands every component: one scheme's palette and the accent. */
 export function colorsFor(theme: Theme, scheme: Scheme): SemanticThemeColors {
   return { themeColor: theme.accent, ...theme.palettes[scheme] };
+}
+
+/**
+ * Whether the screens are drawn dark, which is what the status bar, the dock's
+ * glass, ripples and skeletons have to match.
+ *
+ * It is the background's own shade, not the mode: a person can give the light
+ * palette a black background, and a dark status bar over it is invisible.
+ */
+export function drawsDark(colors: SemanticThemeColors): boolean {
+  return isDark(colors.background);
 }
