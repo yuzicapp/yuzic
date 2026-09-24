@@ -128,6 +128,9 @@ export const shade = {
   scrim: 'rgba(0, 0, 0, 0.35)',
   /** The same job where the artwork is dark enough to need the opposite. */
   scrimLight: 'rgba(255, 255, 255, 0.6)',
+  /** Top to bottom behind the status bar over the scrolled player: the clock
+   *  and the camera cutout on the dark end, fading out below them. */
+  statusBar: ['rgba(0,0,0,0.7)', 'rgba(0,0,0,0)'] as const,
 } as const;
 
 /**

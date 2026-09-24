@@ -1,4 +1,4 @@
-import { onDark, radius } from '@/constants/design';
+import { onDark, radius, shade, spacing } from '@/constants/design';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -7,6 +7,8 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import ImageColors from 'react-native-image-colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ACCENT_CACHE_MAX, createAccentCache, pickAccent, toWashAccent } from '@/features/theme/coverAccent';
 import {
@@ -51,6 +53,9 @@ const NEUTRAL_GRADIENT: [string, string] = [onDark.wash, onDark.background];
  * screen were two unrelated surfaces: tapping the bar dropped one and raised
  * the other. They are one surface now, at a position the finger can hold.
  */
+/** How far the player scrolls before the status bar scrim is fully in. */
+const STATUS_SCRIM_FADE = 24;
+
 export default function PlayerHost() {
   const {
     expansion, barCover, fullCover, scrollY, coverVisibility, coverSwipeX, hostOrigin,
@@ -64,6 +69,7 @@ export default function PlayerHost() {
   const { currentSong, currentIndex, repeatMode } = usePlayingState();
   const { getQueue } = usePlayingActions();
   const queueVersion = usePlayingQueueVersion();
+  const insets = useSafeAreaInsets();
   const coverAccentEnabled = useActiveTheme().surface.coverTint;
   // The app's accent follows the cover when the theme asks; this is where the
   // cover is known, so this is where it is taken from.
@@ -172,6 +178,12 @@ export default function PlayerHost() {
       hostOrigin.value = { x, y };
     });
   }, [hostOrigin]);
+
+  // Faded in over the first stretch of scrolling, and only while the player
+  // is up: the dock and the screens below have their own status bar.
+  const statusBarScrimStyle = useAnimatedStyle(() => ({
+    opacity: expansion.value * interpolate(scrollY.value, [0, STATUS_SCRIM_FADE], [0, 1], Extrapolation.CLAMP),
+  }));
 
   const surfaceStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: (1 - expansion.value) * height }],
@@ -341,6 +353,16 @@ export default function PlayerHost() {
           )}
         </Animated.View>
       )}
+
+      {/* Over the player and its cover, so neither scrolls into the clock or
+        * the camera cutout legibly-illegibly. Invisible until the player has
+        * scrolled, so the player at rest looks exactly as it did. */}
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.statusBarScrim, { height: insets.top + spacing.xl }, statusBarScrimStyle]}
+      >
+        <LinearGradient colors={shade.statusBar} style={StyleSheet.absoluteFill} />
+      </Animated.View>
     </View>
   );
 }
@@ -349,6 +371,12 @@ const styles = StyleSheet.create({
   coverFill: {
     width: '100%',
     height: '100%',
+  },
+  statusBarScrim: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
   },
   coverRow: {
     position: 'absolute',
