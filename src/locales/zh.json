@@ -1482,7 +1482,8 @@
     "similarAlbums": "相似专辑"
   },
   "externalSourcePicker": {
-    "empty": "没有来源能够解析此项目。"
+    "empty": "没有来源能够解析此项目。",
+    "moreMatches_other": "另外 {{count}} 个结果"
   },
   "genreOptions": {
     "actions": {

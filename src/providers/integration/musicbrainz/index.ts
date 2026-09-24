@@ -32,6 +32,8 @@ export type MbArtist = {
   name: string;
   score?: number;
   annotation?: string;
+  /** MusicBrainz's own note for telling same-named artists apart. */
+  disambiguation?: string;
   'release-groups'?: MbReleaseGroup[];
 };
 

@@ -1487,7 +1487,9 @@
     "similarAlbums": "Albums similaires"
   },
   "externalSourcePicker": {
-    "empty": "Aucune source n'a pu résoudre cet élément."
+    "empty": "Aucune source n'a pu résoudre cet élément.",
+    "moreMatches_one": "{{count}} autre résultat",
+    "moreMatches_other": "{{count}} autres résultats"
   },
   "genreOptions": {
     "actions": {
