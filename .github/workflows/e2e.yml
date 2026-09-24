@@ -123,6 +123,26 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
+      # Every suite here signs in through demo.navidrome.org, so when that is
+      # unreachable *from the runner* the first flow fails on an assertion
+      # about the screen after connecting and the rest are skipped — which
+      # reads as "onboarding is broken" and is not. Ask the server the same
+      # two things the app asks, and say plainly which it is.
+      - name: Probe the Navidrome demo
+        run: |
+          base="https://demo.navidrome.org/rest"
+          args="u=demo&p=demo&v=1.16.1&c=Yuzic&f=json"
+          for endpoint in ping getMusicFolders; do
+            code=$(curl -s -o /tmp/probe-$endpoint.json -w '%{http_code}' --max-time 30 "$base/$endpoint?$args" || echo 000)
+            status=$(python3 -c "import json,sys;print(json.load(open('/tmp/probe-$endpoint.json'))['subsonic-response']['status'])" 2>/dev/null || echo unparseable)
+            echo "$endpoint: HTTP $code, subsonic status $status"
+            if [ "$code" != "200" ] || [ "$status" != "ok" ]; then
+              echo "::error::The Navidrome demo did not answer $endpoint from this runner (HTTP $code, status $status). Every E2E suite signs in through it, so this is the environment rather than the app."
+              head -c 400 /tmp/probe-$endpoint.json || true
+              exit 1
+            fi
+          done
+
       # Order matters and is the reason these are separate steps rather than
       # `npm run test:e2e`. `onboarding-demo` is the only flow that runs from a
       # fresh install, and it is what leaves the app connected to a server —
