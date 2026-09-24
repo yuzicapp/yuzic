@@ -537,10 +537,17 @@ and a whole album denormalized into it**, and both are already held once each
 in the `artists` and `albums` arrays synced beside it. In that library the same
 album is serialized about 7.5 times over and the same artist about 44 times.
 
+Album and artist refs are **interned** (`domain/entities/internRef.ts`, one
+shared object per distinct ref up to 50,000), so this duplication is not a heap
+cost — it is paid in what gets stored, and in what has to be parsed back at
+every cold start, because hydration rebuilds each copy from JSON before
+interning can collapse it.
+
 So the ceiling is a schema problem before it is a storage-engine one: tracks
-holding references rather than copies would roughly halve the catalog before
-any paged-reads work begins. Issue #284 carries the numbers and the order to do
-it in.
+holding references rather than copies would roughly halve what is written and
+parsed, which is the part a person feels as a slow start. Worth doing before
+paged reads rather than instead of them — and past 50,000 distinct refs the
+sharing stops, at which point the heap starts tracking these figures too.
 
 ### Adding a new library-shaped resource
 
