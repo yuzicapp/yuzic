@@ -518,6 +518,26 @@ library too large to hold at all needs paged reads out of a real database,
 which is a much larger change; this one makes the common case fast without
 touching a call site.
 
+### What it costs now, measured on the device
+
+The figures above are desktop V8. Measured in Hermes on an iOS 26.5 simulator
+against a real 4,826-track Jellyfin library, the catalog serializes to 5.9 MB:
+tracks 5.31 MB (1,100 B each, 42 ms to parse), albums 533 KB (832 B each),
+artists 39 KB (357 B each). Linear in tracks, that is about 88 MB and 0.7 s at
+80,000, and 330 MB and 2.6 s at 300,000 — close enough to the estimates above
+to treat them as confirmed rather than theoretical.
+
+Where those bytes go is the part worth knowing. Averaged over 400 real tracks,
+`artist` costs 254 B and `album` 252 B — **46% of every track is a whole artist
+and a whole album denormalized into it**, and both are already held once each
+in the `artists` and `albums` arrays synced beside it. In that library the same
+album is serialized about 7.5 times over and the same artist about 44 times.
+
+So the ceiling is a schema problem before it is a storage-engine one: tracks
+holding references rather than copies would roughly halve the catalog before
+any paged-reads work begins. Issue #284 carries the numbers and the order to do
+it in.
+
 ### Adding a new library-shaped resource
 
 Add it to `CATALOG_RESOURCES` in `catalogQueries.ts` — a cache key and a fetch,
