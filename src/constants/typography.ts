@@ -1,4 +1,5 @@
 import { PixelRatio } from 'react-native';
+import { readStartupTextScale } from './startupTextScale';
 
 /**
  * The type scale: 14 roles, each chosen by naming what the text is so the same
@@ -14,7 +15,7 @@ import { PixelRatio } from 'react-native';
  * Adding a role is fine. Adding one that differs from an existing role only in
  * size is how the drift starts again.
  */
-const TYPE_SCALE = {
+const BASE_SCALE = {
   hero: { fontSize: 48, lineHeight: 52, fontWeight: '600' as const },
   display: { fontSize: 28, lineHeight: 34, fontWeight: '600' as const },
   screenTitle: { fontSize: 24, lineHeight: 30, fontWeight: '600' as const },
@@ -30,6 +31,26 @@ const TYPE_SCALE = {
   caption: { fontSize: 13, lineHeight: 17 },
   micro: { fontSize: 11, lineHeight: 14 },
 } as const;
+
+/**
+ * The scale at the user's chosen text size (Appearance, on the theme).
+ * Size and leading grow together, so every role keeps the ratio it was drawn
+ * with; the system text size then applies on top, as it always has.
+ */
+function sizedBy<T extends Record<string, { fontSize: number; lineHeight: number }>>(scale: T, factor: number): T {
+  if (factor === 1) return scale;
+  return Object.fromEntries(
+    Object.entries(scale).map(([role, style]) => [
+      role,
+      { ...style, fontSize: Math.round(style.fontSize * factor), lineHeight: Math.round(style.lineHeight * factor) },
+    ])
+  ) as T;
+}
+
+/** The text size this run of the app was drawn at, which a new choice waits on. */
+export const startupTextScale = readStartupTextScale();
+
+const TYPE_SCALE = sizedBy(BASE_SCALE, startupTextScale);
 
 /**
  * The same scale with its leading grown to match the user's text size.
@@ -97,6 +118,12 @@ export const fontScaleCap = {
  * other is the mismatch this exists to close.
  */
 export const cappedTypography = {
-  control: withScaledLeading(TYPE_SCALE, Math.min(SYSTEM_FONT_SCALE, fontScaleCap.control)),
-  glyph: withScaledLeading(TYPE_SCALE, Math.min(SYSTEM_FONT_SCALE, fontScaleCap.glyph)),
+  // From the base scale, not the user's text size: the cap bounds only the
+  // system multiplier React Native applies, so a role already enlarged by the
+  // in-app setting would reach both factors at once, 1.3 times 1.3, and
+  // overflow the fixed-height box the cap exists to protect. Structural text
+  // grows with the system setting up to its cap and leaves the in-app size to
+  // everything that has room for it.
+  control: withScaledLeading(BASE_SCALE, Math.min(SYSTEM_FONT_SCALE, fontScaleCap.control)),
+  glyph: withScaledLeading(BASE_SCALE, Math.min(SYSTEM_FONT_SCALE, fontScaleCap.glyph)),
 } as const;

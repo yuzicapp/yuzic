@@ -4,11 +4,13 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
 import AppearanceSettings from './';
-import settingsAppearanceReducer, { selectTranslucentDock } from './state';
+import { AppearanceSection, APPEARANCE_SECTIONS, type AppearanceSectionId } from './AppearanceSection';
+import settingsAppearanceReducer, { selectActiveTheme, selectTranslucentDock } from './state';
 import settingsPlaybackReducer from '@/features/settings/playback/state';
 
+const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn(), back: jest.fn() }),
+  useRouter: () => ({ push: mockPush, back: jest.fn() }),
 }));
 
 jest.mock('react-i18next', () => ({
@@ -31,6 +33,10 @@ jest.mock('@/features/player/playingBar/actions/Actions', () => ({ PLAYING_BAR_A
 // The switch's own behaviour is the appearance screen's business; which
 // servers have ratings is pinned in `adapterCapabilities.test.ts`.
 jest.mock('@/features/ratings/useRatingsAvailable', () => ({ useRatingsAvailable: () => true }));
+// The toast host draws with the gesture handler; the background card only calls it on a failed pick.
+jest.mock('@/components/toast', () => ({ notify: { error: jest.fn() } }));
+jest.mock('@/features/theme/backgroundImage', () => ({ pickBackgroundImage: jest.fn(), removeBackgroundImage: jest.fn() }));
+jest.mock('@/features/playback/PlayingContext', () => ({ usePlayingState: () => ({ currentSong: null }) }));
 
 function makeStore() {
   return configureStore({
@@ -43,54 +49,52 @@ function makeStore() {
 
 type Store = ReturnType<typeof makeStore>;
 
-async function renderScreen(store: Store) {
+async function renderWith(store: Store, ui: React.ReactElement) {
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <Provider store={store}>{children}</Provider>
   );
   Wrapper.displayName = 'TestStoreWrapper';
-  return render(<AppearanceSettings />, { wrapper: Wrapper });
+  return render(ui, { wrapper: Wrapper });
 }
 
-/** Every switch on the screen, in the order the screen declares its toggle groups. */
-const SWITCH_ORDER = [
-  'settings.appearance.showQualityBadge',
-  'settings.player.showPlaybackSpeed',
-  'settings.player.showJumpButtons',
-  'settings.player.showVolumeSlider',
-  // Last in the player group, and only present because the mocked adapter
-  // above says this server has ratings.
-  'settings.player.showRating',
-  'settings.appearance.showSourceHeaders',
-  'settings.appearance.coverAccent',
-  'settings.appearance.translucentDock',
-  'settings.appearance.haptics',
-  'settings.appearance.respectReducedMotion',
-] as const;
+const renderSection = (store: Store, section: AppearanceSectionId) =>
+  renderWith(store, <AppearanceSection section={section} />);
 
-type View = Awaited<ReturnType<typeof renderScreen>>;
+type View = Awaited<ReturnType<typeof renderSection>>;
 
-function switchFor(view: View, label: (typeof SWITCH_ORDER)[number]) {
-  expect(view.getByText(label)).toBeTruthy();
-  const switches = view.getAllByRole('switch');
-  expect(switches).toHaveLength(SWITCH_ORDER.length);
-  return switches[SWITCH_ORDER.indexOf(label)];
+/** The switch a label names; every switch carries its row's label. */
+function switchFor(view: View, label: string) {
+  const found = view.getAllByRole('switch').find(s => s.props.accessibilityLabel === label);
+  expect(found).toBeTruthy();
+  return found!;
 }
 
-describe('AppearanceSettings', () => {
+describe('the appearance index', () => {
+  it('lists a row per page and opens the one tapped', async () => {
+    const view = await renderWith(makeStore(), <AppearanceSettings />);
+    for (const section of APPEARANCE_SECTIONS) {
+      expect(view.getByText(`settings.appearance.sections.${section}`)).toBeTruthy();
+    }
+    await fireEvent.press(view.getByText('settings.appearance.sections.player'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/settings/appearanceSectionView', params: { section: 'player' } });
+  });
+});
+
+describe('the appearance pages', () => {
   it('reflects the stored value on each switch', async () => {
-    const view = await renderScreen(makeStore());
-
-    expect(switchFor(view, 'settings.appearance.showQualityBadge').props.value).toBe(false);
-    expect(switchFor(view, 'settings.player.showPlaybackSpeed').props.value).toBe(false);
-    expect(switchFor(view, 'settings.appearance.haptics').props.value).toBe(true);
+    const player = await renderSection(makeStore(), 'player');
+    expect(switchFor(player, 'settings.appearance.showQualityBadge').props.value).toBe(false);
+    expect(switchFor(player, 'settings.player.showPlaybackSpeed').props.value).toBe(false);
+    const dock = await renderSection(makeStore(), 'dock');
+    expect(switchFor(dock, 'settings.appearance.haptics').props.value).toBe(true);
   });
 
   it('writes the quality badge and source headers to appearance settings', async () => {
     const store = makeStore();
-    const view = await renderScreen(store);
-
-    await fireEvent(switchFor(view, 'settings.appearance.showQualityBadge'), 'valueChange', true);
-    await fireEvent(switchFor(view, 'settings.appearance.showSourceHeaders'), 'valueChange', false);
+    const player = await renderSection(store, 'player');
+    await fireEvent(switchFor(player, 'settings.appearance.showQualityBadge'), 'valueChange', true);
+    const layout = await renderSection(store, 'layout');
+    await fireEvent(switchFor(layout, 'settings.appearance.showSourceHeaders'), 'valueChange', false);
 
     expect(store.getState().settingsAppearance.showQualityBadge).toBe(true);
     expect(store.getState().settingsAppearance.showSourceHeaders).toBe(false);
@@ -98,7 +102,7 @@ describe('AppearanceSettings', () => {
 
   it('writes which player controls are drawn to playback settings', async () => {
     const store = makeStore();
-    const view = await renderScreen(store);
+    const view = await renderSection(store, 'player');
 
     await fireEvent(switchFor(view, 'settings.player.showPlaybackSpeed'), 'valueChange', true);
     await fireEvent(switchFor(view, 'settings.player.showVolumeSlider'), 'valueChange', true);
@@ -109,7 +113,7 @@ describe('AppearanceSettings', () => {
 
   it('writes the feel switches', async () => {
     const store = makeStore();
-    const view = await renderScreen(store);
+    const view = await renderSection(store, 'dock');
 
     await fireEvent(switchFor(view, 'settings.appearance.translucentDock'), 'valueChange', true);
     await fireEvent(switchFor(view, 'settings.appearance.haptics'), 'valueChange', false);
@@ -121,5 +125,15 @@ describe('AppearanceSettings', () => {
     });
     // The dock is part of the theme now, so the switch edits the active theme.
     expect(selectTranslucentDock(store.getState())).toBe(true);
+  });
+
+  it('writes the dock shape and tab labels to the theme', async () => {
+    const store = makeStore();
+    const view = await renderSection(store, 'dock');
+
+    await fireEvent(switchFor(view, 'settings.appearance.floatingDock'), 'valueChange', true);
+    await fireEvent(switchFor(view, 'settings.appearance.tabLabels'), 'valueChange', true);
+
+    expect(selectActiveTheme(store.getState()).components).toMatchObject({ dockShape: 'floating', tabLabels: true });
   });
 });

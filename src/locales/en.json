@@ -185,6 +185,46 @@
         "text": "Text",
         "readableHint": "Text is adjusted if needed so it stays readable on your colours.",
         "reset": "Reset colours"
+      },
+      "background": {
+        "subtitle": "Draw the app over a photo or what's playing.",
+        "none": "Plain",
+        "image": "Photo",
+        "cover": "Cover",
+        "changePhoto": "Choose another photo",
+        "blur": "Blur",
+        "dim": "Dim",
+        "pickFailed": "Couldn't use that photo.",
+        "everyTab": "Behind every tab",
+        "everyTabSubtext": "Home, Search and Library. Off, just Home."
+      },
+      "floatingDock": "Floating dock",
+      "floatingDockSubtext": "Lift the tab bar off the screen's edges.",
+      "tabLabels": "Tab labels",
+      "tabLabelsSubtext": "Name each tab under its icon.",
+      "textSize": {
+        "title": "Text size",
+        "small": "Small",
+        "default": "Default",
+        "large": "Large",
+        "larger": "Larger",
+        "restart": "The new size applies the next time Yuzic starts."
+      },
+      "accentFromCover": "Accent from what's playing",
+      "accentFromCoverSubtext": "The accent changes with each cover. Picking a colour turns this off.",
+      "playerLayout": {
+        "title": "Player layout",
+        "subtitle": "How much room the cover takes.",
+        "artwork": "Artwork",
+        "compact": "Compact",
+        "fullWidth": "Full width"
+      },
+      "sections": {
+        "colours": "Colours",
+        "background": "Background",
+        "player": "Player",
+        "layout": "Layout and text",
+        "dock": "Dock and feel"
       }
     },
     "library": {
@@ -1615,8 +1655,7 @@
       "clearProviderDownloads": "Delete all {{provider}} downloads",
       "removeDownload": "Remove download {{title}}",
       "reorderSource": "Reorder {{name}}",
-      "sourceDetails": "About {{name}}",
-      "editColor": "{{name}}, {{value}}. Edit colour"
+      "sourceDetails": "About {{name}}"
     },
     "onboarding": {
       "serverOptions": "Options for {{url}}"

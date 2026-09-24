@@ -58,6 +58,12 @@ interface AppearanceSettingsState {
    * the setters below edit it in place.
    */
   theme: Theme;
+  /**
+   * The accent taken from the cover of what is playing, while the theme asks
+   * for one. Runtime only: it is left out of storage, since it is only ever
+   * true of the track playing now.
+   */
+  liveAccent: string | null;
   gridColumns: number;
   isGridView: boolean;
   /**
@@ -86,6 +92,7 @@ interface AppearanceSettingsState {
 const initialState: AppearanceSettingsState = {
   themeMode: 'system',
   theme: DEFAULT_THEME,
+  liveAccent: null,
   gridColumns: 3,
   isGridView: true,
   libraryViewModes: {},
@@ -112,8 +119,12 @@ const appearanceSlice = createSlice({
     resetPalettes(state) {
       state.theme = { ...normalizeTheme(state.theme), palettes: DEFAULT_THEME.palettes };
     },
+    /** Picking an accent is choosing one, so it stops following the cover. */
     setThemeColor(state, action: PayloadAction<string>) {
-      state.theme = applyThemeEdit(normalizeTheme(state.theme), { accent: action.payload });
+      state.theme = applyThemeEdit(normalizeTheme(state.theme), { accent: action.payload, accentFromCover: false });
+    },
+    setLiveAccent(state, action: PayloadAction<string | null>) {
+      state.liveAccent = action.payload;
     },
     setRadiusPreset(state, action: PayloadAction<RadiusPreset>) {
       state.theme = applyThemeEdit(normalizeTheme(state.theme), { shape: { radius: action.payload } });
@@ -169,6 +180,7 @@ export const {
   setThemeMode,
   editTheme,
   resetPalettes,
+  setLiveAccent,
   setThemeColor,
   setRadiusPreset,
   setListDensity,
@@ -199,18 +211,24 @@ interface AppearanceRootState {
 export const selectThemeMode = (state: AppearanceRootState): ThemeMode =>
   state.settingsAppearance.themeMode;
 
-const selectStoredTheme = (state: AppearanceRootState) => state.settingsAppearance.theme;
+/** The theme as saved, before a live accent is put in. For the one hook that follows the cover. */
+export const selectStoredTheme = (state: AppearanceRootState) => state.settingsAppearance.theme;
+const selectLiveAccent = (state: AppearanceRootState) => state.settingsAppearance.liveAccent;
 
 /**
  * The theme the app is drawn with.
  *
- * Memoised on the stored theme, so it is the same object until the theme
- * changes. It is completed from the default: one saved before a field existed
+ * Memoised on the stored theme and the live accent, so it is the same object
+ * until either changes. With `accentFromCover` on, the live accent stands in
+ * for the theme's own. It is completed from the default: one saved before a field existed
  * must not reach a style as `undefined`.
  */
 export const selectActiveTheme = createSelector(
-  [selectStoredTheme],
-  (theme): Theme => (theme ? normalizeTheme(theme) : DEFAULT_THEME),
+  [selectStoredTheme, selectLiveAccent],
+  (stored, liveAccent): Theme => {
+    const theme = stored ? normalizeTheme(stored) : DEFAULT_THEME;
+    return theme.accentFromCover && liveAccent ? { ...theme, accent: liveAccent } : theme;
+  },
 );
 
 export const selectThemeColor = (state: AppearanceRootState): string =>

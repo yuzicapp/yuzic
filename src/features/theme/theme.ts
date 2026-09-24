@@ -1,4 +1,5 @@
 import type { ListDensity, RadiusPreset, SemanticThemeColors } from '@/constants/design';
+import { isDark } from './color';
 
 /**
  * The theme is data: everything about how the app looks, in one object.
@@ -16,20 +17,52 @@ type Scheme = 'light' | 'dark';
 /** A scheme's colours. The accent is the theme's, not the palette's. */
 export type ThemePalette = Omit<SemanticThemeColors, 'themeColor'>;
 
+export type ScreenBackgroundSource =
+  | { kind: 'none' }
+  /** A photo the user picked, copied into the app's own storage. */
+  | { kind: 'image'; uri: string }
+  /** The cover of whatever is playing, so the screen changes with the music. */
+  | { kind: 'cover' };
+
 export interface Theme {
   /** Both schemes, so the app follows the system's light and dark like it always has. */
   palettes: Record<Scheme, ThemePalette>;
   accent: string;
+  /**
+   * Take the accent from the cover of what is playing instead, falling back to
+   * `accent` when nothing is. See `useLiveCoverAccent`.
+   */
+  accentFromCover: boolean;
   shape: {
     radius: RadiusPreset;
     density: ListDensity;
+    /** A multiple of the type scale; one of `TEXT_SCALES`. Applies from the next start. */
+    textScale: number;
   };
   surface: {
     /** Tint a detail screen with a colour from its cover art. */
     coverTint: boolean;
+    /** What the tab screens are drawn over: their plain colour, a photo, or what is playing. */
+    background: ScreenBackgroundSource;
+    /** Behind Home alone, or behind every tab's root screen. */
+    backgroundScope: 'home' | 'tabs';
+    /** Blur radius applied to the background image, in points. */
+    backgroundBlur: number;
+    /**
+     * How much of the theme's background colour is laid over the image, from 0
+     * to 1. It is a veil in the theme's own colour rather than black, so text
+     * that reads on the plain background keeps reading as it rises.
+     */
+    backgroundDim: number;
   };
   components: {
     dock: 'solid' | 'translucent';
+    /** Edge to edge along the bottom, or a rounded panel floating above it. */
+    dockShape: 'edge' | 'floating';
+    /** Names under the tab icons, for anyone who would rather read than recognise. */
+    tabLabels: boolean;
+    /** The player's cover: in the column, edge to edge, or small beside the title. */
+    playerLayout: 'artwork' | 'fullWidth' | 'compact';
   };
 }
 
@@ -52,11 +85,13 @@ export function themeFromSettings(settings: ThemeSettingsV0, base: Theme): Theme
     ...base,
     accent: settings.themeColor ?? base.accent,
     shape: {
+      ...base.shape,
       radius: settings.radiusPreset ?? base.shape.radius,
       density: settings.listDensity ?? base.shape.density,
     },
-    surface: { coverTint: settings.coverAccentEnabled ?? base.surface.coverTint },
+    surface: { ...base.surface, coverTint: settings.coverAccentEnabled ?? base.surface.coverTint },
     components: {
+      ...base.components,
       dock: settings.translucentDock === undefined
         ? base.components.dock
         : settings.translucentDock ? 'translucent' : 'solid',
@@ -67,4 +102,15 @@ export function themeFromSettings(settings: ThemeSettingsV0, base: Theme): Theme
 /** What `useTheme().colors` hands every component: one scheme's palette and the accent. */
 export function colorsFor(theme: Theme, scheme: Scheme): SemanticThemeColors {
   return { themeColor: theme.accent, ...theme.palettes[scheme] };
+}
+
+/**
+ * Whether the screens are drawn dark, which is what the status bar, the dock's
+ * glass, ripples and skeletons have to match.
+ *
+ * It is the background's own shade, not the mode: a person can give the light
+ * palette a black background, and a dark status bar over it is invisible.
+ */
+export function drawsDark(colors: SemanticThemeColors): boolean {
+  return isDark(colors.background);
 }

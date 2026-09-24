@@ -35,7 +35,7 @@ function renderCard() {
   return { store, view: render(<ThemePalette />, { wrapper: Wrapper }) };
 }
 
-const row = (key: string) => `a11y.settings.editColor:settings.appearance.palette.${key}`;
+const row = (key: string) => `settings.appearance.palette.${key}`;
 
 describe('ThemePalette', () => {
   it('edits the colours of the scheme on screen, and keeps text readable', async () => {
@@ -43,9 +43,9 @@ describe('ThemePalette', () => {
     const screen = await view;
 
     // Near-white text on a near-white background is what the guard is for.
-    await fireEvent.press(screen.getByLabelText(row('background')));
+    await fireEvent.press(screen.getByText(row('background')));
     await pick('#fafafa');
-    await fireEvent.press(screen.getByLabelText(row('text')));
+    await fireEvent.press(screen.getByText(row('text')));
     await pick('#f0f0f0');
 
     const theme = selectActiveTheme(store.getState());
@@ -59,7 +59,7 @@ describe('ThemePalette', () => {
     const screen = await view;
     expect(screen.queryByText('settings.appearance.palette.reset')).toBeNull();
 
-    await fireEvent.press(screen.getByLabelText(row('surface')));
+    await fireEvent.press(screen.getByText(row('surface')));
     await pick('#eeeeee');
     await fireEvent.press(screen.getByText('settings.appearance.palette.reset'));
 

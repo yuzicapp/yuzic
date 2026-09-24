@@ -11,6 +11,7 @@ import reducer, {
   setRadiusPreset,
   setThemeColor,
   setTranslucentDock,
+  setLiveAccent,
 } from './state'
 import { migrateAppearance } from './themeStore'
 import { DEFAULT_THEME } from '@/features/theme/presets'
@@ -94,5 +95,27 @@ describe('upgrading from the old appearance settings', () => {
   it('leaves an already-upgraded blob alone', () => {
     const current = fresh()
     expect(migrateAppearance(current)).toBe(current)
+  })
+})
+
+describe('an accent from what is playing', () => {
+  it('stands in for the theme accent only while the theme follows the cover', () => {
+    let state = reducer(fresh(), setLiveAccent('#336699'))
+    expect(selectThemeColor(root(state))).toBe(DEFAULT_THEME.accent)
+
+    state = reducer(state, editTheme({ accentFromCover: true }))
+    expect(selectThemeColor(root(state))).toBe('#336699')
+
+    state = reducer(state, setLiveAccent(null))
+    expect(selectThemeColor(root(state))).toBe(DEFAULT_THEME.accent)
+  })
+
+  it('stops following the cover when an accent is picked', () => {
+    let state = reducer(fresh(), editTheme({ accentFromCover: true }))
+    state = reducer(state, setLiveAccent('#336699'))
+    state = reducer(state, setThemeColor('#123456'))
+
+    expect(selectActiveTheme(root(state)).accentFromCover).toBe(false)
+    expect(selectThemeColor(root(state))).toBe('#123456')
   })
 })

@@ -185,6 +185,46 @@
         "text": "テキスト",
         "readableHint": "文字が読みやすくなるよう、必要に応じて自動で調整されます。",
         "reset": "色をリセット"
+      },
+      "background": {
+        "subtitle": "アプリの背景に写真や再生中の曲を表示します。",
+        "none": "なし",
+        "image": "写真",
+        "cover": "ジャケット",
+        "changePhoto": "別の写真を選ぶ",
+        "blur": "ぼかし",
+        "dim": "暗さ",
+        "pickFailed": "この写真は使用できませんでした。",
+        "everyTab": "すべてのタブに表示",
+        "everyTabSubtext": "ホーム・検索・ライブラリ。オフのときはホームのみ。"
+      },
+      "floatingDock": "フローティングドック",
+      "floatingDockSubtext": "タブバーを画面の端から浮かせて表示します。",
+      "tabLabels": "タブのラベル",
+      "tabLabelsSubtext": "各タブのアイコンの下に名前を表示します。",
+      "textSize": {
+        "title": "文字サイズ",
+        "small": "小",
+        "default": "標準",
+        "large": "大",
+        "larger": "特大",
+        "restart": "新しいサイズは次回 Yuzic を起動したときに適用されます。"
+      },
+      "accentFromCover": "再生中の曲からアクセント",
+      "accentFromCoverSubtext": "アクセントがジャケットごとに変わります。色を選ぶとオフになります。",
+      "playerLayout": {
+        "title": "プレーヤーのレイアウト",
+        "subtitle": "ジャケットの表示サイズ。",
+        "artwork": "ジャケット",
+        "compact": "コンパクト",
+        "fullWidth": "全幅"
+      },
+      "sections": {
+        "colours": "色",
+        "background": "背景",
+        "player": "プレーヤー",
+        "layout": "レイアウトと文字",
+        "dock": "ドックと操作感"
       }
     },
     "library": {
@@ -1619,8 +1659,7 @@
       "clearProviderDownloads": "{{provider}}のダウンロードをすべて削除",
       "removeDownload": "ダウンロード{{title}}を削除",
       "reorderSource": "{{name}}を並べ替え",
-      "sourceDetails": "{{name}}について",
-      "editColor": "{{name}}、{{value}}。色を編集"
+      "sourceDetails": "{{name}}について"
     },
     "onboarding": {
       "serverOptions": "{{url}}のオプション"

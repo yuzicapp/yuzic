@@ -39,6 +39,7 @@ import { useApi } from '@/providers/registry/useApi'
 import type { SectionConfig } from '@/features/home/homeLayout'
 import { useRadius } from '@/features/theme/useRadius'
 import { useScrollClearance } from '@/features/theme/useScrollClearance'
+import { useHasScreenBackground } from '@/features/theme/ScreenBackground'
 
 function renderSection(config: SectionConfig, refreshKey: number) {
   switch (config.type) {
@@ -88,6 +89,7 @@ export default function Home() {
   useScrollToTop(scrollRef)
 
   const { colors } = useTheme()
+  const hasBackground = useHasScreenBackground('home')
   const rad = useRadius()
   const [refreshKey, setRefreshKey] = useState(0)
   const { resume, library, server, sources } = useDailyLayout(refreshKey)
@@ -201,7 +203,8 @@ export default function Home() {
   return (
     <ScrollView
       ref={scrollRef}
-      style={[styles.container, { backgroundColor: colors.background }]}
+      // Transparent over the theme's background image, which HomeScreen draws behind it.
+      style={[styles.container, { backgroundColor: hasBackground ? 'transparent' : colors.background }]}
       contentContainerStyle={[styles.content, { paddingBottom: scrollClearance }]}
       showsVerticalScrollIndicator={false}
       refreshControl={

@@ -185,6 +185,46 @@
         "text": "文字",
         "readableHint": "必要时会自动调整文字颜色，确保在你的配色上清晰可读。",
         "reset": "重置颜色"
+      },
+      "background": {
+        "subtitle": "在照片或正在播放的内容上显示应用。",
+        "none": "纯色",
+        "image": "照片",
+        "cover": "封面",
+        "changePhoto": "选择其他照片",
+        "blur": "模糊",
+        "dim": "遮罩",
+        "pickFailed": "无法使用这张照片。",
+        "everyTab": "所有标签页",
+        "everyTabSubtext": "主页、搜索和资料库。关闭时仅主页。"
+      },
+      "floatingDock": "悬浮底栏",
+      "floatingDockSubtext": "让标签栏脱离屏幕边缘悬浮显示。",
+      "tabLabels": "标签名称",
+      "tabLabelsSubtext": "在每个标签图标下显示名称。",
+      "textSize": {
+        "title": "文字大小",
+        "small": "小",
+        "default": "默认",
+        "large": "大",
+        "larger": "特大",
+        "restart": "新的文字大小将在下次启动 Yuzic 时生效。"
+      },
+      "accentFromCover": "跟随正在播放的强调色",
+      "accentFromCoverSubtext": "强调色随每张封面变化。选择颜色会关闭此选项。",
+      "playerLayout": {
+        "title": "播放器布局",
+        "subtitle": "封面所占的空间。",
+        "artwork": "封面",
+        "compact": "紧凑",
+        "fullWidth": "全宽"
+      },
+      "sections": {
+        "colours": "颜色",
+        "background": "背景",
+        "player": "播放器",
+        "layout": "布局与文字",
+        "dock": "底栏与手感"
       }
     },
     "library": {
@@ -1619,8 +1659,7 @@
       "clearProviderDownloads": "删除所有 {{provider}} 下载",
       "removeDownload": "移除下载 {{title}}",
       "reorderSource": "重新排序 {{name}}",
-      "sourceDetails": "关于 {{name}}",
-      "editColor": "{{name}}，{{value}}。编辑颜色"
+      "sourceDetails": "关于 {{name}}"
     },
     "onboarding": {
       "serverOptions": "{{url}}的选项"

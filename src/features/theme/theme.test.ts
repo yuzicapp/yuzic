@@ -4,7 +4,7 @@ import path from 'path';
 import { themeColorPreset } from '@/constants/design';
 import { contrast } from './color';
 import { DEFAULT_THEME, derivePalette, normalizeTheme } from './presets';
-import { colorsFor, themeFromSettings } from './theme';
+import { colorsFor, drawsDark, themeFromSettings } from './theme';
 
 describe('the default theme', () => {
   /**
@@ -32,9 +32,9 @@ describe('the default theme', () => {
   });
 
   it('keeps the shape, surface and dock a fresh install always had', () => {
-    expect(DEFAULT_THEME.shape).toEqual({ radius: 'default', density: 'default' });
-    expect(DEFAULT_THEME.surface).toEqual({ coverTint: true });
-    expect(DEFAULT_THEME.components).toEqual({ dock: 'solid' });
+    expect(DEFAULT_THEME.shape).toEqual({ radius: 'default', density: 'default', textScale: 1 });
+    expect(DEFAULT_THEME.surface).toMatchObject({ coverTint: true, background: { kind: 'none' } });
+    expect(DEFAULT_THEME.components).toEqual({ dock: 'solid', dockShape: 'edge', tabLabels: false, playerLayout: 'artwork' });
   });
 });
 
@@ -49,7 +49,7 @@ describe('themeFromSettings', () => {
     }, DEFAULT_THEME);
 
     expect(theme.accent).toBe('#123456');
-    expect(theme.shape).toEqual({ radius: 'sharp', density: 'compact' });
+    expect(theme.shape).toEqual({ radius: 'sharp', density: 'compact', textScale: 1 });
     expect(theme.surface.coverTint).toBe(false);
     expect(theme.components.dock).toBe('translucent');
     expect(colorsFor(theme, 'dark').themeColor).toBe('#123456');
@@ -100,7 +100,7 @@ describe('who reads the theme settings', () => {
   const ALLOWED = [
     'features/theme/useActiveTheme.ts',
     'features/settings/appearance/state.ts',
-    'features/settings/appearance/index.tsx',
+    'features/settings/appearance/useAppearanceToggles.ts',
     'features/settings/appearance/components/ThemeColor.tsx',
     'features/settings/appearance/components/RadiusPresetSelector.tsx',
     'features/settings/appearance/components/ListDensitySelector.tsx',
@@ -122,5 +122,20 @@ describe('who reads the theme settings', () => {
       .filter(file => !ALLOWED.includes(file));
 
     expect(readers).toEqual([]);
+  });
+});
+
+describe('whether the screens are drawn dark', () => {
+  it('follows the modes for the default theme', () => {
+    expect(drawsDark(colorsFor(DEFAULT_THEME, 'light'))).toBe(false);
+    expect(drawsDark(colorsFor(DEFAULT_THEME, 'dark'))).toBe(true);
+  });
+
+  it('follows the background when a palette is given the other shade', () => {
+    const blackLight = { ...DEFAULT_THEME, palettes: { ...DEFAULT_THEME.palettes, light: derivePalette({ background: '#000000', surface: '#111111', text: '#ffffff' }) } };
+    const whiteDark = { ...DEFAULT_THEME, palettes: { ...DEFAULT_THEME.palettes, dark: derivePalette({ background: '#ffffff', surface: '#f4f4f4', text: '#000000' }) } };
+
+    expect(drawsDark(colorsFor(blackLight, 'light'))).toBe(true);
+    expect(drawsDark(colorsFor(whiteDark, 'dark'))).toBe(false);
   });
 });

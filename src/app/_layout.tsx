@@ -210,7 +210,7 @@ function useImageMemoryCleanup() {
 }
 
 function AppShell() {
-  const { resolved, isDarkMode } = useTheme();
+  const { isDarkMode } = useTheme();
   const language = useSelector(selectLanguage);
   useImageMemoryCleanup();
   // Reads the stored catalog back into the query cache, after first paint and
@@ -247,7 +247,7 @@ function AppShell() {
   }, []);
 
   return (
-    <ThemeProvider value={resolved === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={isDarkMode ? DarkTheme : DefaultTheme}>
       <DownloadProvider>
         <DlnaProvider>
         <PlaybackSinkProvider>

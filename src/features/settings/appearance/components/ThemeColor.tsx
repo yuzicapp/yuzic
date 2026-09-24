@@ -11,6 +11,7 @@ import SettingsCardHeader from '../../components/SettingsCardHeader';
 import SettingsCard from '../../components/SettingsCard';
 import Touchable from '@/components/Touchable';
 import { useRadius } from '@/features/theme/useRadius';
+import { PICKER_THUMB } from './ThemePalette';
 
 // The first preset is the default a fresh install starts on, so the list is
 // the one place both are stated.
@@ -64,6 +65,7 @@ export const ThemeColor: React.FC = () => {
         {open && (
           <View style={styles.picker}>
             <ColorPicker
+              thumbSize={PICKER_THUMB}
               value={themeColor}
               onCompleteJS={c => dispatch(setThemeColor(c.hex))}
               style={{ height: 240, width: '100%' }}
@@ -119,5 +121,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     paddingTop: spacing.lg,
+    // Room for half a handle past each end of the panel, inside the card.
+    paddingHorizontal: spacing.sm,
   },
 });

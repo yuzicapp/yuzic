@@ -63,9 +63,10 @@ const DARK: ThemePalette = {
 export const DEFAULT_THEME: Theme = {
   palettes: { light: LIGHT, dark: DARK },
   accent: themeColorPreset[0],
-  shape: { radius: 'default', density: 'default' },
-  surface: { coverTint: true },
-  components: { dock: 'solid' },
+  accentFromCover: false,
+  shape: { radius: 'default', density: 'default', textScale: 1 },
+  surface: { coverTint: true, background: { kind: 'none' }, backgroundScope: 'home', backgroundBlur: 24, backgroundDim: 0.6 },
+  components: { dock: 'solid', dockShape: 'edge', tabLabels: false, playerLayout: 'artwork' },
 };
 
 /** The colours a person picks. Everything else in a palette is worked out from them. */

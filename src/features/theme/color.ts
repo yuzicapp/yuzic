@@ -86,6 +86,9 @@ export function isDark(color: string): boolean {
   return luminance(must(color)) < 0.18;
 }
 
+/** How finely `ensureContrast` walks toward black or white. */
+const CONTRAST_STEPS = 50;
+
 /**
  * `fg`, moved toward black or white just far enough to reach `min` contrast
  * against every one of `backgrounds`.
@@ -93,16 +96,30 @@ export function isDark(color: string): boolean {
  * This is what stops a theme someone made from putting pale grey on pale grey.
  * A colour that already reads is returned unchanged, so a well-made theme looks
  * exactly as its author picked it.
+ *
+ * It tries the direction away from the first background, then the other way.
+ * Backgrounds of opposite shades, say black pages with white cards, can leave
+ * no colour that reaches `min` on both; then it is the one that reads best on
+ * the worse of them, a grey, rather than white text on the white cards.
  */
 export function ensureContrast(fg: string, backgrounds: string[], min: number): string {
   const worst = (color: string) => Math.min(...backgrounds.map(bg => contrast(color, bg)));
   if (worst(fg) >= min) return fg;
-  const darkBackground = isDark(backgrounds[0]);
-  const target = darkBackground ? WHITE : BLACK;
   const start = must(fg);
-  for (let step = 1; step <= 20; step++) {
-    const candidate = toHex(blend(start, target, step / 20));
-    if (worst(candidate) >= min) return candidate;
+  const first = isDark(backgrounds[0]) ? WHITE : BLACK;
+  const second = first === WHITE ? BLACK : WHITE;
+  let best = fg;
+  let bestContrast = worst(fg);
+  for (const target of [first, second]) {
+    for (let step = 1; step <= CONTRAST_STEPS; step++) {
+      const candidate = toHex(blend(start, target, step / CONTRAST_STEPS));
+      const reads = worst(candidate);
+      if (reads >= min) return candidate;
+      if (reads > bestContrast) {
+        best = candidate;
+        bestContrast = reads;
+      }
+    }
   }
-  return toHex(target);
+  return best;
 }

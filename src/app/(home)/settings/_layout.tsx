@@ -23,6 +23,7 @@ export default function SettingsLayout() {
         <Stack>
             <Stack.Screen name='index' options={{ headerShown: false }} />
             <Stack.Screen name='appearanceView' options={{ headerShown: false }} />
+            <Stack.Screen name='appearanceSectionView' options={{ headerShown: false }} />
             <Stack.Screen name='libraryView' options={{ headerShown: false }} />
             <Stack.Screen name='homeView' options={{ headerShown: false }} />
             <Stack.Screen name='playerView' options={{ headerShown: false }} />
