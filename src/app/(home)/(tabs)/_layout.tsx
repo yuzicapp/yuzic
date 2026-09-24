@@ -35,12 +35,17 @@ import { useRadius } from '@/features/theme/useRadius';
 // when tabs are added or reordered.
 export const unstable_settings = { anchor: '(home)' };
 
-/** Active and inactive icon weights. The active tab is the theme colour at a
- * heavier stroke, so it differs in shape as well as hue — colour on its own
- * would be the only thing distinguishing it. */
 /** Enough to read as glass without turning the tabs into mush over busy art. */
 const DOCK_BLUR_INTENSITY = 60;
 
+/**
+ * Active and inactive icon weights. The tabs are drawn in the text colours,
+ * not the accent: the accent can be anything a person picked, or change with
+ * every cover, and the tabs are where you are rather than something to press
+ * for an effect. So the active tab is the text colour at a heavier stroke,
+ * the others the subtext colour, and the difference is weight as well as
+ * shade, never colour alone.
+ */
 const STROKE_ACTIVE = 2.4;
 const STROKE_INACTIVE = 1.75;
 
@@ -64,7 +69,6 @@ function TabButton({
   inactiveColor: string;
   children: (color: string, strokeWidth: number) => React.ReactNode;
 }) {
-  const labelColor = useTheme().colors.secondary;
   return (
     <Touchable
       // With its name drawn under the icon the tab speaks for itself; a label
@@ -83,10 +87,8 @@ function TabButton({
       )}
       {label ? (
         <Text
-          // Words need more contrast than a glyph does, most of all over a
-          // translucent dock on a pale cover, so an inactive name is drawn in
-          // the secondary text colour rather than the icon's subtext grey.
-          style={[styles.tabLabel, { color: active ? activeColor : labelColor }]}
+          // The same colour as its icon, so a tab reads as one thing.
+          style={[styles.tabLabel, { color: active ? activeColor : inactiveColor }, active && styles.tabLabelActive]}
           numberOfLines={1}
           maxFontSizeMultiplier={fontScaleCap.control}
         >
@@ -100,7 +102,6 @@ function TabButton({
 function TabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const { colors, isDarkMode } = useTheme();
-  const themeColor = colors.themeColor;
   const { dock, dockShape, tabLabels } = useActiveTheme().components;
   const translucent = dock === 'translucent';
   const floating = dockShape === 'floating';
@@ -127,7 +128,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
     [onHeightChange, floating, floatingMargin]
   );
 
-  const activeColor = themeColor;
+  const activeColor = colors.text;
   const inactiveColor = colors.subtext;
 
   // Each tab is a Stack group — `(home)`, `(search)`, `(library)`.
@@ -314,6 +315,9 @@ const styles = StyleSheet.create({
   tabLabel: {
     ...cappedTypography.control.micro,
     marginTop: spacing.xxs,
+  },
+  tabLabelActive: {
+    fontWeight: '600',
   },
   tab: {
     flex: 1,
