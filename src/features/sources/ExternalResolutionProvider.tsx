@@ -54,7 +54,7 @@ export function ExternalResolutionProvider({ children }: { children: React.React
     }
 
     // Browsed through a source already: open it there, no search needed.
-    const known = knownAlbumRoute(item);
+    const known = knownAlbumRoute(item, enabledSources);
     if (known) {
       router.push({ pathname: '/albumView', params: known });
       return;

@@ -29,7 +29,11 @@ type Sources = readonly SourceDefinition[];
  * to choose between them, for an artist the app had just been showing.
  */
 export function knownArtistRoute(item: Artist, enabledSources: Sources) {
-  const own = ALL_SOURCES.find(s => s.id === providerIdOf(item));
+  // Only among the sources the listener has switched on. Resolving `own` out
+  // of ALL_SOURCES sent a Deezer-born artist to Deezer with Deezer turned
+  // off — and because this runs before the "no sources enabled" check, that
+  // guard could not be reached by any record carrying a source of its own.
+  const own = enabledSources.find(s => s.id === providerIdOf(item));
   for (const source of own ? [own, ...enabledSources] : enabledSources) {
     const artistId = source.artistIdOf(item.externalIds) || (source === own ? item.nativeId : undefined);
     if (artistId) {
@@ -40,8 +44,8 @@ export function knownArtistRoute(item: Artist, enabledSources: Sources) {
 }
 
 /** As `knownArtistRoute`, for an album browsed through a source. */
-export function knownAlbumRoute(item: Album) {
-  const own = ALL_SOURCES.find(s => s.id === providerIdOf(item));
+export function knownAlbumRoute(item: Album, enabledSources: Sources) {
+  const own = enabledSources.find(s => s.id === providerIdOf(item));
   if (!own || !item.nativeId) return null;
   return { source: own.id, albumId: item.nativeId, artist: item.artist.name, title: item.title };
 }

@@ -69,6 +69,9 @@ function harness(over: Partial<{
   fails: boolean;
   /** Tiers asked after the default one, in order. */
   fallbacks: QueueFillProvider[];
+  /** Runs inside the provider's fetch, for the things a listener can do while
+   *  one is in flight — starting a different album, say. */
+  duringFetch: (replaceQueue: (next: PlayableResource[]) => void) => void;
 }> = {}) {
   let queue = over.queue ?? [resource('1'), resource('2'), resource('3')];
   let segments = over.segments ?? [];
@@ -87,6 +90,7 @@ function harness(over: Partial<{
         excludeIds: [...excludeIds],
         count,
       });
+      over.duringFetch?.(next => { queue = next; });
       if (over.fails) throw new Error('provider is down');
       return over.returns ?? [song('90'), song('91')];
     },
@@ -300,6 +304,40 @@ describe('topping the queue up', () => {
     await h.coordinator.fillQueueIfLow();
 
     expect(h.providerCalls).toHaveLength(2);
+  });
+});
+
+describe('a queue that moved while the fill was in flight', () => {
+  /**
+   * Asking the tiers is several round trips, and the library tier answers on
+   * nearly every server — so the window is real and the tracks coming back
+   * were chosen from a queue that may no longer be playing. Appending them
+   * anyway put the previous album's artist on the end of the one the listener
+   * had just started.
+   */
+  it('drops the fill when the listener has started something else', async () => {
+    const h = harness({
+      duringFetch: replaceQueue => replaceQueue([resource('B1'), resource('B2')]),
+    });
+
+    await h.coordinator.fillQueueIfLow();
+
+    expect(ids(h.queue)).toEqual(['B1', 'B2']);
+    expect(h.engineCalls).toEqual([]);
+    expect(h.warnings.join(' ')).toContain('discarded');
+  });
+
+  it('still fills when the queue merely advanced a track under it', async () => {
+    const h = harness({
+      queue: [resource('1'), resource('2'), resource('3')],
+      // The same queue, one track longer: what a listener adding a song does.
+      duringFetch: replaceQueue =>
+        replaceQueue([resource('1'), resource('2'), resource('3'), resource('4')]),
+    });
+
+    await h.coordinator.fillQueueIfLow();
+
+    expect(ids(h.queue)).toEqual(['1', '2', '3', '4', '90', '91']);
   });
 });
 

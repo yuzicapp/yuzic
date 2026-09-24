@@ -75,14 +75,37 @@ describe('knownArtistRoute', () => {
 
 describe('knownAlbumRoute', () => {
   it('opens an album on the source it was browsed through', () => {
-    expect(knownAlbumRoute(album(integrationProvenance('musicbrainz'), 'rg-1'))).toEqual({
+    expect(knownAlbumRoute(album(integrationProvenance('musicbrainz'), 'rg-1'), both)).toEqual({
       source: 'musicbrainz', albumId: 'rg-1', artist: 'Artist', title: 'Album',
     });
   });
 
   it('knows nothing about an album from anywhere else', () => {
-    expect(knownAlbumRoute(album(serverProvenance('srv'), '9'))).toBeNull();
-    expect(knownAlbumRoute(album(integrationProvenance('lastfm'), '9'))).toBeNull();
+    expect(knownAlbumRoute(album(serverProvenance('srv'), '9'), both)).toBeNull();
+    expect(knownAlbumRoute(album(integrationProvenance('lastfm'), '9'), both)).toBeNull();
+  });
+
+  /**
+   * Switching a source off means the app stops using it. These helpers run
+   * before the "no sources enabled" check, so resolving a record's own source
+   * out of every source there is — rather than the enabled ones — both used a
+   * source that was off and made that check unreachable for any record with an
+   * origin of its own.
+   */
+  it('will not open an album on a source that is switched off', () => {
+    const item = album(integrationProvenance('musicbrainz'), 'rg-1');
+
+    expect(knownAlbumRoute(item, deezer)).toBeNull();
+    expect(knownAlbumRoute(item, [])).toBeNull();
+  });
+});
+
+describe('a record whose own source is switched off', () => {
+  it('does not send an artist there either', () => {
+    const item = artist(integrationProvenance('deezer'), 'dz-1');
+
+    expect(knownArtistRoute(item, deezer)).toMatchObject({ source: 'deezer' });
+    expect(knownArtistRoute(item, [])).toBeNull();
   });
 });
 
