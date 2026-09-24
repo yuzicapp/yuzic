@@ -254,7 +254,10 @@ export default function PlayerHost() {
   // same size at both ends of the travel.
   const coverRadius = (expansionValue: number, scale: number) => {
     'worklet';
-    return interpolate(expansionValue, [0, 1], [barRadius, cardRadius], Extrapolation.CLAMP) / scale;
+    // The resting corner is whatever the slot was drawn with: square for the
+    // full-width player, the card's rounding otherwise.
+    const restingRadius = fullCover.value.radius ?? cardRadius;
+    return interpolate(expansionValue, [0, 1], [barRadius, restingRadius], Extrapolation.CLAMP) / scale;
   };
 
   // A neighbour rests a full window width away, not a cover width: the cover

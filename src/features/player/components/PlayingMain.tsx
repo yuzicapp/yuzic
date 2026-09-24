@@ -85,6 +85,8 @@ const PlayingMain: React.FC<PlayingMainProps> = ({
   // the slot rather than in it.
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const rad = useRadius();
+  // Square at the window's edges; the card's rounding everywhere else.
+  const coverCorner = layout.bleed ? 0 : rad.card;
 
   // Handed to the host as the swipe is accepted, so the row it is drawing is
   // held still while the skip commits: the queue moves the instant playback
@@ -136,9 +138,10 @@ const PlayingMain: React.FC<PlayingMainProps> = ({
         x,
         y: restingSlotY(y, expansion.value, windowHeight, scrollY.value),
         size: slotWidth,
+        radius: coverCorner,
       };
     });
-  }, [fullCover, expansion, scrollY, windowHeight]);
+  }, [fullCover, expansion, scrollY, windowHeight, coverCorner]);
 
   // Re-measure when the player comes to rest at either end: the lyrics preview
   // and the optional cards arrive after the first layout and can move this.
@@ -240,7 +243,7 @@ const PlayingMain: React.FC<PlayingMainProps> = ({
           // margin here would only push the square off centre.
           split || inline ? styles.coverBeside : styles.coverAbove,
           inline && styles.coverInline,
-          { width: coverSize, height: coverSize, borderRadius: rad.card },
+          { width: coverSize, height: coverSize, borderRadius: coverCorner },
         ]}
         // The square is what the finger swipes, but the cover the eye
         // follows is drawn by the host with pointerEvents="none" — so this

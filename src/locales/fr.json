@@ -214,9 +214,10 @@
       "accentFromCoverSubtext": "L'accent change avec chaque pochette. Choisir une couleur désactive cette option.",
       "playerLayout": {
         "title": "Disposition du lecteur",
-        "subtitle": "Pochette en grand, ou plus petite pour voir les paroles plus tôt.",
-        "artwork": "Grande pochette",
-        "compact": "Compact"
+        "subtitle": "La place qu'occupe la pochette.",
+        "artwork": "Pochette",
+        "compact": "Compact",
+        "fullWidth": "Pleine largeur"
       },
       "sections": {
         "colours": "Couleurs",

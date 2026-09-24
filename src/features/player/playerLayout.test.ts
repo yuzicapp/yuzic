@@ -90,3 +90,23 @@ describe('the compact player', () => {
     expect(playerLayout(window, 'compact')).toEqual(playerLayout(window))
   })
 })
+
+describe('the full-width player', () => {
+  it('runs the cover to both edges while the column keeps its inset', () => {
+    const artwork = playerLayout({ width: 390, height: 844, landscape: false })
+    const full = playerLayout({ width: 390, height: 844, landscape: false }, 'fullWidth')
+
+    expect(full.bleed).toBe(true)
+    expect(full.coverSize).toBe(390)
+    expect(full.columnWidth).toBe(artwork.columnWidth)
+  })
+
+  it('caps the cover in a short window rather than pushing the controls off it', () => {
+    expect(playerLayout({ width: 600, height: 700, landscape: false }, 'fullWidth').coverSize).toBeLessThanOrEqual(700 * 0.55)
+  })
+
+  it('leaves the landscape player as it is', () => {
+    const window = { width: 844, height: 390, landscape: true }
+    expect(playerLayout(window, 'fullWidth')).toEqual(playerLayout(window))
+  })
+})

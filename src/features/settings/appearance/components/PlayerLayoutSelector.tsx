@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { Maximize2, Minimize2 } from 'lucide-react-native';
+import { Maximize2, Minimize2, RectangleHorizontal } from 'lucide-react-native';
 
 import { iconSize } from '@/constants/design';
 import { editTheme, selectActiveTheme } from '@/features/settings/appearance/state';
@@ -12,6 +12,7 @@ type Layout = Theme['components']['playerLayout'];
 
 const OPTIONS: { id: Layout; icon: React.ReactElement<{ color?: string }> }[] = [
   { id: 'artwork', icon: <Maximize2 size={iconSize.row} /> },
+  { id: 'fullWidth', icon: <RectangleHorizontal size={iconSize.row} /> },
   { id: 'compact', icon: <Minimize2 size={iconSize.row} /> },
 ];
 

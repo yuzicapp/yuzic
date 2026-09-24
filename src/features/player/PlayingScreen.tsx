@@ -209,7 +209,7 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
                                         styles.header,
                                         {
                                             paddingTop: insets.top,
-                                            paddingBottom: landscape || layout.inline ? spacing.md : spacing.xxxl,
+                                            paddingBottom: landscape || layout.inline || layout.bleed ? spacing.md : spacing.xxxl,
                                         },
                                     ]}
                                 >

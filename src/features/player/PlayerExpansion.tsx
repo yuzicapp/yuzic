@@ -28,7 +28,8 @@ import {
  */
 
 /** A square of cover art, in window coordinates. */
-type CoverRect = { x: number; y: number; size: number };
+/** Where a cover sits, and, for the player's, the corner it is drawn with there. */
+type CoverRect = { x: number; y: number; size: number; radius?: number };
 
 const EMPTY_COVER_RECT: CoverRect = { x: 0, y: 0, size: 0 };
 

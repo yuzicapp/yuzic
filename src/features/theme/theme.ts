@@ -60,8 +60,8 @@ export interface Theme {
     dockShape: 'edge' | 'floating';
     /** Names under the tab icons, for anyone who would rather read than recognise. */
     tabLabels: boolean;
-    /** The player with its cover at full width, or smaller to leave room below. */
-    playerLayout: 'artwork' | 'compact';
+    /** The player's cover: in the column, edge to edge, or small beside the title. */
+    playerLayout: 'artwork' | 'fullWidth' | 'compact';
   };
 }
 

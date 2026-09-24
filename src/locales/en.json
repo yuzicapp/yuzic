@@ -214,9 +214,10 @@
       "accentFromCoverSubtext": "The accent changes with each cover. Picking a colour turns this off.",
       "playerLayout": {
         "title": "Player layout",
-        "subtitle": "Full-size artwork, or smaller so lyrics and more start sooner.",
-        "artwork": "Full artwork",
-        "compact": "Compact"
+        "subtitle": "How much room the cover takes.",
+        "artwork": "Artwork",
+        "compact": "Compact",
+        "fullWidth": "Full width"
       },
       "sections": {
         "colours": "Colours",

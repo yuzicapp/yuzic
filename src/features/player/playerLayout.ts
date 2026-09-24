@@ -27,6 +27,11 @@ export type PlayerLayout = {
    * and transport full width below, instead of a cover above everything.
    */
   inline: boolean
+  /**
+   * The full-width player: the cover runs to both edges of the window with
+   * square corners, and only the column below it keeps the page inset.
+   */
+  bleed: boolean
 }
 
 /**
@@ -76,7 +81,10 @@ const COVER_HEIGHT_SHARE: Record<PlayerLayoutMode, number> = {
 const INLINE_COVER = { share: 0.3, max: 128 }
 
 /** Which player the theme asks for. Only the stacked shape has a compact form. */
-type PlayerLayoutVariant = 'artwork' | 'compact'
+type PlayerLayoutVariant = 'artwork' | 'compact' | 'fullWidth'
+
+/** How much of the window's height a full-width cover may take before it is capped. */
+const BLEED_HEIGHT_SHARE = 0.55
 
 /**
  * How the player lays itself out in this window.
@@ -102,9 +110,12 @@ export function playerLayout(
   if (!window.landscape) {
     const columnWidth = cappedContentWidth(available, contentWidth.player)
     const inline = variant === 'compact'
+    const bleed = variant === 'fullWidth'
     const coverSize = inline
       ? Math.min(Math.round(columnWidth * INLINE_COVER.share), INLINE_COVER.max)
-      : squareArtSize(columnWidth, window.height * COVER_HEIGHT_SHARE.stacked)
+      : bleed
+        ? squareArtSize(window.width, window.height * BLEED_HEIGHT_SHARE)
+        : squareArtSize(columnWidth, window.height * COVER_HEIGHT_SHARE.stacked)
     return {
       mode: 'stacked',
       coverSize,
@@ -112,6 +123,7 @@ export function playerLayout(
       rowWidth: columnWidth,
       columnGap: 0,
       inline,
+      bleed,
     }
   }
 
@@ -137,5 +149,6 @@ export function playerLayout(
     rowWidth: coverSize + SPLIT_GAP + columnWidth,
     columnGap: SPLIT_GAP,
     inline: false,
+    bleed: false,
   }
 }

@@ -214,9 +214,10 @@
       "accentFromCoverSubtext": "アクセントがジャケットごとに変わります。色を選ぶとオフになります。",
       "playerLayout": {
         "title": "プレーヤーのレイアウト",
-        "subtitle": "ジャケットを大きく表示するか、小さくして歌詞などを見やすくします。",
-        "artwork": "大きいジャケット",
-        "compact": "コンパクト"
+        "subtitle": "ジャケットの表示サイズ。",
+        "artwork": "ジャケット",
+        "compact": "コンパクト",
+        "fullWidth": "全幅"
       },
       "sections": {
         "colours": "色",

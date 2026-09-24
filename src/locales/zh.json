@@ -214,9 +214,10 @@
       "accentFromCoverSubtext": "强调色随每张封面变化。选择颜色会关闭此选项。",
       "playerLayout": {
         "title": "播放器布局",
-        "subtitle": "大尺寸封面，或缩小封面以便更快看到歌词等内容。",
-        "artwork": "大封面",
-        "compact": "紧凑"
+        "subtitle": "封面所占的空间。",
+        "artwork": "封面",
+        "compact": "紧凑",
+        "fullWidth": "全宽"
       },
       "sections": {
         "colours": "颜色",
