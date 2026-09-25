@@ -26,6 +26,32 @@ function buildCoverArtArchiveUrl(
   return `https://coverartarchive.org/${endpoint}/${mbid}/front-${mbSize}`
 }
 
+/**
+ * What a cover is *of*, as one stable string, with no size in it.
+ *
+ * For the drawn stand-in behind art that does not exist: it needs the same
+ * answer for a thumb and a detail tile, or one album would be two colours on
+ * two screens. Here rather than at the call site because knowing which
+ * providers exist is this layer's job — a component branching on
+ * `navidrome`/`jellyfin`/`emby` is what `check-provider-branches` is for.
+ *
+ * Null when the cover names nothing to be stable about, which leaves the caller
+ * to seed from the subject instead.
+ */
+export function coverIdentity(source: CoverSource): string | null {
+  const cover = source ? resolveCoverNow(source).cover : source;
+  if (!cover || cover.kind === 'none' || cover.kind === 'special') return null;
+
+  if (cover.kind === 'url') return `url:${cover.url}`;
+  if (cover.kind === 'coverartarchive') return `coverartarchive:${cover.mbid}:${cover.mbidType}`;
+  if (cover.kind === 'navidrome') return `navidrome:${cover.coverArtId}`;
+  if (cover.kind === 'jellyfin') return `jellyfin:${cover.itemId}`;
+  if (cover.kind === 'emby') return `emby:${cover.itemId}`;
+  if (cover.kind === 'plex') return `plex:${cover.path}`;
+
+  return null;
+}
+
 export function buildCoverCacheKey(
   source: CoverSource,
   size: 'thumb' | 'grid' | 'detail' | 'background'
