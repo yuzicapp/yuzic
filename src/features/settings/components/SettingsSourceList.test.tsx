@@ -8,21 +8,37 @@ jest.mock('@/features/theme/useTheme', () => ({
 }));
 jest.mock('@/features/theme/useRadius', () => ({ useRadius: () => ({ pill: 999 }) }));
 
-jest.mock('react-native-draggable-flatlist', () => {
+jest.mock('react-native-reorderable-list', () => {
   const React = require('react');
-  const { View } = require('react-native');
+  const { View, ScrollView } = require('react-native');
 
-  const MockDraggableList = ({ data, renderItem, onDragEnd }: any) => (
+  const MockNestedList = ({ data, renderItem, onReorder }: any) => (
     <View testID="draggable-source-list">
-      {data.map((item: any, index: number) => (
-        <React.Fragment key={item.id}>
-          {renderItem({ item, getIndex: () => index, drag: jest.fn(), isActive: false })}
-        </React.Fragment>
+      {data.map((item: any) => (
+        <React.Fragment key={item.id}>{renderItem({ item })}</React.Fragment>
       ))}
-      <View testID="complete-source-reorder" onTouchEnd={() => onDragEnd({ data: [...data].reverse() })} />
+      {/* A drag of the first row to the end, which for the two-source fixture
+          is the same reversal the old mock produced. */}
+      <View
+        testID="complete-source-reorder"
+        onTouchEnd={() => onReorder({ from: 0, to: data.length - 1 })}
+      />
     </View>
   );
-  return { NestableDraggableFlatList: MockDraggableList };
+
+  return {
+    NestedReorderableList: MockNestedList,
+    ScrollViewContainer: ScrollView,
+    // The real one, so the test exercises the reordering rather than asserting
+    // against a second implementation of it.
+    reorderItems: (items: any[], from: number, to: number) => {
+      const next = [...items];
+      next.splice(to, 0, ...next.splice(from, 1));
+      return next;
+    },
+    useReorderableDrag: () => jest.fn(),
+    useIsActive: () => false,
+  };
 });
 
 describe('SettingsSourceList', () => {

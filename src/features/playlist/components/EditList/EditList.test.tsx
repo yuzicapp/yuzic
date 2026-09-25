@@ -11,19 +11,29 @@ const mockMoveMutate = jest.fn();
 let mockOffline = false;
 const mockNotifyError = jest.fn();
 
-jest.mock('react-native-draggable-flatlist', () => {
-  const { View } = require('react-native');
-  const MockList = ({ data, renderItem, onDragEnd, keyExtractor }: any) => (
+jest.mock('react-native-reorderable-list', () => {
+  const { View, ScrollView } = require('react-native');
+  const MockList = ({ data, renderItem, onReorder, keyExtractor }: any) => (
     <View>
       {data.map((item: any, index: number) => (
-        <View key={keyExtractor(item)}>
-          {renderItem({ item, getIndex: () => index, drag: jest.fn(), isActive: false })}
-        </View>
+        <View key={keyExtractor(item)}>{renderItem({ item, index })}</View>
       ))}
-      <View testID="drag-first-to-last" onTouchEnd={() => onDragEnd({ from: 0, to: data.length - 1, data })} />
+      <View testID="drag-first-to-last" onTouchEnd={() => onReorder({ from: 0, to: data.length - 1 })} />
     </View>
   );
-  return { __esModule: true, default: MockList };
+  return {
+    __esModule: true,
+    default: MockList,
+    NestedReorderableList: MockList,
+    ScrollViewContainer: ScrollView,
+    reorderItems: (items: any[], from: number, to: number) => {
+      const next = [...items];
+      next.splice(to, 0, ...next.splice(from, 1));
+      return next;
+    },
+    useReorderableDrag: () => jest.fn(),
+    useIsActive: () => false,
+  };
 });
 
 jest.mock('react-i18next', () => ({
