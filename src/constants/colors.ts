@@ -212,4 +212,14 @@ export const coverFade = {
    *  whatever the photo turns out to be. Never fully transparent: the top of
    *  the image needs holding down too. */
   photoScrim: ['rgba(0,0,0,0.45)', 'rgba(0,0,0,0.6)'],
+  /**
+   * The same job on a small tile, where the text sits in one corner.
+   *
+   * Heavier at the foot and lighter at the head than `photoScrim`, because a
+   * browse tile writes a large name across its bottom edge and shows the art
+   * everywhere else — and album covers carry their own lettering, so a name
+   * laid on one at `photoScrim`'s weight lands white-on-white as often as not.
+   * The top stays barely tinted so the art still reads as art.
+   */
+  tileScrim: ['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.45)', 'rgba(0,0,0,0.88)'],
 } as const;

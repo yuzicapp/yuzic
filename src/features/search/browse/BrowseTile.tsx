@@ -9,6 +9,9 @@ import { useRadius } from '@/features/theme/useRadius'
 import { useTheme } from '@/features/theme/useTheme'
 import type { BrowseTile as Tile } from './browseTiles'
 
+/** Below this, the name needs the smaller type to fit on one line. */
+const COMPACT_TILE_WIDTH = 150
+
 /**
  * One way into the library.
  *
@@ -39,6 +42,12 @@ export default function BrowseTile({
   const rad = useRadius()
   const cover = tile.covers[0]
 
+  // Three to a row leaves no room for 20pt type: "Electronic" broke across two
+  // lines mid-word, and "Cloud Rap" lost its second line to the tile's edge.
+  // The hero keeps the larger size, which is most of what makes it read as the
+  // hero in the first place.
+  const compact = width < COMPACT_TILE_WIDTH
+
   return (
     <Touchable
       testID="search-browse-tile"
@@ -52,16 +61,19 @@ export default function BrowseTile({
       ) : null}
 
       {/*
-        `coverFade.photoScrim` is the app's existing answer to "text over
-        artwork we did not choose" — it holds the whole image down rather than
-        only its foot, because a tile's name is large and the art behind it can
-        be bright anywhere. Drawn even with no artwork, so a tile with art and
-        a tile without read as the same object.
+        Weighted to the foot, where the name sits, and barely tinted at the head
+        so the art still reads as art. `photoScrim` was the first thing tried
+        here and it is not enough: album covers carry their own lettering, and
+        a tag laid over one at that weight landed white-on-white — "Trap" over
+        the word YOUNGBOY was the case that proved it.
+
+        Drawn even with no artwork, so a tile with art and a tile without read
+        as the same object.
       */}
-      <LinearGradient colors={coverFade.photoScrim} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={coverFade.tileScrim} style={StyleSheet.absoluteFill} />
 
       <View style={styles.caption}>
-        <Text style={styles.label} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.8}>
+        <Text style={[styles.label, compact && styles.labelCompact]} numberOfLines={2}>
           {tile.label}
         </Text>
       </View>
@@ -77,6 +89,9 @@ const styles = StyleSheet.create({
   caption: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
+  },
+  labelCompact: {
+    ...typography.rowTitle,
   },
   label: {
     ...typography.sectionTitle,
