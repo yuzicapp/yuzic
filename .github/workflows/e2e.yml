@@ -120,6 +120,19 @@ jobs:
           xcrun simctl boot "$udid"
           xcrun simctl bootstatus "$udid"
 
+      # iOS offers its swipe-typing tutorial the first time a keyboard opens on
+      # a fresh device — a card over the bottom of the screen, tab bar
+      # included. The smoke flow taps into search and then back to Home, and
+      # that tap landed on the tutorial instead, so the flow failed on an
+      # assertion about Home while the app was working perfectly.
+      #
+      # Every runner is a fresh device, so this would greet every run.
+      - name: Tell the keyboard we have seen its tutorial
+        run: |
+          udid="${{ steps.sim.outputs.udid }}"
+          xcrun simctl spawn "$udid" defaults write com.apple.Preferences DidShowContinuousPathIntroduction -bool true
+          xcrun simctl spawn "$udid" defaults write com.apple.keyboard.preferences DidShowContinuousPathIntroduction -bool true || true
+
       - name: Install the app
         run: |
           app=$(find ios/build/Build/Products -maxdepth 3 -name 'Yuzic.app' | head -1)
