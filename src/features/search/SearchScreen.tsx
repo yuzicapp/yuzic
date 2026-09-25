@@ -51,6 +51,8 @@ const Search = () => {
             placeholderTextColor={colors.placeholder}
             value={m.query}
             onChangeText={m.onSearchChange}
+            onFocus={m.onSearchFocus}
+            onBlur={m.onSearchBlur}
             returnKeyType="search"
             onSubmitEditing={m.onSearchSubmit}
             // A library is full of names iOS has never seen — `pornophonique`,

@@ -995,6 +995,13 @@
       "album": "アルバム",
       "artist": "アーティスト",
       "playlist": "プレイリスト"
+    },
+    "browse": {
+      "title": "さがす",
+      "genres": "ジャンル",
+      "moods": "ムード",
+      "genre": "ジャンル",
+      "mood": "ムード"
     }
   },
   "media": {

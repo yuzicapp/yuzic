@@ -998,6 +998,13 @@
       "album": "Album",
       "artist": "Artist",
       "playlist": "Playlist"
+    },
+    "browse": {
+      "title": "Browse",
+      "genres": "Genres",
+      "moods": "Moods",
+      "genre": "Genre",
+      "mood": "Mood"
     }
   },
   "artist": {

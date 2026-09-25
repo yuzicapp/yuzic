@@ -995,6 +995,13 @@
       "album": "专辑",
       "artist": "艺人",
       "playlist": "播放列表"
+    },
+    "browse": {
+      "title": "浏览",
+      "genres": "风格",
+      "moods": "情绪",
+      "genre": "风格",
+      "mood": "情绪"
     }
   },
   "media": {
