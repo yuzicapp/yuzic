@@ -107,7 +107,16 @@ So after any release:
 3. Fill in and publish the draft release the run created. It is generated with
    an empty body and stays a draft until someone writes it, which is why the
    public releases page can lag the actual shipped version by months.
-4. If one platform failed, say so explicitly rather than re-running blind. The
+4. **Publish the changelog entry to `yuzic-web`** (`_pages/changelog.md`), and
+   move the `` ### `Latest` `` marker onto it. `fastlane/metadata/android/en-US/changelogs/default.txt`
+   is the source to expand from — it is already written for users, and it is
+   overwritten next release, so the site is the only place the note survives.
+   This step did not exist until 2026-09-25, and the site had silently fallen
+   seven releases behind: it read 2.6.0 while 2.11.0 was on both stores. The
+   site is the only release note a user who is not on GitHub will ever read,
+   so a release that is not on it did not, as far as they can tell, happen.
+   `changelog-current.yml` in `yuzic-web` fails daily while the site is behind.
+5. If one platform failed, say so explicitly rather than re-running blind. The
    fix usually belongs on `dev` and has to be promoted before a re-run can
    possibly succeed — which is exactly what did not happen after 1.4.0.
 
