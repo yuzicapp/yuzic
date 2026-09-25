@@ -173,6 +173,12 @@ jobs:
       # fresh install, and it is what leaves the app connected to a server —
       # every flow after it opens with `clearState: false` and depends on the
       # state this one established.
+      # First, because it is the one flow that needs no server: if the app
+      # cannot start, everything below fails for a reason that has nothing to
+      # do with the flows.
+      - name: The app launches
+        run: maestro test .maestro/launch.yaml
+
       - name: Onboarding (connects to the Navidrome demo)
         run: maestro test .maestro/onboarding-demo.yaml
 
