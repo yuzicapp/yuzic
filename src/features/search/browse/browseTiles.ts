@@ -1,6 +1,6 @@
 import type { Album } from '@/domain/entities/Album'
 import type { CoverSource } from '@/domain/entities/Cover'
-import { coversOf } from '@/features/library/mosaicCovers'
+import { coversOf, MOSAIC_COVERS } from '@/features/library/mosaicCovers'
 
 /**
  * What the Search screen offers when nothing has been typed.
@@ -46,6 +46,36 @@ const tagsOf = (album: Album, kind: BrowseTileKind): string[] =>
   (kind === 'genre' ? album.genres : album.moods) ?? []
 
 /**
+ * A stable number for a label, so each tag starts its art somewhere different.
+ *
+ * Tags overlap heavily — an album tagged "Hip Hop" is usually tagged "Trap"
+ * and "Pop Rap" too — and taking the first four covers of each gave three
+ * adjacent tiles the identical mosaic, which reads as a rendering bug rather
+ * than as a true fact about the library. Rotating each tag's albums by its own
+ * name picks a different four without pretending they are more representative:
+ * any four of a tag's albums are equally its art, so the only thing to
+ * optimise for is telling the tiles apart.
+ *
+ * Deterministic on the label alone, so a tile keeps its art across renders,
+ * sessions and syncs rather than reshuffling whenever the catalogue order
+ * shifts.
+ */
+function labelSeed(label: string): number {
+  let hash = 0
+  for (let i = 0; i < label.length; i += 1) {
+    hash = (hash * 31 + label.charCodeAt(i)) | 0
+  }
+  return Math.abs(hash)
+}
+
+/** The tag's albums, rotated so this tag's art starts at its own offset. */
+function artFor(label: string, tagged: Album[]): Album[] {
+  if (tagged.length <= MOSAIC_COVERS) return tagged
+  const start = labelSeed(label) % tagged.length
+  return [...tagged.slice(start), ...tagged.slice(0, start)]
+}
+
+/**
  * Tiles for one kind of tag, largest first.
  *
  * Ranked by how much of the library sits behind each, not alphabetically. A
@@ -76,7 +106,7 @@ export function browseTilesFor(albums: readonly Album[], kind: BrowseTileKind): 
       kind,
       label,
       albumCount: tagged.length,
-      covers: coversOf(tagged),
+      covers: coversOf(artFor(label, tagged)),
     }))
     .sort((a, b) => b.albumCount - a.albumCount || a.label.localeCompare(b.label))
 }

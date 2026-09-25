@@ -122,3 +122,37 @@ describe('albumsForTile', () => {
     expect(albumsForTile([album('a', { genres: ['Jazz'] })], 'genre', 'Techno')).toEqual([])
   })
 })
+
+/**
+ * Tags overlap heavily in a real library, and taking each tile's art from the
+ * front of its own list gave "Hip Hop", "Trap" and "Pop Rap" the identical
+ * four covers on screen.
+ */
+describe('telling tiles apart', () => {
+  const overlapping = Array.from({ length: 20 }, (_, i) =>
+    album(`a${i}`, { genres: ['Hip Hop', 'Trap', 'Pop Rap'], art: true })
+  )
+
+  it('gives overlapping tags different art', () => {
+    const tiles = browseTilesFor(overlapping, 'genre')
+    const fronts = tiles.map(t => (t.covers[0] as { coverArtId: string }).coverArtId)
+
+    expect(new Set(fronts).size).toBe(tiles.length)
+  })
+
+  it('keeps a tag’s art stable across rebuilds', () => {
+    const once = browseTilesFor(overlapping, 'genre')
+    const twice = browseTilesFor(overlapping, 'genre')
+
+    expect(twice).toEqual(once)
+  })
+
+  it('still shows what little art there is when a tag has few albums', () => {
+    const few = [
+      album('x', { genres: ['Ambient'], art: true }),
+      album('y', { genres: ['Ambient'], art: true }),
+    ]
+
+    expect(browseTilesFor(few, 'genre')[0].covers).toHaveLength(2)
+  })
+})

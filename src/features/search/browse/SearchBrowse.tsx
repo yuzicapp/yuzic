@@ -127,6 +127,11 @@ const styles = StyleSheet.create({
   },
   tileLabel: {
     ...typography.rowTitle,
+    // Two lines' worth, always. A grid of tags mixes "Pop" with "Southern Hip
+    // Hop", and letting the caption size itself pushed the count down on the
+    // wrapping ones — which left the next row starting at a different height
+    // on every column, so the grid read as broken rather than ragged.
+    height: typography.rowTitle.lineHeight * 2,
   },
   tileCount: {
     ...typography.rowSubtitle,
