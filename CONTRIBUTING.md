@@ -75,7 +75,7 @@ optional and configured at runtime in Settings, not at build time:
   **Settings → Metadata**, **Pages**, **Search**, or **Home**.
 - ListenBrainz and AudioMuse-AI are authenticated per-user in
   **Settings → Connections**.
-- The Lidarr, slskd, and SoulSync downloaders point at your own self-hosted
+- The Lidarr, slskd, SoulSync and Downtify downloaders point at your own self-hosted
   instances (also **Settings → Connections**). Downloaded audio is transcoded server-side by
   your music server via the stream URL, so testing a download-related change
   needs a real server but no extra service.
@@ -91,7 +91,7 @@ npx tsc --noEmit
 npx jest --ci
 ```
 
-These three are exactly what `.github/workflows/pr-checks.yml` runs on every
+These, plus `npm run architecture:check` (seven `tools/architecture` checks), are exactly what `.github/workflows/pr-checks.yml` runs on every
 push/PR to `dev` and `master` — branch protection gates on this check, so a
 PR won't be mergeable until it's green.
 
@@ -125,10 +125,11 @@ it stays true.
 
 If your change touches anything under `.github/workflows/` or `fastlane/`,
 read [`AGENTS.md`](AGENTS.md) first. In particular: Android versionCode and
-iOS build number are derived automatically from a run counter plus a fixed
-offset, specifically to prevent Play/App Store Connect from rejecting a
-build with a duplicate version code. Don't reintroduce manual version
-inputs — `AGENTS.md` explains why and documents the full mechanism.
+iOS build number are **queried from Play and App Store Connect at build
+time**, never computed locally. A run counter plus a fixed offset is what
+this used to do, and it shipped 2.0.0 underneath an existing build — don't
+reintroduce it, or any other manual version input. `AGENTS.md` documents
+the full mechanism and what went wrong.
 
 ## Pull requests
 

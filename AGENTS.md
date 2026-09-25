@@ -10,7 +10,8 @@ updated in the same commit.
 | --- | --- |
 | [`docs/architecture.md`](docs/architecture.md) | Adding a server provider, a player behaviour, a persisted playback field, or a synced library resource. Covers `ApiAdapter`, `playbackSlice`, `contentKind`, `useSync`, and where things live under `src/`. |
 | [`docs/integrations.md`](docs/integrations.md) | Adding or changing a server, integration, or downloader, or calling a new endpoint on one. Carries the endpoint tables and the list of endpoints we deliberately don't call. |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setup, the three CI gates, E2E. |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setup, the CI gates, E2E. |
+| [`.maestro/README.md`](.maestro/README.md) | Adding or changing an E2E flow, or working out why one failed. |
 | This file, below | Any UI work, and anything under `.github/workflows/` or `fastlane/`. |
 
 **Keep them in sync.** A new integration, downloader, or outside endpoint
@@ -29,8 +30,9 @@ support boundaries in `docs/`.
 
 ## CI
 
-- `.github/workflows/pr-checks.yml`: lint (`npm run lint`), typecheck (`npx tsc --noEmit`), and tests (`npx jest --ci`) on every push/PR to `master` and `dev`. Keep this green — it's what branch protection gates on.
+- `.github/workflows/pr-checks.yml`: lint (`npm run lint`), typed routes, typecheck (`npx tsc --noEmit`), tests (`npx jest --ci`) and the architecture gates (`npm run architecture:check`) on every push/PR to `master` and `dev`. Keep this green — it's what branch protection gates on.
 - `.github/workflows/android-build.yml` / `ios-build.yml`: build and ship to Play's alpha track / App Store Connect (TestFlight only — `submit_for_review: false`, never public review). **`workflow_call` only** — there is no `workflow_dispatch` on either, so a release is the one thing that can ship. No manual version inputs — see below.
+- `.github/workflows/e2e.yml`: the Maestro suites on an iOS simulator, nightly and on demand — never a PR gate, because the flows sign in through a public demo server. See [`.maestro/README.md`](.maestro/README.md).
 - `.github/workflows/release-on-version-bump.yml`: on push to `master`, if `package.json`'s `version` field changed from the previous commit, automatically calls both build workflows.
 
 ## Version numbers — the stores are asked, never told
@@ -44,7 +46,7 @@ moment a build is entered a different way.
 The mechanism (see `fastlane/Fastfile`):
 - `VERSION_LABEL` (e.g. `2.0.0`) is read directly from `package.json` at build time — single source of truth, never passed as a workflow input.
 - **Android**: `google_play_track_version_codes` across *all four* tracks (internal, alpha, beta, production), highest + 1. All four, because a code live anywhere is a code Play will not accept again — and production has historically sat *below* alpha here.
-- **iOS**: `latest_testflight_build_number` twice — for the current version train and for the app overall — highest + 1. App Store Connect only enforces uniqueness *within* a version, so the second question is what stops a new build landing underneath an existing one.
+- **iOS**: every build upload App Store Connect holds — `Spaceship::ConnectAPI.get_build_uploads`, the 200 most recent — highest + 1 across *all* versions. `latest_testflight_build_number` answers a narrower question and is deliberately not used: sorted by upload date with a limit of one, it returned 10 where the app already had 94, which is how 2.0.0 shipped underneath an existing build.
 - There is deliberately **no override and no fallback**. If the store cannot be reached the build fails; it does not invent a number. The old code fell back to `Time.now.to_i`, which would have spent about 1.7 billion of a 2.1 billion version code ceiling in one upload, irreversibly.
 
 **Do not reintroduce a locally-derived number.** The previous mechanism was
@@ -59,14 +61,17 @@ build. On iOS the same skew was silent and worse: the release uploaded 2.0.0
 build **10** underneath the dispatch path's 2.0.0 build **94**, which App Store
 Connect *accepted*, leaving testers on the older-numbered build.
 
-**What the stores held when this changed (2026-09-07)**, as a sanity check
-rather than a source of truth — the next run should come out one above these:
-- Play: production **1.3.7 / 109**, alpha **1.4.0 / 132** (a `workflow_dispatch` upload on 2026-09-05). The rejected 2.0.0 attempt was code 118.
-- TestFlight: **2.0.0 / 94**, plus the release run's stranded **2.0.0 / 10**.
+**What the stores held at the last release**, as a sanity check rather than a
+source of truth — the next run should come out one above these:
 
-So the first run on the new mechanism should say `Using Android version code:
-133` and `Using iOS build number: 95`. Anything much lower means something
-local answered instead of the store.
+- 2.10.0 (2026-09-24): TestFlight build **131**, Play version code **152**.
+- When the mechanism changed (2026-09-07): Play production **1.3.7 / 109**,
+  alpha **1.4.0 / 132**; TestFlight **2.0.0 / 94**, plus the release run's
+  stranded **2.0.0 / 10**. The rejected 2.0.0 Play attempt was code 118.
+
+A number much below the latest line means something local answered instead of
+the store. The release run now prints both on its summary — see the `verdict`
+job — so this is a cross-check rather than the only record.
 
 **Play release notes** come from
 `fastlane/metadata/android/en-US/changelogs/`. There cannot be a
