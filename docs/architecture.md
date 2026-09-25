@@ -387,6 +387,31 @@ This replaced four copies of `if (activeDevice) castX()` in the player and a
 three-term negation in the output sheet that decided whether "This device" was
 the selected row — every new output had been adding another term to both.
 
+### Loudness — the measurement is ours, the policy is the engine's
+
+The engine has applied ReplayGain since it was written; nothing had ever given
+it the figures. They arrive on every Subsonic song response and were dropped in
+the mapper.
+
+The split worth keeping: `Song.loudness` holds **what the origin measured** —
+track and album gain, both peaks, the format's own base gain, the fallback —
+unchosen, because which figure applies is the listener's setting rather than
+the server's. `loudnessFor` picks one, and the distinctions it draws are the
+ones that make normalisation better than none: an absent measurement is not
+0 dB, a measured 0 dB is not an absent one, album mode falls back to the track
+figure but never the reverse, and the base gain adds on top of whichever wins
+because it describes the decoder rather than the mastering.
+
+The per-track figure rides `MediaItem` to the engine boundary and lands on
+`Track.replayGainDb`; whether to apply it at all is `setLoudness`, a policy the
+engine re-reads live — including for the track already playing.
+
+Settings offer a switch and a preamp, deliberately not the engine's
+track/album/auto modes. Those three behave identically today because the
+engine's `Track` carries a single gain figure rather than a pair, so offering
+the choice would be offering three names for one behaviour. Album mode wants an
+engine change, not a settings entry.
+
 ## 3. `contentKind` — routing the player around non-song content
 
 Every `Song` carries a required `contentKind: 'song' | 'liveStream' |
@@ -1010,7 +1035,8 @@ src/features/           — one directory per feature: its screen, components,
     activeBackend.ts    — builds it, hands it out, one per launch
     mediaItem.ts        — the app's own playable-item type, formerly the
                           player package's
-    audioSettings.ts    — crossfade and equalizer shapes, bands and presets
+    audioSettings.ts    — crossfade, equalizer and loudness shapes, bands
+                          and presets
     usePlayerState.ts   — the reactive half: progress, playing, active item
     playbackSink.ts     — where the audio comes out (§ above), a separate
                           question from which player produces it
