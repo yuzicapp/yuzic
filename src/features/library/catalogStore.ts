@@ -108,21 +108,57 @@ function pushInto<K>(map: Map<K, LocalId[]>, key: K, id: LocalId): void {
   else map.set(key, [id]);
 }
 
-export function buildCatalogStore(catalog: Catalog): CatalogStore {
-  const songs = new Map<LocalId, Song>();
-  const albums = new Map<LocalId, Album>();
-  const artists = new Map<LocalId, Artist>();
-  const songByNativeId = new Map<string, Song>();
-  const albumByNativeId = new Map<string, Album>();
-  const artistByNativeId = new Map<string, Artist>();
-  const playlists = new Map<LocalId, Playlist>();
-  const playlistByNativeId = new Map<string, Playlist>();
-  const albumIdsByArtist = new Map<LocalId, LocalId[]>();
-  const songIdsByAlbum = new Map<LocalId, LocalId[]>();
-  const songIdsByArtist = new Map<LocalId, LocalId[]>();
-  const albumIdsByGenre = new Map<string, LocalId[]>();
+/**
+ * Indexes, grouped by the one array each is derived from.
+ *
+ * Every index here comes from exactly one of the catalog's four arrays —
+ * `albumIdsByGenre` reads only albums, `songIdsByArtist` only songs — so
+ * there is no reason for a new tracks array to rebuild the artist maps. It
+ * used to: the store was built in one pass over all four, and the catalog
+ * hydrates one resource at a time, so a cold start rebuilt every index four
+ * times over, each time walking the whole library.
+ *
+ * Cached weakly against the array itself. A `WeakMap` is exactly the right
+ * shape: the key *is* the identity that would invalidate the cache, so there
+ * is no invalidation to write and nothing is held alive that the query cache
+ * has let go of.
+ */
+const artistIndexes = new WeakMap<readonly Artist[], ArtistIndexes>();
+const playlistIndexes = new WeakMap<readonly Playlist[], PlaylistIndexes>();
+const albumIndexes = new WeakMap<readonly Album[], AlbumIndexes>();
+const songIndexes = new WeakMap<readonly Song[], SongIndexes>();
 
-  for (const artist of catalog.artists) {
+type ArtistIndexes = {
+  artists: Map<LocalId, Artist>;
+  artistByNativeId: Map<string, Artist>;
+};
+
+type PlaylistIndexes = {
+  playlists: Map<LocalId, Playlist>;
+  playlistByNativeId: Map<string, Playlist>;
+};
+
+type AlbumIndexes = {
+  albums: Map<LocalId, Album>;
+  albumByNativeId: Map<string, Album>;
+  albumIdsByArtist: Map<LocalId, LocalId[]>;
+  albumIdsByGenre: Map<string, LocalId[]>;
+};
+
+type SongIndexes = {
+  songs: Map<LocalId, Song>;
+  songByNativeId: Map<string, Song>;
+  songIdsByAlbum: Map<LocalId, LocalId[]>;
+  songIdsByArtist: Map<LocalId, LocalId[]>;
+};
+
+function indexArtists(source: readonly Artist[]): ArtistIndexes {
+  const cached = artistIndexes.get(source);
+  if (cached) return cached;
+
+  const artists = new Map<LocalId, Artist>();
+  const artistByNativeId = new Map<string, Artist>();
+  for (const artist of source) {
     artists.set(artist.localId, artist);
     // First writer wins, matching the identity index next door: a catalog
     // that somehow holds the same native id twice keeps the earlier record
@@ -130,26 +166,74 @@ export function buildCatalogStore(catalog: Catalog): CatalogStore {
     if (!artistByNativeId.has(artist.nativeId)) artistByNativeId.set(artist.nativeId, artist);
   }
 
-  for (const playlist of catalog.playlists) {
+  const built = { artists, artistByNativeId };
+  artistIndexes.set(source, built);
+  return built;
+}
+
+function indexPlaylists(source: readonly Playlist[]): PlaylistIndexes {
+  const cached = playlistIndexes.get(source);
+  if (cached) return cached;
+
+  const playlists = new Map<LocalId, Playlist>();
+  const playlistByNativeId = new Map<string, Playlist>();
+  for (const playlist of source) {
     playlists.set(playlist.localId, playlist);
     if (!playlistByNativeId.has(playlist.nativeId)) {
       playlistByNativeId.set(playlist.nativeId, playlist);
     }
   }
 
-  for (const album of catalog.albums) {
+  const built = { playlists, playlistByNativeId };
+  playlistIndexes.set(source, built);
+  return built;
+}
+
+function indexAlbums(source: readonly Album[]): AlbumIndexes {
+  const cached = albumIndexes.get(source);
+  if (cached) return cached;
+
+  const albums = new Map<LocalId, Album>();
+  const albumByNativeId = new Map<string, Album>();
+  const albumIdsByArtist = new Map<LocalId, LocalId[]>();
+  const albumIdsByGenre = new Map<string, LocalId[]>();
+  for (const album of source) {
     albums.set(album.localId, album);
     if (!albumByNativeId.has(album.nativeId)) albumByNativeId.set(album.nativeId, album);
     pushInto(albumIdsByArtist, album.artist.localId, album.localId);
     for (const genre of album.genres) pushInto(albumIdsByGenre, genre, album.localId);
   }
 
-  for (const song of catalog.songs) {
+  const built = { albums, albumByNativeId, albumIdsByArtist, albumIdsByGenre };
+  albumIndexes.set(source, built);
+  return built;
+}
+
+function indexSongs(source: readonly Song[]): SongIndexes {
+  const cached = songIndexes.get(source);
+  if (cached) return cached;
+
+  const songs = new Map<LocalId, Song>();
+  const songByNativeId = new Map<string, Song>();
+  const songIdsByAlbum = new Map<LocalId, LocalId[]>();
+  const songIdsByArtist = new Map<LocalId, LocalId[]>();
+  for (const song of source) {
     songs.set(song.localId, song);
     if (!songByNativeId.has(song.nativeId)) songByNativeId.set(song.nativeId, song);
     pushInto(songIdsByAlbum, song.album.localId, song.localId);
     pushInto(songIdsByArtist, song.artist.localId, song.localId);
   }
+
+  const built = { songs, songByNativeId, songIdsByAlbum, songIdsByArtist };
+  songIndexes.set(source, built);
+  return built;
+}
+
+export function buildCatalogStore(catalog: Catalog): CatalogStore {
+  const { artists, artistByNativeId } = indexArtists(catalog.artists);
+  const { playlists, playlistByNativeId } = indexPlaylists(catalog.playlists);
+  const { albums, albumByNativeId, albumIdsByArtist, albumIdsByGenre } = indexAlbums(catalog.albums);
+  const { songs, songByNativeId, songIdsByAlbum, songIdsByArtist } = indexSongs(catalog.songs);
 
   const provenance =
     catalog.songs[0]?.provenance ??
