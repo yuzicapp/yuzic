@@ -131,6 +131,15 @@ export const shade = {
   /** Top to bottom behind the status bar over the scrolled player: the clock
    *  and the camera cutout on the dark end, fading out below them. */
   statusBar: ['rgba(0,0,0,0.7)', 'rgba(0,0,0,0)'] as const,
+  /**
+   * Under light text that sits directly on artwork.
+   *
+   * A scrim can only darken what it covers by a fixed amount, so it cannot
+   * promise legibility over art that is nearly white — and album covers often
+   * are. A shadow travels with the glyphs instead, which is the one thing that
+   * holds wherever the letters land.
+   */
+  textOnArt: 'rgba(0,0,0,0.75)',
 } as const;
 
 /**

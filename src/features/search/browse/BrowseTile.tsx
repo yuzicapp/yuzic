@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 
 import { MediaImage } from '@/components/MediaImage'
 import Touchable from '@/components/Touchable'
-import { coverFade, onDark, spacing, typography } from '@/constants/design'
+import { coverFade, onDark, shade, spacing, typography } from '@/constants/design'
 import { useRadius } from '@/features/theme/useRadius'
 import { useTheme } from '@/features/theme/useTheme'
 import type { BrowseTile as Tile } from './browseTiles'
@@ -70,7 +70,14 @@ export default function BrowseTile({
         Drawn even with no artwork, so a tile with art and a tile without read
         as the same object.
       */}
-      <LinearGradient colors={coverFade.tileScrim} style={StyleSheet.absoluteFill} />
+      <LinearGradient
+        colors={coverFade.tileScrim}
+        // Held back so the darkening happens over the lower half, where the
+        // name is, rather than being spread evenly up a tile that is mostly
+        // artwork.
+        locations={[0, 0.55, 1]}
+        style={StyleSheet.absoluteFill}
+      />
 
       <View style={styles.caption}>
         <Text style={[styles.label, compact && styles.labelCompact]} numberOfLines={2}>
@@ -98,5 +105,10 @@ const styles = StyleSheet.create({
     // Always the light text: it sits on a scrim that is dark by construction,
     // whatever the theme and whatever the artwork behind it.
     color: onDark.text,
+    // And a shadow under it, because the scrim alone cannot promise anything
+    // over a nearly-white cover — see `shade.textOnArt`.
+    textShadowColor: shade.textOnArt,
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
   },
 })
