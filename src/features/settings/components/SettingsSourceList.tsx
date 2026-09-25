@@ -137,7 +137,13 @@ const SettingsSourceList: React.FC<Props> = ({
           onOrderChange(reorderItems(orderedSources, from, to).map(source => source.id))
         }
         // The page this sits in owns the scrolling; this list only reorders.
+        // `scrollable` is the library's autoscroll-during-drag behaviour and
+        // `scrollEnabled` the FlatList's own — both off, or React Native logs
+        // "VirtualizedLists should never be nested inside plain ScrollViews",
+        // which it decides purely on `scrollEnabled !== false`. The list is
+        // laid out at full height inside the page, so it has nothing to scroll.
         scrollable={false}
+        scrollEnabled={false}
         // `useIsActive` in the row only re-renders when this is set.
         shouldUpdateActiveItem
       />
