@@ -72,10 +72,12 @@ export default function BrowseTile({
       */}
       <LinearGradient
         colors={coverFade.tileScrim}
-        // Held back so the darkening happens over the lower half, where the
-        // name is, rather than being spread evenly up a tile that is mostly
-        // artwork.
-        locations={[0, 0.55, 1]}
+        // Full darkness is reached *before* the bottom edge, not at it, so the
+        // whole caption band sits on near-black rather than on the last few
+        // percent of a ramp. Shifting the midpoint alone was not enough — it
+        // changed the measured luminance under "Dance-Pop" by about one level
+        // out of 255, which is another way of saying it did nothing.
+        locations={[0, 0.45, 0.88]}
         style={StyleSheet.absoluteFill}
       />
 
@@ -109,6 +111,6 @@ const styles = StyleSheet.create({
     // over a nearly-white cover — see `shade.textOnArt`.
     textShadowColor: shade.textOnArt,
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
+    textShadowRadius: 8,
   },
 })

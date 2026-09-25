@@ -230,5 +230,5 @@ export const coverFade = {
    * laid on one at `photoScrim`'s weight lands white-on-white as often as not.
    * The top stays barely tinted so the art still reads as art.
    */
-  tileScrim: ['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.45)', 'rgba(0,0,0,0.88)'],
+  tileScrim: ['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.95)'],
 } as const;
