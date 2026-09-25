@@ -143,6 +143,26 @@ So after any release:
    site is the only release note a user who is not on GitHub will ever read,
    so a release that is not on it did not, as far as they can tell, happen.
    `changelog-current.yml` in `yuzic-web` fails daily while the site is behind.
+
+   **Push it when the release PR merges — do not wait for the builds.** Decided
+   2026-09-25. Waiting sounds safer and is not: a release only reaches
+   TestFlight and Play's *alpha* track, and promoting either to the public is a
+   separate manual act that can be days later, so there is no moment when the
+   page and general availability line up. Waiting only adds a step that can be
+   forgotten, which is the failure this checklist exists for. The version is
+   fixed the moment the PR merges, and a half-failed release is fixed forward
+   and re-promoted under the same number, so the entry stays true either way.
+   The site being briefly ahead is the cheap direction to be wrong in, and
+   `changelog-current.yml` treats it that way: behind fails, ahead only warns.
+   Note a *draft* GitHub release creates no tag, so that warning persists until
+   step 3 is done.
+
+   `yuzic-web` is worked on **directly on `master`** — no branches, no PRs;
+   pushing `master` is what publishes. Fetch first: this file is edited from
+   more than one place, and on 2026-09-25 `master` moved fifteen commits under
+   a branch that had been cut from it. Match the entries already there: no
+   summary line under the heading, `####` sections, bullets that say what the
+   old behaviour was.
 5. If one platform failed, say so explicitly rather than re-running blind. The
    fix usually belongs on `dev` and has to be promoted before a re-run can
    possibly succeed — which is exactly what did not happen after 1.4.0.
