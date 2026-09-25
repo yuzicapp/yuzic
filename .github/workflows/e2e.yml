@@ -65,6 +65,16 @@ jobs:
       # bundle, so the simulator runs the app the way a person would get it.
       # No signing is involved for a simulator destination.
       #
+      # Ad-hoc signed rather than unsigned. `CODE_SIGNING_ALLOWED=NO` builds an
+      # app with no code signature at all, and the simulator's securityd then
+      # refuses its keychain writes: `-34018, Client has neither
+      # application-identifier nor keychain-access-groups entitlements`. Server
+      # credentials live in the keychain, so onboarding connected to the demo
+      # over the network and then could not save what it got — leaving the app
+      # on the server-type screen and every suite after it skipped. An ad-hoc
+      # signature needs no certificate and no team, which is what a laptop
+      # build has been doing all along.
+      #
       # `DEBUG_INFORMATION_FORMAT=dwarf` drops the dSYM bundle, which nothing
       # here reads: the flows either pass or hand back a screenshot, and no
       # crash log gets symbolicated. It is several gigabytes and a `lipo` of
@@ -80,7 +90,9 @@ jobs:
             -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath ios/build \
-            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=YES \
             DEBUG_INFORMATION_FORMAT=dwarf \
             build \
             > /tmp/xcodebuild-e2e.log 2>&1 || {
@@ -107,6 +119,19 @@ jobs:
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
           xcrun simctl boot "$udid"
           xcrun simctl bootstatus "$udid"
+
+      # iOS offers its swipe-typing tutorial the first time a keyboard opens on
+      # a fresh device — a card over the bottom of the screen, tab bar
+      # included. The smoke flow taps into search and then back to Home, and
+      # that tap landed on the tutorial instead, so the flow failed on an
+      # assertion about Home while the app was working perfectly.
+      #
+      # Every runner is a fresh device, so this would greet every run.
+      - name: Tell the keyboard we have seen its tutorial
+        run: |
+          udid="${{ steps.sim.outputs.udid }}"
+          xcrun simctl spawn "$udid" defaults write com.apple.Preferences DidShowContinuousPathIntroduction -bool true
+          xcrun simctl spawn "$udid" defaults write com.apple.keyboard.preferences DidShowContinuousPathIntroduction -bool true || true
 
       - name: Install the app
         run: |
