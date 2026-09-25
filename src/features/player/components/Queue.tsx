@@ -5,7 +5,7 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
-import DraggableFlatList from 'react-native-draggable-flatlist';
+import ReorderableList, { reorderItems, useReorderableDrag } from 'react-native-reorderable-list';
 import { GripVertical, ChevronLeft, Pause, Play, SkipForward } from 'lucide-react-native';
 import { usePlayingState, usePlayingActions, usePlayingQueueVersion } from '@/features/playback/PlayingContext';
 import { MediaImage } from '@/components/MediaImage';
@@ -21,7 +21,6 @@ type QueueItemProps = {
   index: number;
   isCurrent: boolean;
   onPress: (index: number) => void;
-  onLongPress: () => void;
 };
 
 function queueItemPropsAreEqual(prev: QueueItemProps, next: QueueItemProps) {
@@ -36,12 +35,15 @@ function queueItemPropsAreEqual(prev: QueueItemProps, next: QueueItemProps) {
 }
 
 const QueueItem = memo(
-  ({ item, index, isCurrent, onPress, onLongPress }: QueueItemProps) => {
+  ({ item, index, isCurrent, onPress }: QueueItemProps) => {
     const rad = useRadius();
+    // The drag handle comes from the list rather than being threaded down as a
+    // prop, so it stays out of the memo comparison above.
+    const drag = useReorderableDrag();
     return (
     <Touchable
       onPress={() => onPress(index)}
-      onLongPress={onLongPress}
+      onLongPress={drag}
       style={[
         styles.queueItem,
         { borderRadius: rad.md },
@@ -103,37 +105,23 @@ const Queue: React.FC<{ onBack: () => void; width: number }> = ({
     [skipTo]
   );
 
-  const handleDragEnd = useCallback(
-    ({ data, from, to }: { data: Song[]; from: number; to: number }) => {
-      setQueue(data);
+  const handleReorder = useCallback(
+    ({ from, to }: { from: number; to: number }) => {
+      setQueue(current => reorderItems(current, from, to));
       moveTrack(from, to);
     },
     [moveTrack]
   );
 
   const renderItem = useCallback(
-    ({
-      item,
-      getIndex,
-      drag,
-      isActive,
-    }: {
-      item: Song;
-      getIndex: () => number | undefined;
-      drag: () => void;
-      isActive: boolean;
-    }) => {
-      const index = getIndex() ?? 0;
-      return (
-        <QueueItem
-          item={item}
-          index={index}
-          isCurrent={item.localId === currentSong?.localId}
-          onPress={handleSongClick}
-          onLongPress={drag}
-        />
-      );
-    },
+    ({ item, index }: { item: Song; index: number }) => (
+      <QueueItem
+        item={item}
+        index={index}
+        isCurrent={item.localId === currentSong?.localId}
+        onPress={handleSongClick}
+      />
+    ),
     [currentSong?.localId, handleSongClick]
   );
 
@@ -206,10 +194,10 @@ const Queue: React.FC<{ onBack: () => void; width: number }> = ({
       </Text>
 
       {/* List */}
-      <DraggableFlatList
+      <ReorderableList
         data={queue}
         keyExtractor={item => item.localId}
-        onDragEnd={handleDragEnd}
+        onReorder={handleReorder}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
