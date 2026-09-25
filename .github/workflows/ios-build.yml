@@ -42,6 +42,14 @@ jobs:
       - name: Install Node dependencies
         run: npm ci --omit=dev
 
+      # See the Android workflow: --omit=dev also skipped `patch-package`, so no
+      # release build applied any patch between 2026-09-08 and 2026-09-25. On
+      # iOS that cost the expo-router patch, which is what lets the app mount
+      # when CarPlay launches it with no phone window — so the CarPlay fix
+      # shipped in 2.11.0 was never actually in 2.11.0.
+      - name: Verify patches are applied
+        run: ./tools/verify-patches.sh
+
       - name: Cache CocoaPods
         uses: actions/cache@v4
         with:

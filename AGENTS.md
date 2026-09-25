@@ -35,6 +35,33 @@ support boundaries in `docs/`.
 - `.github/workflows/e2e.yml`: the Maestro suites on an iOS simulator, on demand only — not a PR gate and not a nightly, because the flows sign in through a public demo server and each run is forty minutes of a macOS runner. See [`.maestro/README.md`](.maestro/README.md).
 - `.github/workflows/release-on-version-bump.yml`: on push to `master`, if `package.json`'s `version` field changed from the previous commit, automatically calls both build workflows.
 
+## `patches/` must stay in release builds
+
+**`patch-package` belongs in `dependencies`, not `devDependencies`.** Release
+builds install with `npm ci --omit=dev` — deliberately, to keep
+`expo-dev-launcher` out of the artifact — and `--omit=dev` skips anything in
+`devDependencies`, tooling included. `patch-package` was in the wrong list from
+2026-09-08, and `postinstall` was guarded on its binary existing:
+
+```
+if [ -e node_modules/.bin/patch-package ]; then patch-package --error-on-fail; fi
+```
+
+so every release build applied **no patches at all**, exited zero, and said
+nothing. It held for seventeen days and three releases because everything works
+in development, where dev dependencies are installed. What it cost: the
+`expo-router` patch that lets the app mount when a car launches it with no phone
+window, so the CarPlay cold-launch fix was absent from the 2.11.0 that shipped
+it; and the `react-native-draggable-flatlist` patch for nested-list measurement
+on the new architecture, absent since 2.9.0.
+
+`postinstall` is unguarded now, so a missing `patch-package` fails the install
+instead of quietly skipping. `tools/verify-patches.sh` runs in both build
+workflows after the install and fails unless every patch in `patches/` is
+actually present in `node_modules` — it reverse-applies each one, which also
+catches a patch left stale by an upstream bump. Don't move `patch-package` back,
+and don't re-add a guard that turns a missing tool into a no-op.
+
 ## Version numbers — the stores are asked, never told
 
 Android versionCode and iOS build number are **queried from Play and App Store
