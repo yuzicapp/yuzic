@@ -1010,7 +1010,8 @@
       "genres": "Genres",
       "moods": "Moods",
       "genre": "Genre",
-      "mood": "Mood"
+      "mood": "Mood",
+      "allGenres": "All genres"
     }
   },
   "artist": {

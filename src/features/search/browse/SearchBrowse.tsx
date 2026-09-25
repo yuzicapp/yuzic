@@ -1,31 +1,32 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useTranslation } from 'react-i18next'
-import { Tags } from 'lucide-react-native'
 
-import { iconSize, spacing, typography } from '@/constants/design'
+import { controlSize, spacing, tinted, typography } from '@/constants/design'
 import { useAlbums } from '@/features/album/useAlbums'
-import CoverMosaic from '@/features/library/CoverMosaic'
-import { GRID_SPACING, gridItemWidth, libraryGutter } from '@/features/library/layout'
-import { useGridColumns } from '@/features/layout/useGridColumns'
+import { GRID_SPACING } from '@/features/library/layout'
 import { useWindowLayout } from '@/features/layout/useWindowLayout'
 import { useTheme } from '@/features/theme/useTheme'
 import { useRadius } from '@/features/theme/useRadius'
 import Touchable from '@/components/Touchable'
-import { browseTilesFor, MAX_TILES_PER_KIND, type BrowseTile } from './browseTiles'
+import BrowseTile from './BrowseTile'
+import { tileShape, tileSize } from './browseLayout'
+import { browseTilesFor, MAX_TILES_PER_KIND, type BrowseTileKind } from './browseTiles'
 
 /**
  * The idle Search screen: ways into the library, rather than nothing.
  *
- * Shown when the field is empty and unfocused. Focusing the field replaces
- * this with recent searches, because a list of past queries is useful with a
- * cursor in the field and clutter without one.
+ * Shown when the field is empty and unfocused. Focusing replaces it with
+ * recent searches, because past queries are useful with a cursor in the field
+ * and clutter without one.
  *
- * Genres first, moods second where the library has them — see `browseTiles`
- * for why neither is inferred. A library with no tags at all gets nothing
- * here, which is correct: there is genuinely nothing to offer, and an invented
- * tile would be worse than the empty screen this replaces.
+ * There are no section headers. "Genres" over a grid is the grammar of a shelf
+ * on Home — one row among many — and here it sat above the whole screen, under
+ * a title that already said Search. Two kinds of tag became two stacked
+ * shelves. A chip row says the same thing in one line and lets the grid have
+ * the screen, and it disappears entirely for a library with only genres, which
+ * is most of them.
  */
 export default function SearchBrowse() {
   const { t } = useTranslation()
@@ -34,106 +35,122 @@ export default function SearchBrowse() {
   const navigation = useNavigation<any>()
   const route = useRoute()
   const { width } = useWindowLayout()
-  const columns = useGridColumns()
   const { albums } = useAlbums()
-
-  const gutter = libraryGutter(true, GRID_SPACING, width)
-  const tileSize = gridItemWidth(width, columns, GRID_SPACING, gutter)
 
   const genres = useMemo(() => browseTilesFor(albums, 'genre'), [albums])
   const moods = useMemo(() => browseTilesFor(albums, 'mood'), [albums])
 
-  const open = (tile: BrowseTile) =>
-    navigation.push('browseTagView', { kind: tile.kind, label: tile.label })
+  const [kind, setKind] = useState<BrowseTileKind>('genre')
+  // A library with no mood tags is never offered the choice — see `browseTiles`
+  // for why nothing here is inferred.
+  const kinds: BrowseTileKind[] = moods.length > 0 ? ['genre', 'mood'] : ['genre']
+  const active = kind === 'mood' && moods.length > 0 ? moods : genres
 
-  const section = (titleKey: string, tiles: BrowseTile[], seeAll?: () => void) => {
-    if (tiles.length === 0) return null
-    return (
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.secondary }]}>{t(titleKey)}</Text>
-          {seeAll && tiles.length > MAX_TILES_PER_KIND && (
-            <Touchable accessibilityRole="button" onPress={seeAll}>
-              <Text style={[styles.seeAll, { color: colors.subtext }]}>{t('library.seeAll')}</Text>
-            </Touchable>
-          )}
-        </View>
-        <View style={[styles.grid, { paddingHorizontal: gutter }]}>
-          {tiles.slice(0, MAX_TILES_PER_KIND).map(tile => (
-            <Touchable
-              key={tile.key}
-              testID="search-browse-tile"
-              accessibilityRole="button"
-              accessibilityLabel={tile.label}
-              style={[styles.tile, { width: tileSize, margin: GRID_SPACING }]}
-              onPress={() => open(tile)}
-            >
-              <CoverMosaic
-                covers={tile.covers}
-                size={tileSize}
-                fallback={<Tags size={iconSize.row} color={colors.subtext} />}
-              />
-              <View style={[styles.caption, { borderRadius: rad.md }]}>
-                <Text style={[styles.tileLabel, { color: colors.secondary }]} numberOfLines={2}>
-                  {tile.label}
-                </Text>
-                <Text style={[styles.tileCount, { color: colors.subtext }]} numberOfLines={1}>
-                  {t('library.count.albums', { count: tile.albumCount })}
-                </Text>
-              </View>
-            </Touchable>
-          ))}
-        </View>
-      </View>
-    )
-  }
+  const contentWidth = width - spacing.page * 2
+  const tiles = active.slice(0, MAX_TILES_PER_KIND)
+
+  if (genres.length === 0 && moods.length === 0) return null
 
   return (
     <View testID="search-browse">
-      {section('search.browse.genres', genres, () =>
-        navigation.push('genresView', (route.params ?? {}) as never)
+      {kinds.length > 1 && (
+        <View style={styles.chipRow}>
+          {kinds.map(option => {
+            const selected = option === kind
+            return (
+              <Touchable
+                key={option}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: selected ? tinted(colors.themeColor, 'selected') : colors.muted,
+                    borderRadius: rad.pillFor(controlSize.inlineControl),
+                  },
+                ]}
+                onPress={() => setKind(option)}
+              >
+                <Text
+                  style={[styles.chipText, { color: selected ? colors.themeColor : colors.secondary }]}
+                >
+                  {t(`search.browse.${option}s`)}
+                </Text>
+              </Touchable>
+            )
+          })}
+        </View>
       )}
-      {section('search.browse.moods', moods)}
+
+      <View style={styles.grid}>
+        {tiles.map((tile, rank) => {
+          const { width: w, height } = tileSize(tileShape(rank), contentWidth, GRID_SPACING)
+          return (
+            <View key={tile.key} style={styles.cell}>
+              <BrowseTile
+                tile={tile}
+                width={w}
+                height={height}
+                onPress={() =>
+                  navigation.push('browseTagView', { kind: tile.kind, label: tile.label })
+                }
+              />
+            </View>
+          )
+        })}
+      </View>
+
+      {/*
+        The tail, as a row rather than a tile: everything above is a place to
+        go, and this is the way to the rest — a different kind of thing, so it
+        does not pretend to be one of them.
+      */}
+      {kind === 'genre' && genres.length > MAX_TILES_PER_KIND && (
+        <Touchable
+          accessibilityRole="button"
+          style={styles.allRow}
+          onPress={() => navigation.push('genresView', (route.params ?? {}) as never)}
+        >
+          <Text style={[styles.allText, { color: colors.subtext }]}>
+            {t('search.browse.allGenres')}
+          </Text>
+        </Touchable>
+      )}
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  section: {
+  chipRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.page,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.md,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.page,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.sm,
+  chip: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
   },
-  sectionTitle: {
-    ...typography.sectionTitle,
-  },
-  seeAll: {
-    ...typography.caption,
+  chipText: {
+    ...typography.rowSubtitle,
     fontWeight: '500',
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    paddingHorizontal: spacing.page - GRID_SPACING,
   },
-  tile: {},
-  caption: {
-    paddingTop: spacing.xs,
+  cell: {
+    margin: GRID_SPACING,
   },
-  tileLabel: {
-    ...typography.rowTitle,
-    // Two lines' worth, always. A grid of tags mixes "Pop" with "Southern Hip
-    // Hop", and letting the caption size itself pushed the count down on the
-    // wrapping ones — which left the next row starting at a different height
-    // on every column, so the grid read as broken rather than ragged.
-    height: typography.rowTitle.lineHeight * 2,
+  allRow: {
+    paddingHorizontal: spacing.page,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
   },
-  tileCount: {
+  allText: {
     ...typography.rowSubtitle,
+    fontWeight: '500',
   },
 })

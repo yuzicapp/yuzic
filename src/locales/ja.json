@@ -1007,7 +1007,8 @@
       "genres": "ジャンル",
       "moods": "ムード",
       "genre": "ジャンル",
-      "mood": "ムード"
+      "mood": "ムード",
+      "allGenres": "すべてのジャンル"
     }
   },
   "media": {

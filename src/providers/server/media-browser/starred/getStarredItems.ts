@@ -48,7 +48,13 @@ export async function getStarredItems(
 
     return { songs, albums };
   } catch (error) {
-    console.error(`Failed to fetch ${client.brand.label} starred items:`, error);
+    // A warning, not an error: this call has already decided how to cope, and
+    // it copes by returning nothing rather than by failing. `console.error`
+    // says something went wrong that the code could not handle, and in
+    // development it puts a full-screen red box over the app — which, for a
+    // server behind a flaky tunnel answering 530 on one request in ten, means
+    // the app is unusable for a fault it is already absorbing.
+    console.warn(`Could not read ${client.brand.label} starred items:`, error);
     return { songs: [], albums: [] };
   }
 }

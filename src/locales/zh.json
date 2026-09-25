@@ -1007,7 +1007,8 @@
       "genres": "风格",
       "moods": "情绪",
       "genre": "风格",
-      "mood": "情绪"
+      "mood": "情绪",
+      "allGenres": "全部风格"
     }
   },
   "media": {

@@ -1010,7 +1010,8 @@
       "genres": "Genres",
       "moods": "Ambiances",
       "genre": "Genre",
-      "mood": "Ambiance"
+      "mood": "Ambiance",
+      "allGenres": "Tous les genres"
     }
   },
   "media": {
