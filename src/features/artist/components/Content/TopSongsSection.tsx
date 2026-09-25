@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -6,6 +6,7 @@ import { notify } from '@/components/toast';
 
 import { useApi } from '@/providers/registry/useApi'
 import { QueryKeys } from '@/state/query/queryKeys'
+import { MAX_TRACK_ROWS, ShowMoreTracks, visibleTrackRows } from './trackSection'
 import { useTheme } from '@/features/theme/useTheme'
 import { usePlayingActions } from '@/features/playback/PlayingContext'
 import { usePlayableSongResolver } from '@/features/song/usePlayableSongResolver';
@@ -13,7 +14,7 @@ import TopTrackRow from '@/components/rows/TopTrackRow'
 import { spacing, typography } from '@/constants/design'
 import type { Artist } from '@/domain/entities/Artist'
 
-const TOP_SONG_LIMIT = 5
+const TOP_SONG_LIMIT = MAX_TRACK_ROWS
 
 type Props = {
   artist: Artist
@@ -41,6 +42,8 @@ export default function TopSongsSection({ artist }: Props) {
   const { playSong } = usePlayingActions()
   const { resolvePlayableSong } = usePlayableSongResolver()
 
+  const [showAll, setShowAll] = useState(false)
+
   const getTopSongs = api.artists.getTopSongs
 
   const { data: songs } = useQuery({
@@ -63,6 +66,8 @@ export default function TopSongsSection({ artist }: Props) {
 
   if (!songs?.length) return null
 
+  const visible = songs.slice(0, visibleTrackRows(songs.length, showAll))
+
   return (
     <View>
       <View style={styles.sectionHeader}>
@@ -70,7 +75,7 @@ export default function TopSongsSection({ artist }: Props) {
           {t('artist.sections.topSongs')}
         </Text>
       </View>
-      {songs.map((song, index) => (
+      {visible.map((song, index) => (
         <TopTrackRow
           key={song.localId}
           song={song}

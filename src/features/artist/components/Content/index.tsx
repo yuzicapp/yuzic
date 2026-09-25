@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { useRadius } from '@/features/theme/useRadius'
 import { StyleSheet, Text, View } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import { Ellipsis, Globe } from 'lucide-react-native'
 import type { Album } from '@/domain/entities/Album'
 import AlbumRow from '@/components/rows/AlbumRow'
@@ -56,12 +56,16 @@ export default function ArtistContent({ model }: Props) {
   const scrollClearance = useScrollClearance()
   const { listInset, fullBleed } = useContentInset()
   const navigation = useNavigation<any>()
+  // The params that identify this artist, forwarded so the releases list
+  // resolves the same one rather than being handed a name to look up again.
+  const { params: routeParams } = useRoute<any>()
   const { navigateToAlbum } = useMatchedNavigation()
   const { colors } = useTheme()
   const rad = useRadius()
   const { t } = useTranslation()
-  const [visibleAlbumsCount, setVisibleAlbumsCount] = useState(INITIAL_RELEASE_ROWS)
-  const [visibleSinglesCount, setVisibleSinglesCount] = useState(INITIAL_RELEASE_ROWS)
+  // Fixed, now that the overflow opens a list rather than growing this one.
+  const visibleAlbumsCount = INITIAL_RELEASE_ROWS
+  const visibleSinglesCount = INITIAL_RELEASE_ROWS
   const [showUnownedAlbums, setShowUnownedAlbums] = useState(false)
   const [showUnownedSingles, setShowUnownedSingles] = useState(false)
 
@@ -194,11 +198,16 @@ export default function ArtistContent({ model }: Props) {
             if (isUnowned) {
               if (item.target === 'albums') setShowUnownedAlbums(true)
               else setShowUnownedSingles(true)
-            } else if (item.target === 'albums') {
-              setVisibleAlbumsCount(c => c + 5)
-            } else {
-              setVisibleSinglesCount(c => c + 5)
+              return
             }
+            // The rest of a discography is a list, not another five rows.
+            // Growing in place meant eight taps to reach the end of a
+            // prolific artist, and no way to sort what you finally had.
+            navigation.push('artistReleasesView', {
+              ...routeParams,
+              group: item.target,
+              scope: isLocal ? 'owned' : 'external',
+            })
           }}
         >
           <View style={[styles.showMoreIcon, { backgroundColor: colors.card, borderRadius: rad.thumb }]}>
@@ -231,7 +240,7 @@ export default function ArtistContent({ model }: Props) {
         subtextOverride={releaseYearLabel(item.album) ?? undefined}
       />
     )
-  }, [colors, rad.thumb, artist, isLocal, model, navigation, navigateToAlbum, setVisibleAlbumsCount, setVisibleSinglesCount, setShowUnownedAlbums, setShowUnownedSingles, t])
+  }, [colors, rad.thumb, artist, isLocal, model, navigation, navigateToAlbum, routeParams, setShowUnownedAlbums, setShowUnownedSingles, t])
 
   // The list is mostly a column of album rows, so it is capped and centred
   // like every other column of rows — but five of its item kinds are not
