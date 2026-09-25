@@ -13,15 +13,24 @@ name: App launches (iOS Simulator)
 # there. It asks nothing of any server — a fresh install lands on onboarding,
 # which renders from the bundle alone — so unlike `e2e.yml` it can gate a merge
 # without making somebody else's uptime a condition of shipping.
+# Not a PR gate, on evidence rather than principle. The Release build takes
+# 37-53 minutes on a macOS runner — the rest of the job is two — and macOS
+# minutes bill at ten times Linux. A check that slow in front of every push
+# is one people route around, and the first two attempts died on their own
+# timeout before the app ever started.
+#
+# So it runs after merge and nightly, which still closes the gap it was built
+# for: nothing else in CI ever starts the app, and a `dev` that cannot launch
+# now says so within the hour rather than at the next release.
 on:
   push:
     branches: [master, dev]
     paths-ignore: ['**/*.md', 'docs/**', '.maestro/**', 'fastlane/**']
-  pull_request:
-    branches: [master, dev]
-    # A documentation change cannot stop the app launching, and this job is
-    # thirty-odd minutes of somebody's runner.
-    paths-ignore: ['**/*.md', 'docs/**', '.maestro/**', 'fastlane/**']
+  schedule:
+    # Early, so a nightly failure is waiting rather than competing with the
+    # E2E suites at 09:00.
+    - cron: '0 7 * * *'
+  workflow_dispatch:
 
 concurrency:
   group: app-launch-${{ github.ref }}
@@ -31,7 +40,7 @@ jobs:
   launch:
     name: Build and launch
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
@@ -64,10 +73,12 @@ jobs:
           cd ios
           pod install --repo-update
 
-      # The Xcode build is 37 of this job's 40 minutes from cold, and almost
-      # all of it is pods and generated React Native sources that only change
-      # when a dependency does. Keyed on the lockfiles for that reason; a miss
-      # is the cold build, which is what the timeout allows for.
+      # The Xcode build is 37-53 minutes from cold and almost all of it is pods
+      # and generated React Native sources, which only change when a dependency
+      # does — hence the lockfile key. Note a cache is only written by a job
+      # that *finishes*, so the first green run is what seeds it; the two runs
+      # before this workflow settled were killed by their own timeout and
+      # therefore saved nothing, which is why the timeout now has real room.
       - name: Cache the build
         uses: actions/cache@v4
         with:
