@@ -140,6 +140,12 @@ jobs:
             echo
             if [ "$IOS_RESULT" = success ] && [ "$ANDROID_RESULT" = success ]; then
               echo "Both halves shipped. Check each number is above the last release's, then write the draft release."
+              echo
+              # The site is the only release note a user who is not on GitHub
+              # ever reads, and it is nobody's job until it is written down: it
+              # sat on 2.6.0 while 2.11.0 was on both stores. Expanded from the
+              # Play note, which this release overwrote.
+              echo "Then **publish this release to the site** — \`_pages/changelog.md\` in \`yuzic-web\`, with the \`Latest\` marker moved onto it. Expand it from \`fastlane/metadata/android/en-US/changelogs/default.txt\`, which the next release overwrites."
             else
               echo "**This release is incomplete.** Per AGENTS, the fix belongs on \`dev\` and has to be promoted before a re-run can succeed — do not re-run this blind."
             fi
