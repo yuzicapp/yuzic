@@ -50,6 +50,10 @@ const PlaylistContent: React.FC<Props> = ({ playlist, songs, songsLoading }) => 
     return songs.map(song => ({ type: 'song', song }));
   }, [songs, songsLoading]);
 
+  // Hoisted for the reason given in the album screen: a literal here is a
+  // guaranteed miss on `SongRow`'s memo.
+  const collection = useMemo(() => ({ playlist, songs }), [playlist, songs]);
+
   const renderItem = useCallback(({ item }: { item: ListItem }) => {
     if (item.type === 'skeleton') {
       return <LoadingSongRow />;
@@ -58,12 +62,12 @@ const PlaylistContent: React.FC<Props> = ({ playlist, songs, songsLoading }) => 
     return (
       <SongRow
         song={item.song}
-        collection={{ playlist, songs }}
+        collection={collection}
         showDownloadedDot
         isFavorite={starredSongIds.has(item.song.localId)}
       />
     );
-  }, [starredSongIds, playlist, songs]);
+  }, [starredSongIds, collection]);
 
   if (editing && !songsLoading) {
     return <PlaylistEditList playlist={playlist} songs={songs} onDone={stopEditing} />;

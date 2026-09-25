@@ -175,6 +175,10 @@ const AlbumContent: React.FC<Props> = ({ model }) => {
     return listItems;
   }, [songs, songsLoading, isLocal]);
 
+  // Hoisted out of `renderItem`: a fresh object there is a guaranteed miss on
+  // `SongRow`'s shallow memo, so every row re-rendered whenever the list did.
+  const collection = useMemo(() => (album ? { album, songs } : undefined), [album, songs]);
+
   const renderItem = useCallback(({ item }: { item: ListItem }) => {
     if (item.type === 'skeleton') {
       return <LoadingSongRow />;
@@ -195,7 +199,7 @@ const AlbumContent: React.FC<Props> = ({ model }) => {
       return (
         <SongRow
           song={song}
-          collection={album ? { album, songs } : undefined}
+          collection={collection}
           variant="albumCompact"
           isFavorite={starredSongIds.has(song.localId)}
         />
@@ -212,7 +216,7 @@ const AlbumContent: React.FC<Props> = ({ model }) => {
         onPress={previewUrl ? () => handlePreviewPress(song) : undefined}
       />
     );
-  }, [colors, starredSongIds, album, songs, t, isLocal, playability, handlePreviewPress]);
+  }, [colors, starredSongIds, collection, album, t, isLocal, playability, handlePreviewPress]);
 
   return (
     <DetailScreen bar={<AlbumHeaderBar model={model} />}>
