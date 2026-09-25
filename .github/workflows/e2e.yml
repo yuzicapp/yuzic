@@ -13,11 +13,11 @@ name: E2E (Maestro, iOS Simulator)
 # tell whether a flow passes, only that a renamed testID has not silently
 # broken one. This job is the half that actually runs them.
 
+# Run it when you want it, not every night. The nightly was red for weeks
+# without anyone noticing — which says what it was worth unattended — and each
+# run is forty minutes of a macOS runner, billed at ten times Linux.
 on:
   workflow_dispatch:
-  schedule:
-    # Nightly, well clear of the release workflow's usual window.
-    - cron: '0 9 * * *'
 
 concurrency:
   group: e2e-${{ github.ref }}
