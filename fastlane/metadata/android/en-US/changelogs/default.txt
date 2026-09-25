@@ -1,8 +1,5 @@
-Search opens on your library instead of a blank page.
+The car opens Yuzic properly, and reordering works again.
 
-- Browse by genre, sized by how much of each you own
-- The keyboard no longer forces itself open; recents appear when you tap the field
-- An artist's discography opens as a sortable list, not a "more" button
-- Loudness normalisation, from your server's own measurements (Settings > Player)
-- Albums read every genre and mood your files carry, and know a single from an EP
-- Jellyfin: tracks without lyrics no longer report an error
+- Starting Yuzic from the car works with your phone app closed. This was fixed last release but was missing from the build itself
+- Dragging Home shelves into the order you want, in Settings, works again
+- Drag-to-reorder is smoother in playlists, the queue and settings
