@@ -30,6 +30,8 @@ export interface SubsonicSong {
   bpm?: number;
   genre?: string;
   genres?: (SubsonicGenreRef | string)[];
+  /** OpenSubsonic extension; the track's mood tags, as the file carries them. */
+  moods?: string[];
   /** 1-5 where the user has rated it, absent or 0 where they have not. */
   userRating?: number;
   /** OpenSubsonic extensions; used for matching, absent on older servers. */
@@ -45,7 +47,19 @@ export interface SubsonicAlbum {
   coverArt?: string;
   year?: number;
   genre?: string;
+  /** OpenSubsonic extension; the full list, where the legacy field holds one. */
+  genres?: (SubsonicGenreRef | string)[];
+  /** OpenSubsonic extension; the album's mood tags, as the files carry them. */
+  moods?: string[];
+  /** OpenSubsonic extension; MusicBrainz release-group types ("Album", "EP"). */
+  releaseTypes?: string[];
+  /** OpenSubsonic extension; the one secondary type reported as a flag. */
+  isCompilation?: boolean;
   created?: string;
+  /** Reported on the ID3 object too, not only in a list. */
+  playCount?: number;
+  /** OpenSubsonic extension; when the origin last recorded a play. */
+  played?: string;
   song?: SubsonicSong[];
   /** 1-5 where the user has rated it, absent or 0 where they have not. */
   userRating?: number;
@@ -62,6 +76,11 @@ export interface SubsonicAlbumListEntry {
   coverArt?: string;
   year?: number;
   genre?: string;
+  /** OpenSubsonic extensions, as on the ID3 album object. */
+  genres?: (SubsonicGenreRef | string)[];
+  moods?: string[];
+  releaseTypes?: string[];
+  isCompilation?: boolean;
   created?: string;
   songCount?: number;
   playCount?: number;
@@ -105,6 +124,15 @@ export interface SubsonicPlaylist {
   created?: string;
   /** The account that owns it. Public playlists of other accounts are listed too. */
   owner?: string;
+  /** The playlist's description, which the API calls a comment. */
+  comment?: string;
+  /**
+   * OpenSubsonic extension; whether the caller may NOT change it.
+   *
+   * The server's own answer to a question this adapter used to guess at by
+   * comparing usernames — see `ownedBy`.
+   */
+  readonly?: boolean;
   entry?: SubsonicSong[];
   /**
    * How many tracks it holds. Reported by `getPlaylists`, which returns no

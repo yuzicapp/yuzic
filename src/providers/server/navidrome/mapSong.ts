@@ -12,18 +12,9 @@ import type { ExternalIds } from '@/domain/identity/ExternalIds';
 import { albumCoverSubject, missingCover, type CoverSource } from '@/domain/entities/Cover';
 import { reportedRating } from '@/domain/entities/Rating';
 import { albumRef, artistRef } from './mapRefs';
+import { genresOf, moodsOf } from './tagLists';
 import type { SubsonicSong } from './types';
 import { internCover } from '@/domain/entities/internRef';
-
-/** Subsonic reports genres two ways, and older servers only the singular one. */
-function genresOf(dto: SubsonicSong): string[] {
-  if (Array.isArray(dto.genres) && dto.genres.length > 0) {
-    return dto.genres
-      .map(genre => (typeof genre === 'string' ? genre : genre?.name))
-      .filter((genre): genre is string => Boolean(genre));
-  }
-  return dto.genre ? [dto.genre] : [];
-}
 
 function externalIdsOf(dto: SubsonicSong): ExternalIds {
   const ids: ExternalIds = {};
@@ -69,6 +60,7 @@ export function mapSong(dto: SubsonicSong, context: MapSongContext): Song {
     trackNumber: dto.track,
     year: dto.year,
     genres: genresOf(dto),
+    moods: moodsOf(dto),
     addedAt: dto.created ? Date.parse(dto.created) || undefined : undefined,
     serverPlayCount: dto.playCount,
     serverLastPlayedAt: dto.played ? Date.parse(dto.played) || undefined : undefined,

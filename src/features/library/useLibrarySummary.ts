@@ -11,6 +11,7 @@ import { selectWantCountForActiveServer, selectWantsForActiveServer } from '@/st
 import { buildGenreRows } from '@/features/genre/genreList'
 import { albumsByGenre } from './catalogStore'
 import { useCatalogStore } from './useCatalogStore'
+import { coversOf, hasArt, MOSAIC_COVERS } from './mosaicCovers'
 import type { CoverSource } from '@/domain/entities/Cover'
 
 export type LibraryEntryKey =
@@ -34,29 +35,6 @@ type LibraryEntrySummary = {
   covers: CoverSource[]
 }
 
-/** A mosaic is four covers or it is one — three-quarters of a grid reads as a
- * loading state rather than a design. */
-export const MOSAIC_COVERS = 4
-
-/**
- * Whether a cover will actually resolve to a picture.
- *
- * A letter tile or an empty cover is the fallback the row already has, drawn
- * smaller and four times over, so it is worth nothing here.
- */
-function hasArt(cover: CoverSource | undefined): cover is CoverSource {
-  return !!cover && cover.kind !== 'none'
-}
-
-function coversOf(items: { cover: CoverSource }[]): CoverSource[] {
-  const covers: CoverSource[] = []
-  for (const item of items) {
-    if (!hasArt(item.cover)) continue
-    covers.push(item.cover)
-    if (covers.length === MOSAIC_COVERS) break
-  }
-  return covers
-}
 
 /**
  * What each library entry point holds, and what it looks like.

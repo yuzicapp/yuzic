@@ -64,6 +64,11 @@ export interface Song extends EntityCore {
    */
   releaseDate?: string;
   genres: string[];
+  /**
+   * Mood tags the origin reports, where it reports any. See `Album.moods` —
+   * absent means the origin said nothing, not that the track has no mood.
+   */
+  moods?: string[];
   /** When this arrived in the library, unix ms. Server-originated records only. */
   addedAt?: number;
   /**

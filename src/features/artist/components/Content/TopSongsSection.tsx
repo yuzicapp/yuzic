@@ -84,6 +84,11 @@ export default function TopSongsSection({ artist }: Props) {
           onPress={() => void handlePress(song.nativeId)}
         />
       ))}
+      <ShowMoreTracks
+        total={songs.length}
+        expanded={showAll}
+        onToggle={() => setShowAll(prev => !prev)}
+      />
     </View>
   )
 }

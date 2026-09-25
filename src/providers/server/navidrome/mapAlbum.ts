@@ -6,7 +6,7 @@
  * carries songs). Both map here, because a caller should not have to know
  * which endpoint an album came from to render it.
  */
-import type { Album, ReleaseType } from '@/domain/entities/Album';
+import type { Album } from '@/domain/entities/Album';
 import { makeLocalId } from '@/domain/identity/LocalId';
 import type { LocalId } from '@/domain/identity/LocalId';
 import type { Provenance } from '@/domain/identity/Provenance';
@@ -14,6 +14,8 @@ import { albumCoverSubject, missingCover, type CoverSource } from '@/domain/enti
 import type { ExternalIds } from '@/domain/identity/ExternalIds';
 import { reportedRating } from '@/domain/entities/Rating';
 import { artistRef } from './mapRefs';
+import { releaseTypeOf } from './releaseType';
+import { genresOf, moodsOf } from './tagLists';
 import type { SubsonicAlbum, SubsonicAlbumListEntry } from './types';
 
 type AnyAlbumDto = SubsonicAlbum | SubsonicAlbumListEntry;
@@ -73,16 +75,17 @@ export function mapAlbum(dto: AnyAlbumDto, context: MapAlbumContext): Album {
     cover: albumCoverOf(dto),
     artist: artistRef(provenance, dto.artistId, dto.artist, context.artistCover),
     year: dto.year,
-    // Subsonic has no release-type field; everything in a library listing is
-    // presented as an album unless a provider that knows better says otherwise.
-    releaseType: 'album' satisfies ReleaseType,
-    genres: dto.genre ? [dto.genre] : [],
+    releaseType: releaseTypeOf(dto),
+    genres: genresOf(dto),
+    moods: moodsOf(dto),
     addedAt: dto.created ? Date.parse(dto.created) || undefined : undefined,
-    // Only the getAlbumList shape reports these; the ID3 album object does not.
-    serverPlayCount: 'playCount' in dto ? dto.playCount : undefined,
-    serverLastPlayedAt: 'played' in dto && dto.played
-      ? Date.parse(dto.played) || undefined
-      : undefined,
+    // Both shapes report these — the comment here used to claim only the list
+    // shape did, which the spec contradicts: `playCount` is base Subsonic on
+    // AlbumID3 and `played` is an OpenSubsonic extension on it. Nothing was
+    // actually lost, because `in` is a runtime test and the value arrives
+    // whether or not the interface admitted it existed; the DTO now says so.
+    serverPlayCount: dto.playCount,
+    serverLastPlayedAt: dto.played ? Date.parse(dto.played) || undefined : undefined,
     userRating: reportedRating(dto.userRating),
     songIds: context.songIds ?? [],
   };

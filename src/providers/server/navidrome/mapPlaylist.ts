@@ -40,9 +40,14 @@ export function mapPlaylist(dto: SubsonicPlaylist, context: MapPlaylistContext):
     externalIds: {},
     title: dto.name ?? 'Untitled playlist',
     cover,
+    description: dto.comment,
     // Navidrome lists the caller's own playlists and other accounts' public
     // ones; only the owner may edit, so the others must not offer to.
     isOwned: ownedBy(dto.owner, context.username),
+    // Where the server states it, believe it: `readonly` is the fact `ownedBy`
+    // approximates, and it is the only thing that can describe a playlist
+    // shared *with* edit rights, which owner-matching reads as someone else's.
+    canEdit: typeof dto.readonly === 'boolean' ? !dto.readonly : undefined,
     createdAt: dto.created ? Date.parse(dto.created) || undefined : undefined,
     updatedAt: dto.changed ? Date.parse(dto.changed) || undefined : undefined,
     songIds: context.songIds ?? [],

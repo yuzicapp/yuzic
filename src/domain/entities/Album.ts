@@ -25,6 +25,17 @@ export interface Album extends EntityCore {
   releaseDate?: string;
   releaseType: ReleaseType;
   genres: string[];
+  /**
+   * Mood tags the origin reports, where it reports any.
+   *
+   * The listener's own tags, read and shown as they are — not inferred. A
+   * server that says nothing about mood is absent here rather than empty,
+   * the same distinction every other optional origin-reported field draws:
+   * "this library is not mood-tagged" and "this album has no moods" are
+   * different facts, and a browse surface that offers mood as a way in should
+   * only offer it to a library that actually carries them.
+   */
+  moods?: string[];
   /** When this arrived in the library, unix ms. Server-originated records only. */
   addedAt?: number;
   /**

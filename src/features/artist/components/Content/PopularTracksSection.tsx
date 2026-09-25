@@ -1,4 +1,4 @@
-import { onDark , controlSize, spacing, typography } from '@/constants/design';
+import { onDark, spacing, typography } from '@/constants/design';
 import React, { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -8,7 +8,6 @@ import { selectShowSourceHeaders } from '@/features/settings/appearance/state';
 import { usePreviewPlayer } from '@/features/playback/usePreviewPlayer'
 import TopTrackRow from '@/components/rows/TopTrackRow'
 import type { Song } from '@/domain/entities/Song'
-import Touchable from '@/components/Touchable'
 import { useRadius } from '@/features/theme/useRadius'
 import { MAX_TRACK_ROWS, ShowMoreTracks, visibleTrackRows } from './trackSection'
 import { ARTIST_CATALOGUE } from '@/providers/registry/artistSources'

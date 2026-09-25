@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native'
 import { MediaImage } from '@/components/MediaImage'
 import { useTheme } from '@/features/theme/useTheme'
 import { useRadius } from '@/features/theme/useRadius'
-import { MOSAIC_COVERS } from './useLibrarySummary'
+import { MOSAIC_COVERS } from './mosaicCovers'
 import type { CoverSource } from '@/domain/entities/Cover'
 
 type Props = {

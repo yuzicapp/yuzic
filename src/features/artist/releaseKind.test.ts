@@ -6,6 +6,33 @@ import {
 } from './releaseKind';
 
 const album = (title: string) => ({ nativeId: 'a', title } as Album);
+const reported = (title: string, releaseType: Album['releaseType']) =>
+  ({ nativeId: 'a', title, releaseType } as Album);
+
+/**
+ * The server's answer, where it gave one. OpenSubsonic reports `releaseTypes`,
+ * and reading it retires the guessing below for every library that does.
+ */
+describe('isSingleOrEp when the server reported a release type', () => {
+  it('believes a reported single or EP however many tracks it has', () => {
+    expect(isSingleOrEp(reported('Kid A', 'single'), 20)).toBe(true);
+    expect(isSingleOrEp(reported('Kid A', 'ep'), 20)).toBe(true);
+  });
+
+  it('keeps a reported compilation with the albums however short it is', () => {
+    expect(isSingleOrEp(reported('Rarities', 'compilation'), 2)).toBe(false);
+  });
+
+  /**
+   * 'album' is both what a server reports for an album and what a provider
+   * that knows nothing about release types defaults to, so it cannot be
+   * trusted to mean the server spoke — the guess still runs.
+   */
+  it('still guesses for a reported album, which may be a default', () => {
+    expect(isSingleOrEp(reported('Untitled', 'album'), 2)).toBe(true);
+    expect(isSingleOrEp(reported('Untitled', 'album'), 20)).toBe(false);
+  });
+});
 
 describe('isSingleOrEp by track count', () => {
   it('treats a short release as a single or EP', () => {
