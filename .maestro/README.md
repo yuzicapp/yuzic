@@ -81,9 +81,10 @@ server fixtures.
 
 ## In CI
 
-`.github/workflows/e2e.yml` runs four of the flows nightly on a macOS runner —
-`onboarding-demo`, `smoke`, `common-user-flows`, `detail-flows` —
-and on demand from the Actions tab. `ratings.yaml` and `store-screenshots.yaml`
+`.github/workflows/e2e.yml` runs five of the flows — `launch`, `onboarding-demo`,
+`smoke`, `common-user-flows`, `detail-flows` — on a macOS runner, on demand
+from the Actions tab. There is deliberately no nightly: it was red for weeks
+without anyone noticing, and each run is forty minutes of a macOS runner. `ratings.yaml` and `store-screenshots.yaml`
 stay local. It builds the app for the simulator in
 Release — Debug would expect Metro and the flows would end up driving a dev
 client's launcher — installs it on whichever iPhone simulator the runner image
