@@ -395,7 +395,13 @@
         "seguesSubtext": "Les enchaînements d'album restent nets. Activé, ils sont fondus."
       },
       "showRating": "Afficher la note",
-      "showRatingSubtext": "Cinq étoiles sous le titre dans le lecteur"
+      "showRatingSubtext": "Cinq étoiles sous le titre dans le lecteur",
+      "loudness": {
+        "label": "Normalisation du volume",
+        "subtext": "Harmonise le volume de tous les titres à partir des mesures de votre serveur. Sans effet si la bibliothèque n'a pas été analysée.",
+        "preampLabel": "Préamplification",
+        "preampSubtext": "La normalisation baisse les titres forts, donc tout devient plus faible. Ceci restitue le volume sans risque de distorsion."
+      }
     },
     "listenBrainz": {
       "title": "ListenBrainz",
@@ -998,6 +1004,14 @@
       "album": "Album",
       "artist": "Artiste",
       "playlist": "Playlist"
+    },
+    "browse": {
+      "title": "Parcourir",
+      "genres": "Genres",
+      "moods": "Ambiances",
+      "genre": "Genre",
+      "mood": "Ambiance",
+      "allGenres": "Tous les genres"
     }
   },
   "media": {
@@ -1484,7 +1498,11 @@
     },
     "play": "lecture",
     "plays": "lectures",
-    "similarAlbums": "Albums similaires"
+    "similarAlbums": "Albums similaires",
+    "header": {
+      "songs_one": "{{count}} titre",
+      "songs_other": "{{count}} titres"
+    }
   },
   "externalSourcePicker": {
     "empty": "Aucune source n'a pu résoudre cet élément.",

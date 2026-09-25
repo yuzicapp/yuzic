@@ -131,6 +131,15 @@ export const shade = {
   /** Top to bottom behind the status bar over the scrolled player: the clock
    *  and the camera cutout on the dark end, fading out below them. */
   statusBar: ['rgba(0,0,0,0.7)', 'rgba(0,0,0,0)'] as const,
+  /**
+   * Under light text that sits directly on artwork.
+   *
+   * A scrim can only darken what it covers by a fixed amount, so it cannot
+   * promise legibility over art that is nearly white — and album covers often
+   * are. A shadow travels with the glyphs instead, which is the one thing that
+   * holds wherever the letters land.
+   */
+  textOnArt: 'rgba(0,0,0,0.75)',
 } as const;
 
 /**
@@ -212,4 +221,14 @@ export const coverFade = {
    *  whatever the photo turns out to be. Never fully transparent: the top of
    *  the image needs holding down too. */
   photoScrim: ['rgba(0,0,0,0.45)', 'rgba(0,0,0,0.6)'],
+  /**
+   * The same job on a small tile, where the text sits in one corner.
+   *
+   * Heavier at the foot and lighter at the head than `photoScrim`, because a
+   * browse tile writes a large name across its bottom edge and shows the art
+   * everywhere else — and album covers carry their own lettering, so a name
+   * laid on one at `photoScrim`'s weight lands white-on-white as often as not.
+   * The top stays barely tinted so the art still reads as art.
+   */
+  tileScrim: ['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.95)'],
 } as const;

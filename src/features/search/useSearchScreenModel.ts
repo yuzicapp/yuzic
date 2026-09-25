@@ -77,23 +77,30 @@ export function useSearchScreenModel() {
   selectedEntityTypesRef.current = selectedEntityTypes;
 
   /**
-   * Open the keyboard when the tab is opened with nothing typed.
+   * Whether the field is focused — which decides what the idle screen shows.
    *
-   * Arriving at Search means intending to type, and the tab used to land on a
-   * field the user then had to reach up and tap. Gated on an empty query so
-   * this is the *idle* screen's behaviour, not the tab's: coming back from an
-   * album opened out of the results should return to those results, not
-   * throw a keyboard over them. Deferred a frame because focusing
-   * mid-transition drops the keyboard on both platforms.
+   * The tab used to force the keyboard open on arrival, on the theory that
+   * arriving at Search means intending to type. Often it doesn't: it means
+   * browsing, and half the screen was gone before anything had been looked at.
+   * So the tab opens quietly now, and typing is a tap away like it is
+   * everywhere else.
+   *
+   * Focus is what tells `SearchResultsBody` to put recent searches up. They
+   * belong to the act of typing — a list of half-remembered past queries is
+   * useful with a cursor in the field and clutter without one.
    */
   const searchInputRef = useRef<TextInput>(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const onSearchFocus = useCallback(() => setIsInputFocused(true), []);
+  const onSearchBlur = useCallback(() => setIsInputFocused(false), []);
+
+  // Leaving the tab ends the focused state whether or not the field gets a
+  // blur event: navigating away from a focused field (tapping a browse tile,
+  // say) unmounts nothing, so coming back would otherwise land on recents
+  // with no keyboard to explain them.
   useFocusEffect(
     useCallback(() => {
-      if (queryRef.current.trim() !== '') return;
-      const frame = requestAnimationFrame(() => searchInputRef.current?.focus());
-      return () => cancelAnimationFrame(frame);
-      // Intentionally not reacting to `query`: this fires on focus, and
-      // re-running it as the user types would fight the keyboard.
+      return () => setIsInputFocused(false);
     }, [])
   );
 
@@ -277,6 +284,7 @@ export function useSearchScreenModel() {
     activeServerId: activeServerId ?? undefined,
     // query state
     query, onSearchChange, onSearchSubmit, clearQuery, searchInputRef,
+    isInputFocused, onSearchFocus, onSearchBlur,
     // scope / filters
     resultScope, setResultScope, enabledSearchSourceIds,
     selectedSourceIds, selectedEntityTypes, toggleFilterSource, toggleFilterEntityType,

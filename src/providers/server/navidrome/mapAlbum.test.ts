@@ -42,6 +42,34 @@ describe('mapAlbum', () => {
     });
   });
 
+  /**
+   * This mapper used to read only the singular `genre`, so an album the server
+   * reported three genres for arrived carrying one — and the genre a library is
+   * browsed by is the album's.
+   */
+  it('reads every genre the server reports, not just the first', () => {
+    const multiGenre: SubsonicAlbum = {
+      ...id3Dto,
+      genres: [{ name: 'Electronic' }, { name: 'Art Rock' }, { name: 'Experimental' }],
+    };
+
+    expect(mapAlbum(multiGenre, { provenance }).genres).toEqual([
+      'Electronic',
+      'Art Rock',
+      'Experimental',
+    ]);
+  });
+
+  it('carries the mood tags the files were tagged with', () => {
+    expect(mapAlbum({ ...id3Dto, moods: ['Melancholy', 'Nocturnal'] }, { provenance }).moods)
+      .toEqual(['Melancholy', 'Nocturnal']);
+  });
+
+  it('leaves moods absent for a library that is not mood-tagged', () => {
+    expect(mapAlbum(id3Dto, { provenance }).moods).toBeUndefined();
+    expect(mapAlbum(listDto, { provenance }).moods).toBeUndefined();
+  });
+
   it('reads the title out of either endpoint shape', () => {
     expect(mapAlbum(id3Dto, { provenance }).title).toBe('Kid A');
     expect(mapAlbum(listDto, { provenance }).title).toBe('Amnesiac');

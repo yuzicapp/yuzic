@@ -96,6 +96,64 @@ jobs:
     uses: ./.github/workflows/ios-build.yml
     secrets: inherit
 
+
+  # What actually shipped, in words, on the run's own summary page.
+  #
+  # AGENTS has three incidents behind this: 1.4.0 and 2.0.0 each shipped one
+  # platform and were refused by the other, and 2.0.0's iOS half reported
+  # success while uploading underneath a build TestFlight already had. The
+  # lesson written there is that a failed release looks the same whether
+  # nothing shipped or half of it did, and that the number that landed is the
+  # thing to read rather than the tick. That check was a person's job until
+  # now.
+  verdict:
+    name: Say what shipped
+    needs: [detect-version-bump, build-android, build-ios]
+    if: always() && needs.detect-version-bump.outputs.changed == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summarise
+        env:
+          VERSION: ${{ needs.detect-version-bump.outputs.version }}
+          IOS_RESULT: ${{ needs.build-ios.result }}
+          ANDROID_RESULT: ${{ needs.build-android.result }}
+          IOS_BUILD: ${{ needs.build-ios.outputs.build_number }}
+          ANDROID_CODE: ${{ needs.build-android.outputs.version_code }}
+        run: |
+          set -euo pipefail
+          verdict() {
+            case "$1" in
+              success) echo "shipped";;
+              failure) echo "FAILED — nothing reached this store";;
+              cancelled) echo "cancelled";;
+              skipped) echo "did not run";;
+              *) echo "$1";;
+            esac
+          }
+          {
+            echo "## Release $VERSION"
+            echo
+            echo "| Platform | Outcome | Number the store gave it |"
+            echo "| --- | --- | --- |"
+            echo "| iOS (TestFlight) | $(verdict "$IOS_RESULT") | ${IOS_BUILD:-unknown} |"
+            echo "| Android (Play alpha) | $(verdict "$ANDROID_RESULT") | ${ANDROID_CODE:-unknown} |"
+            echo
+            if [ "$IOS_RESULT" = success ] && [ "$ANDROID_RESULT" = success ]; then
+              echo "Both halves shipped. Check each number is above the last release's, then write the draft release."
+            else
+              echo "**This release is incomplete.** Per AGENTS, the fix belongs on \`dev\` and has to be promoted before a re-run can succeed — do not re-run this blind."
+            fi
+            if [ "${IOS_BUILD:-unknown}" = unknown ] || [ "${ANDROID_CODE:-unknown}" = unknown ]; then
+              echo
+              echo "A number reads \`unknown\`, which means the store was never asked or the log line moved. Treat that as unverified rather than fine."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$IOS_RESULT" != success ] || [ "$ANDROID_RESULT" != success ]; then
+            echo "::error::Release $VERSION is incomplete — iOS: $IOS_RESULT, Android: $ANDROID_RESULT."
+            exit 1
+          fi
+
   # The draft is created before the builds and in parallel with them, so it
   # cannot carry their output — which is why 2.0.1 and 2.0.2 sat empty on the
   # releases page with the binaries reachable only from a workflow run that

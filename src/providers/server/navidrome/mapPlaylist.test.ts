@@ -44,3 +44,27 @@ describe('mapPlaylist', () => {
     expect(playlist.title).toBe('Untitled playlist');
   });
 });
+
+/**
+ * The server's own answers, where OpenSubsonic gives them. `canEdit` and
+ * `description` are domain fields that existed for exactly this and went
+ * unfilled because the DTO never declared the fields behind them.
+ */
+describe('mapPlaylist reading what the server reports', () => {
+  it('carries the description the API calls a comment', () => {
+    expect(mapPlaylist({ id: 'p-1', name: 'Mix', comment: 'Songs for driving' }, { provenance }).description)
+      .toBe('Songs for driving');
+  });
+
+  it('believes `readonly` over guessing editability from the owner name', () => {
+    expect(mapPlaylist({ id: 'p-1', name: 'Mix', owner: 'someone-else', readonly: false }, { provenance, username: 'me' }).canEdit)
+      .toBe(true);
+    expect(mapPlaylist({ id: 'p-1', name: 'Mix', owner: 'me', readonly: true }, { provenance, username: 'me' }).canEdit)
+      .toBe(false);
+  });
+
+  it('leaves canEdit absent when the server does not say, so it falls back to ownership', () => {
+    expect(mapPlaylist({ id: 'p-1', name: 'Mix', owner: 'me' }, { provenance, username: 'me' }).canEdit)
+      .toBeUndefined();
+  });
+});

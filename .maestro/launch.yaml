@@ -1,0 +1,20 @@
+# The app starts, and the first screen is really there.
+#
+# Deliberately asks nothing of a server: a fresh install lands on onboarding,
+# which renders from the bundle alone. That makes this the one flow that can
+# gate a PR without putting somebody else's uptime in the way of a merge.
+#
+# What it catches is the class of failure the unit suite cannot see at all — a
+# bundle that does not evaluate, a native module missing from the build, a
+# provider that throws on mount, a white screen. All of those pass lint,
+# typecheck and jest.
+appId: com.arinora.rawarr
+---
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: "Get Started"
+    timeout: 60000
+
+- assertVisible: "Get Started"

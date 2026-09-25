@@ -23,6 +23,10 @@ appId: com.arinora.rawarr
 - assertVisible:
     id: "search-input"
 
+# Focusing the search field opens the keyboard, and the keyboard covers the
+# dock — so this tap used to land on a row of emoji rather than on Home.
+- hideKeyboard
+
 - tapOn:
     id: "home-tab"
 - assertVisible:

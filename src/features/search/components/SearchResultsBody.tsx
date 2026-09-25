@@ -9,6 +9,7 @@ import SkeletonListRow from '@/components/SkeletonListRow';
 import { getSourceMeta } from '@/features/sources/registry';
 import type { useSearchScreenModel } from '@/features/search/useSearchScreenModel';
 import RecentSearches from './RecentSearches';
+import SearchBrowse from '../browse/SearchBrowse';
 import ResultRow from './results/ResultRow';
 
 type Model = ReturnType<typeof useSearchScreenModel>;
@@ -26,17 +27,33 @@ export default function SearchResultsBody({ m }: { m: Model }) {
   const { colors } = useTheme();
   const rad = useRadius();
 
+  /**
+   * Nothing typed: browse, unless the field is focused and there is history.
+   *
+   * Recent searches belong to the act of typing — they are only useful with a
+   * cursor in the field — so an unfocused screen offers ways into the library
+   * instead, and the tab stops opening on nothing at all. Focusing with no
+   * history yet keeps the browse tiles rather than replacing them with a blank
+   * screen, which is what the old idle state did to anyone who had not searched
+   * before.
+   */
   if (m.query.trim() === '') {
-    return (
-      <RecentSearches
-        queries={m.recentQueries}
-        entities={m.recentEntities}
-        onQueryPress={m.onRecentQueryPress}
-        onEntityPress={m.onRecentEntityPress}
-        onRemove={m.onRemoveRecent}
-        onClear={m.onClearRecent}
-      />
-    );
+    const hasHistory = m.recentQueries.length > 0 || m.recentEntities.length > 0;
+
+    if (m.isInputFocused && hasHistory) {
+      return (
+        <RecentSearches
+          queries={m.recentQueries}
+          entities={m.recentEntities}
+          onQueryPress={m.onRecentQueryPress}
+          onEntityPress={m.onRecentEntityPress}
+          onRemove={m.onRemoveRecent}
+          onClear={m.onClearRecent}
+        />
+      );
+    }
+
+    return <SearchBrowse />;
   }
 
   if (m.isLoading) {

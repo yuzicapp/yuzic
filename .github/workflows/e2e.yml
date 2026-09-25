@@ -13,11 +13,11 @@ name: E2E (Maestro, iOS Simulator)
 # tell whether a flow passes, only that a renamed testID has not silently
 # broken one. This job is the half that actually runs them.
 
+# Run it when you want it, not every night. The nightly was red for weeks
+# without anyone noticing — which says what it was worth unattended — and each
+# run is forty minutes of a macOS runner, billed at ten times Linux.
 on:
   workflow_dispatch:
-  schedule:
-    # Nightly, well clear of the release workflow's usual window.
-    - cron: '0 9 * * *'
 
 concurrency:
   group: e2e-${{ github.ref }}
@@ -65,6 +65,16 @@ jobs:
       # bundle, so the simulator runs the app the way a person would get it.
       # No signing is involved for a simulator destination.
       #
+      # Ad-hoc signed rather than unsigned. `CODE_SIGNING_ALLOWED=NO` builds an
+      # app with no code signature at all, and the simulator's securityd then
+      # refuses its keychain writes: `-34018, Client has neither
+      # application-identifier nor keychain-access-groups entitlements`. Server
+      # credentials live in the keychain, so onboarding connected to the demo
+      # over the network and then could not save what it got — leaving the app
+      # on the server-type screen and every suite after it skipped. An ad-hoc
+      # signature needs no certificate and no team, which is what a laptop
+      # build has been doing all along.
+      #
       # `DEBUG_INFORMATION_FORMAT=dwarf` drops the dSYM bundle, which nothing
       # here reads: the flows either pass or hand back a screenshot, and no
       # crash log gets symbolicated. It is several gigabytes and a `lipo` of
@@ -80,7 +90,9 @@ jobs:
             -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath ios/build \
-            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=YES \
             DEBUG_INFORMATION_FORMAT=dwarf \
             build \
             > /tmp/xcodebuild-e2e.log 2>&1 || {
@@ -108,6 +120,19 @@ jobs:
           xcrun simctl boot "$udid"
           xcrun simctl bootstatus "$udid"
 
+      # iOS offers its swipe-typing tutorial the first time a keyboard opens on
+      # a fresh device — a card over the bottom of the screen, tab bar
+      # included. The smoke flow taps into search and then back to Home, and
+      # that tap landed on the tutorial instead, so the flow failed on an
+      # assertion about Home while the app was working perfectly.
+      #
+      # Every runner is a fresh device, so this would greet every run.
+      - name: Tell the keyboard we have seen its tutorial
+        run: |
+          udid="${{ steps.sim.outputs.udid }}"
+          xcrun simctl spawn "$udid" defaults write com.apple.Preferences DidShowContinuousPathIntroduction -bool true
+          xcrun simctl spawn "$udid" defaults write com.apple.keyboard.preferences DidShowContinuousPathIntroduction -bool true || true
+
       - name: Install the app
         run: |
           app=$(find ios/build/Build/Products -maxdepth 3 -name 'Yuzic.app' | head -1)
@@ -123,11 +148,37 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
+      # Every suite here signs in through demo.navidrome.org, so when that is
+      # unreachable *from the runner* the first flow fails on an assertion
+      # about the screen after connecting and the rest are skipped — which
+      # reads as "onboarding is broken" and is not. Ask the server the same
+      # two things the app asks, and say plainly which it is.
+      - name: Probe the Navidrome demo
+        run: |
+          base="https://demo.navidrome.org/rest"
+          args="u=demo&p=demo&v=1.16.1&c=Yuzic&f=json"
+          for endpoint in ping getMusicFolders; do
+            code=$(curl -s -o /tmp/probe-$endpoint.json -w '%{http_code}' --max-time 30 "$base/$endpoint?$args" || echo 000)
+            status=$(python3 -c "import json,sys;print(json.load(open('/tmp/probe-$endpoint.json'))['subsonic-response']['status'])" 2>/dev/null || echo unparseable)
+            echo "$endpoint: HTTP $code, subsonic status $status"
+            if [ "$code" != "200" ] || [ "$status" != "ok" ]; then
+              echo "::error::The Navidrome demo did not answer $endpoint from this runner (HTTP $code, status $status). Every E2E suite signs in through it, so this is the environment rather than the app."
+              head -c 400 /tmp/probe-$endpoint.json || true
+              exit 1
+            fi
+          done
+
       # Order matters and is the reason these are separate steps rather than
       # `npm run test:e2e`. `onboarding-demo` is the only flow that runs from a
       # fresh install, and it is what leaves the app connected to a server —
       # every flow after it opens with `clearState: false` and depends on the
       # state this one established.
+      # First, because it is the one flow that needs no server: if the app
+      # cannot start, everything below fails for a reason that has nothing to
+      # do with the flows.
+      - name: The app launches
+        run: maestro test .maestro/launch.yaml
+
       - name: Onboarding (connects to the Navidrome demo)
         run: maestro test .maestro/onboarding-demo.yaml
 

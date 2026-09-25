@@ -94,10 +94,15 @@ export default function GenreSection({ genre, refreshKey = 0 }: Props) {
     const seen = new Set<string>()
     return libraryAlbums
       .filter(album => album.genres?.some(albumGenre => genreMatches(albumGenre, selectedGenre)))
+      // A compilation's credit is not an artist to find more music by. This
+      // used to test the credit against the literal string "various artists",
+      // which missed "VA", "Verschiedene Interpreten", and a soundtrack filed
+      // under its label — the server reports the fact itself now.
+      .filter(album => album.releaseType !== 'compilation')
       .map(album => album.artist.name)
       .filter(name => {
         const normalized = name.trim().toLowerCase()
-        if (!normalized || normalized === 'various artists' || seen.has(normalized)) return false
+        if (!normalized || seen.has(normalized)) return false
         seen.add(normalized)
         return true
       })

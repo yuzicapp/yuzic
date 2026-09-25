@@ -33,5 +33,6 @@ export function buildTrackItem(resource: PlayableResource, extra?: RequestHeader
     ...(isContinuous(track.contentKind) ? { continuous: true } : {}),
     ...(track.headers ? { headers: track.headers } : {}),
     ...(track.artworkHeaders ? { artworkHeaders: track.artworkHeaders } : {}),
+    ...(track.loudness ? { loudness: track.loudness } : {}),
   };
 }

@@ -21,6 +21,7 @@
  * decides on its own what a header or an artwork URI *is*.
  */
 import type { ContentKind } from '@/domain/playback/ContentKind';
+import type { Loudness } from '@/domain/entities/Loudness';
 import { buildCover, isDrawnCover } from '@/providers/registry/covers';
 import type { RequestHeaders } from '@/features/player/mediaHeaders';
 import type { PlayableResource } from './playableResource';
@@ -63,6 +64,13 @@ interface EngineBoundaryTrack {
   headers?: Record<string, string>;
   /** Ephemeral request headers for the artwork fetch. */
   artworkHeaders?: Record<string, string>;
+  /**
+   * What the origin measured about this track's loudness, carried through
+   * unchosen: which figure gets applied is the listener's setting, and it is
+   * read at the engine boundary so that changing it does not mean rebuilding
+   * every queue item.
+   */
+  loudness?: Loudness;
 }
 
 /**
@@ -93,5 +101,6 @@ export function toEngineBoundaryTrack(
     contentKind: song.contentKind,
     ...(headers ? { headers } : {}),
     ...(artworkHeaders ? { artworkHeaders } : {}),
+    ...(song.loudness ? { loudness: song.loudness } : {}),
   };
 }

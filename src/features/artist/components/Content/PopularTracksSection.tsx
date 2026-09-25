@@ -1,4 +1,4 @@
-import { onDark , controlSize, spacing, typography } from '@/constants/design';
+import { onDark, spacing, typography } from '@/constants/design';
 import React, { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -8,8 +8,8 @@ import { selectShowSourceHeaders } from '@/features/settings/appearance/state';
 import { usePreviewPlayer } from '@/features/playback/usePreviewPlayer'
 import TopTrackRow from '@/components/rows/TopTrackRow'
 import type { Song } from '@/domain/entities/Song'
-import Touchable from '@/components/Touchable'
 import { useRadius } from '@/features/theme/useRadius'
+import { MAX_TRACK_ROWS, ShowMoreTracks, visibleTrackRows } from './trackSection'
 import { ARTIST_CATALOGUE } from '@/providers/registry/artistSources'
 
 type Props = {
@@ -31,8 +31,8 @@ export default function PopularTracksSection({ topTracks, artistId, artistName }
 
   if (topTracks.length === 0) return null
 
-  const allTracks = topTracks.slice(0, 10)
-  const visible = showAll ? allTracks : allTracks.slice(0, 5)
+  const allTracks = topTracks.slice(0, MAX_TRACK_ROWS)
+  const visible = allTracks.slice(0, visibleTrackRows(allTracks.length, showAll))
 
   // `streamId` carries a resolved preview URL — see `Song.streamId` and
   // `usePreviewPlayer`'s `attachPreviewUrl`.
@@ -61,18 +61,7 @@ export default function PopularTracksSection({ topTracks, artistId, artistName }
             : undefined}
         />
       ))}
-      {allTracks.length > 5 && (
-        <View style={styles.toggleRow}>
-          <Touchable
-            style={[styles.toggleButton, { backgroundColor: colors.card, borderRadius: rad.pillFor(controlSize.inlineControl) }]}
-            onPress={() => setShowAll(v => !v)}
-          >
-            <Text style={[styles.toggleText, { color: colors.secondary }]}>
-              {showAll ? t('common.less') : t('common.more')}
-            </Text>
-          </Touchable>
-        </View>
-      )}
+      <ShowMoreTracks total={allTracks.length} expanded={showAll} onToggle={() => setShowAll(v => !v)} />
     </View>
   )
 }

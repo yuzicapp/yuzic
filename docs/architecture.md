@@ -77,6 +77,7 @@ export interface ApiAdapter {
   discovery?: DiscoveryApi; // getRandomSongs + getNowPlaying (Subsonic)
   podcasts?: PodcastsApi;   // Subsonic only
   jukebox?: JukeboxApi;     // Subsonic only — see the note on probing below
+  user?: UserApi;           // the account's own avatar, where the server has one
 }
 ```
 
@@ -123,7 +124,7 @@ wins, and `commitSyncResult` drops it the moment a sync has brought the
 catalog back carrying the server's own answer. Absent and zero are kept apart
 throughout: a server without ratings is not a server where nothing is rated.
 
-`api/capabilities.test.ts` pins what each adapter declares, because these are
+`src/providers/server/adapterCapabilities.test.ts` pins what each adapter declares, because these are
 read by screens that no longer have any other way to find out.
 
 **Callers check for existence, not provider name.** The Library tab does
@@ -141,10 +142,10 @@ open-ended.
 
 ### One adapter per protocol, not per product
 
-`api/mediaBrowser/adapter.ts` backs both Jellyfin and Emby: they speak the same
+`src/providers/server/media-browser/adapter.ts` backs both Jellyfin and Emby: they speak the same
 MediaBrowser-derived API and differ only in what `MediaBrowserBrand` captures —
 the stream token param, whether `/System/Ping` returns JSON, and how a cover is
-addressed. `api/jellyfin/index.ts` and `api/emby/index.ts` are three-line brand
+addressed. `src/providers/server/media-browser/jellyfin/index.ts` and `src/providers/server/media-browser/emby/index.ts` are three-line brand
 bindings over it.
 
 They were two full adapter files, identical but for the brand constant, and had
@@ -158,7 +159,7 @@ Implement the base surface first. Add optional surfaces only when the server
 exposes the shape natively — don't approximate. If a server has a partial
 version of a feature (e.g. Jellyfin's `PlaybackPositionTicks` is a per-item
 resume position, not a dedicated bookmarks table), the adapter is where the
-translation lives. See `api/mediaBrowser/bookmarks/bookmarks.ts` for how the
+translation lives. See `src/providers/server/media-browser/bookmarks/bookmarks.ts` for how the
 Jellyfin/Emby bookmarks are dressed up as Subsonic-style `Bookmark[]`.
 
 ### Local files are a provider, not an offline special case
@@ -221,7 +222,7 @@ I was doing" true on every provider, not just Navidrome. It carries:
 - `bookmarks: Record<songId, { positionMs, updatedAt }>` — per-track resume
   positions for long-form content and podcasts
 
-`usePlaybackPersistence` (in `hooks/`) writes to this slice from PlayingContext
+`usePlaybackPersistence` (in `features/playback/`) writes to this slice from PlayingContext
 on every meaningful change. `useQueueSync` and `useBookmarkManager` are
 **mirror layers** on top: they push local state to the server when the adapter
 supports it (`api.queue`, `api.bookmarks`) and seed the local state on connect.
@@ -386,18 +387,46 @@ This replaced four copies of `if (activeDevice) castX()` in the player and a
 three-term negation in the output sheet that decided whether "This device" was
 the selected row — every new output had been adding another term to both.
 
+### Loudness — the measurement is ours, the policy is the engine's
+
+The engine has applied ReplayGain since it was written; nothing had ever given
+it the figures. They arrive on every Subsonic song response and were dropped in
+the mapper.
+
+The split worth keeping: `Song.loudness` holds **what the origin measured** —
+track and album gain, both peaks, the format's own base gain, the fallback —
+unchosen, because which figure applies is the listener's setting rather than
+the server's. `loudnessFor` picks one, and the distinctions it draws are the
+ones that make normalisation better than none: an absent measurement is not
+0 dB, a measured 0 dB is not an absent one, album mode falls back to the track
+figure but never the reverse, and the base gain adds on top of whichever wins
+because it describes the decoder rather than the mastering.
+
+The per-track figure rides `MediaItem` to the engine boundary and lands on
+`Track.replayGainDb`; whether to apply it at all is `setLoudness`, a policy the
+engine re-reads live — including for the track already playing.
+
+Settings offer a switch and a preamp, deliberately not the engine's
+track/album/auto modes. Those three behave identically today because the
+engine's `Track` carries a single gain figure rather than a pair, so offering
+the choice would be offering three names for one behaviour. Album mode wants an
+engine change, not a settings entry.
+
 ## 3. `contentKind` — routing the player around non-song content
 
-Every `Song` carries an optional `contentKind: 'song' | 'liveStream' | 'podcastEpisode'`
-(default `'song'`). The player checks this before drawing UI or dispatching
-side-effects:
+Every `Song` carries a required `contentKind: 'song' | 'liveStream' |
+'podcastEpisode' | 'preview'`. One behaviour table in
+`domain/playback/ContentKind.ts` says what each kind supports, and the player
+reads it through these rather than comparing the kind itself:
 
-- `canScrobble(song)` — false for `liveStream` (a radio session isn't a listen)
-- `canJumpWithin(song)` — false for `liveStream` (infinite feed, no position)
-- `canFillQueueFrom(song)` — true only for `'song'` (radio and podcasts don't
+- `isScrobbleable(kind)` — false for `liveStream` (a radio session isn't a listen)
+- `isSeekable(kind)` — false for `liveStream` (infinite feed, no position)
+- `isAutoplaySeed(kind)` — true only for `'song'` (radio and podcasts don't
   spawn autoplay recommendations)
-- `hasFiniteDuration(song)` — false for `liveStream`, so the progress bar
-  hides and the timestamps go with it
+- `hasDuration(kind)` — false for `liveStream`, so the progress bar hides and
+  the timestamps go with it
+- `hasReissuableUrl(kind)`, `isContinuous(kind)` — for a URL that can be
+  fetched again, and for audio that never ends
 
 Live streams are `Song`-shaped fabrications built by `buildStationSong`; the
 title and streamUrl carry meaning, everything else is a placeholder that the
@@ -518,6 +547,33 @@ library too large to hold at all needs paged reads out of a real database,
 which is a much larger change; this one makes the common case fast without
 touching a call site.
 
+### What it costs now, measured on the device
+
+The figures above are desktop V8. Measured in Hermes on an iOS 26.5 simulator
+against a real 4,826-track Jellyfin library, the catalog serializes to 5.9 MB:
+tracks 5.31 MB (1,100 B each, 42 ms to parse), albums 533 KB (832 B each),
+artists 39 KB (357 B each). Linear in tracks, that is about 88 MB and 0.7 s at
+80,000, and 330 MB and 2.6 s at 300,000 — close enough to the estimates above
+to treat them as confirmed rather than theoretical.
+
+Where those bytes go is the part worth knowing. Averaged over 400 real tracks,
+`artist` costs 254 B and `album` 252 B — **46% of every track is a whole artist
+and a whole album denormalized into it**, and both are already held once each
+in the `artists` and `albums` arrays synced beside it. In that library the same
+album is serialized about 7.5 times over and the same artist about 44 times.
+
+Album and artist refs are **interned** (`domain/entities/internRef.ts`, one
+shared object per distinct ref up to 50,000), so this duplication is not a heap
+cost — it is paid in what gets stored, and in what has to be parsed back at
+every cold start, because hydration rebuilds each copy from JSON before
+interning can collapse it.
+
+So the ceiling is a schema problem before it is a storage-engine one: tracks
+holding references rather than copies would roughly halve what is written and
+parsed, which is the part a person feels as a slow start. Worth doing before
+paged reads rather than instead of them — and past 50,000 distinct refs the
+sharing stops, at which point the heap starts tracking these figures too.
+
 ### Adding a new library-shaped resource
 
 Add it to `CATALOG_RESOURCES` in `catalogQueries.ts` — a cache key and a fetch,
@@ -573,37 +629,42 @@ flags: attempting a request that cannot land, catching the timeout, and calling
 it an error is how offline search came to show a red banner over results that
 had actually succeeded.
 
-## 6. Entity model — `LibraryState`, `LocalId`, and one row per kind
+## 6. Entity model — `EntityCore`, `LocalId`, and one row per kind
 
 Every artist/album/track is *one* entity shape carrying a resolution state,
 not a `local` type shadowed by a parallel `External` type. This replaced four
 duplicated pairs (Album/Song rows, Album/Song options) and two album-screen
 bodies' worth of divergence.
 
-- **`LibraryState`** (`domain/library/LibraryState.ts`) —
-  `'in-library' | 'wanted' | 'acquirable' | 'external'`. It is a *property* of
-  an entity, not a screen it lives on. The same `AlbumRow`/`SongRow` renders
-  any state; only the badge and primary action differ.
+- **`EntityCore`** (`domain/entities/EntityCore.ts`) — the four fields every
+  entity has: `localId`, `nativeId`, `provenance`, `externalIds`. All four are
+  **required**; they were optional while the model was being migrated, and
+  every consumer then had to decide what an absent one meant, which they did
+  not all decide the same way. Where a record came from is data on the record
+  (`provenance`), not a second type — the same `AlbumRow`/`SongRow` renders a
+  library album and an external one, and only the badge and primary action
+  differ.
+
+  There was a `LibraryState` enum here — `'in-library' | 'wanted' |
+  'acquirable' | 'external'` — resolved by `resolveLibraryState` and read
+  through `useLibraryState`. It was deleted in September 2026 because nothing
+  read it: the rows ask the questions they actually need (`provenance.origin`,
+  `selectIsWanted`, download progress) rather than collapsing them into one
+  state first.
 - **`LocalId`** (`domain/identity/LocalId.ts`) — a stable, on-device identity built by
   `makeLocalId()` from *origin* ids (server+item, or externalSource+nativeId),
   **never** from display metadata. Identity is deliberately separate from
   *matching* (`features/library/matchToLibrary.ts`, which is mbid-first then normalized
   title/artist): a server-originated and an external-originated record for the
   same album have **different** `LocalId`s and are related by matching, not by
-  identity. `localId`/`externalIds`/`libraryState` are additive-optional on the
-  entity types, so adapters populate them incrementally without breaking
-  construction sites; server adapters stamp them from `client.serverId`
-  (guarded — a missing server id yields no id rather than a wrong one).
-- **`resolveLibraryState(facts)`** (`domain/library/LibraryState.ts`)
-  is the *pure* single source of truth for the state — precedence
-  in-library > wanted > acquirable > external, fallthrough to `external` (never
-  silently claims ownership). `useLibraryState()`
-  (`features/library/useLibraryState.ts`) assembles the facts.
-  `isWanted` reads `selectIsWanted` — the Wants system exists
-  (`features/wants/`, and `want` is its own action in the entity-action
-  registry, distinct from `get`).
-- **`useExternalAlbumStatus` still exists on purpose.** `resolveLibraryState`
-  answers *which* state; `useExternalAlbumStatus` additionally reports in-flight
+  identity. Server adapters stamp `localId` from `client.serverId` (guarded — a
+  missing server id yields no id rather than a wrong one).
+- **Wanted is read where it is needed.** `selectIsWanted(localId)`
+  (`state/redux/selectors/wantsSelectors.ts`), used by
+  `features/entity-actions/shared/wantActions.ts` — the Wants system is its own
+  feature (`features/wants/`), and `want` is its own action in the
+  entity-action registry, distinct from `get`.
+- **`useExternalAlbumStatus` still exists on purpose.** It reports in-flight
   **download progress %**, which the state enum does not carry. It reads the
   shared `DownloadersQueueContext` rather than polling — there is exactly one
   poll per downloader in the app, and this is one of its readers. The shared rows call it only for external-origin entities
@@ -696,9 +757,10 @@ acquiring. The two are deliberately different code paths.
   wishlist works with zero providers connected. A want carries `localId`,
   `title`/`artist` (so it renders with no lookup), `externalIds`, `unit`,
   `origin`, and an optional `jobRef` it only *references*.
-- **`libraryState:'wanted'`** flows through `resolveLibraryState` via
-  `useLibraryState` reading `selectIsWanted(localId)` — the resolver stays pure;
-  the hook is the only state source.
+- **Whether something is wanted** is read straight from
+  `selectIsWanted(localId)` wherever it is needed — `wantActions.ts` for the
+  action, the rows for their badge. There is no intermediate state model; see
+  §6 for the one that was deleted and why.
 - **Get** is `GetReviewSheet` (replaced the old fire-and-forget `DownloadSheet`):
   it always opens a compact review (target server, unit-compatible provider
   selection, a "Requesting…" line) and the confirm button is **disabled until a
@@ -949,7 +1011,7 @@ src/providers/
     listenbrainz/       — scrobbling and read-only recommendations
     lrclib/             — synced lyrics
     audiomuse/          — the acoustic-similarity service client
-    lidarr/, slskd/, soulsync/ — downloader clients
+    lidarr/, slskd/, soulsync/, downtify/ — downloader clients
 
 src/features/           — one directory per feature: its screen, components,
                           hooks and logic together
@@ -973,7 +1035,8 @@ src/features/           — one directory per feature: its screen, components,
     activeBackend.ts    — builds it, hands it out, one per launch
     mediaItem.ts        — the app's own playable-item type, formerly the
                           player package's
-    audioSettings.ts    — crossfade and equalizer shapes, bands and presets
+    audioSettings.ts    — crossfade, equalizer and loudness shapes, bands
+                          and presets
     usePlayerState.ts   — the reactive half: progress, playing, active item
     playbackSink.ts     — where the audio comes out (§ above), a separate
                           question from which player produces it
@@ -987,7 +1050,7 @@ src/features/           — one directory per feature: its screen, components,
                           and query hooks
   home/, search/, library/, downloads/, wants/, onboarding/, settings/,
   podcasts/, radio/, shares/ — the remaining screens with what they own
-  downloaders/          — Lidarr + slskd + SoulSync registry and queue
+  downloaders/          — Lidarr + slskd + SoulSync + Downtify registry and queue
   offline/              — downloads: policies, filesystem, the job queue,
                           DownloadContext, and the offline mutation queue that
                           replays scrobbles and edits made without a connection

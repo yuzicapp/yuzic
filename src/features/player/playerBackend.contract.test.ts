@@ -118,6 +118,7 @@ function createFakeBackend(): PlayerBackend {
     setRepeatMode() {},
     setCrossfade() {},
     setEqualizer() {},
+    setLoudness() {},
 
     getProgress() {
       return { position: 0, duration: 0, buffered: 0 };
@@ -250,6 +251,7 @@ describe.each(implementations)('PlayerBackend contract — %s', (_name, makeBack
       backend.setCrossfade({ durationSec: 4, mode: 'gapless-aware', skipIsImmediate: true });
       backend.setCrossfade(null);
       backend.setEqualizer([]);
+      backend.setLoudness({ enabled: false, preampDb: 0 });
       backend.sleepAfterTime(60);
       backend.cancelSleepTimer();
       backend.clearCache();

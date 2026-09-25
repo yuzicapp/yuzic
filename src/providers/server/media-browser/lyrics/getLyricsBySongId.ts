@@ -1,5 +1,6 @@
 import type { MediaBrowserClient } from "../client";
 import { LyricsResult } from "@/providers/contracts/ServerAdapter";
+import { MediaBrowserRequestError } from "../requestError";
 
 type MediaBrowserLyricsResponse = {
   Lyrics?: {
@@ -56,6 +57,16 @@ export async function getLyricsBySongId(
     }
     return null;
   } catch (error) {
+    // Jellyfin answers "this track has no lyrics" with a 404, which is an
+    // answer and not a failure. Rethrowing it made every unsynced track on a
+    // Jellyfin server report an error: `resolveLyrics` keeps a server failure
+    // and rethrows it when no external source finds anything either — on the
+    // stated principle that "a failure is not 'no lyrics'" — so the lyrics
+    // view showed an error where it should have shown nothing to show. In
+    // development it also put a red box over the app on every such track.
+    if (error instanceof MediaBrowserRequestError && error.status === 404) {
+      return null;
+    }
     console.error('Jellyfin/Emby getLyricsBySongId failed:', error);
     throw error;
   }

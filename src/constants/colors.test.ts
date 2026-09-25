@@ -34,6 +34,23 @@ describe('the colours the app states outright', () => {
     }
   })
 
+  /**
+   * A browse tile writes its name across the bottom of album art that may be
+   * bright, or may carry its own white lettering. The foot has to be dark
+   * enough to take white text whatever is behind it.
+   */
+  it('weights the tile scrim towards its foot', () => {
+    const alphas = coverFade.tileScrim.map(stop => Number(stop.match(/,([\d.]+)\)$/)![1]))
+
+    expect(alphas).toHaveLength(3)
+    expect(alphas[0]).toBeLessThan(alphas[1])
+    expect(alphas[1]).toBeLessThan(alphas[2])
+    expect(alphas[2]).toBeGreaterThan(0.8)
+    // Never opaque: a tile whose art is fully hidden is a coloured rectangle,
+    // and the art is the reason the tile is worth looking at.
+    expect(alphas[2]).toBeLessThan(1)
+  })
+
   it('keeps veils translucent — an opaque one would hide the wash behind it', () => {
     for (const value of Object.values(veil)) {
       const alpha = Number(value.match(/,([\d.]+)\)$/)![1])

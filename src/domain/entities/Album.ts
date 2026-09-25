@@ -25,6 +25,17 @@ export interface Album extends EntityCore {
   releaseDate?: string;
   releaseType: ReleaseType;
   genres: string[];
+  /**
+   * Mood tags the origin reports, where it reports any.
+   *
+   * The listener's own tags, read and shown as they are — not inferred. A
+   * server that says nothing about mood is absent here rather than empty,
+   * the same distinction every other optional origin-reported field draws:
+   * "this library is not mood-tagged" and "this album has no moods" are
+   * different facts, and a browse surface that offers mood as a way in should
+   * only offer it to a library that actually carries them.
+   */
+  moods?: string[];
   /** When this arrived in the library, unix ms. Server-originated records only. */
   addedAt?: number;
   /**
@@ -49,6 +60,28 @@ export interface Album extends EntityCore {
    * a list of ties.
    */
   userRating?: number;
+  /**
+   * How many tracks the origin says it has, where it says.
+   *
+   * Travels separately from `songIds` for the reason that array's own comment
+   * gives: its length is what has been *loaded*, which is zero for an album
+   * nobody has opened yet. The server reports the real number in every album
+   * listing and we were dropping it, so the album header showed "0 songs" and
+   * a runtime of 0:00 until the track list resolved.
+   */
+  songCount?: number;
+  /** Total running time in seconds, where the origin reports it. */
+  durationSeconds?: number;
   /** Tracks that have been loaded, in running order, as references. */
   songIds: LocalId[];
+}
+
+/**
+ * How many songs an album has, for a surface that wants to say so.
+ *
+ * The origin's own count where it gave one, else what has been loaded — the
+ * same rule, and the same reasoning, as `playlistSongCount`.
+ */
+export function albumSongCount(album: Album): number {
+  return album.songCount ?? album.songIds.length;
 }

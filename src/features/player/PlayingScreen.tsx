@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePlayingState, usePlayingProgress } from '@/features/playback/PlayingContext';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
 import { selectShowPlaybackSpeed, selectShowVolumeSlider } from '@/features/settings/playback/state';
 import { useSongScreenModel, type SongScreenModel } from '@/features/song/useSongScreenModel';
 import type { LyricsResult } from '@/providers/contracts/ServerAdapter';
@@ -33,7 +32,6 @@ import VolumeCard from './components/VolumeCard';
 import { useDragToClose } from './useDragToClose';
 import { usePlayingTransitions, type PlayingViewMode } from './usePlayingTransitions';
 import { useSheetRef } from '@/components/useSheetRef';
-import Touchable from '@/components/Touchable';
 import { contentWidth, onDark, spacing } from '@/constants/design';
 import { useWindowLayout } from '@/features/layout/useWindowLayout';
 import { cappedContentWidth } from '@/features/layout/windowClass';
@@ -68,7 +66,6 @@ const LyricsPreviewCardResolver: React.FC<{
 const PlayingScreen: React.FC<PlayingScreenProps> = ({
     onClose,
 }) => {
-    const { t } = useTranslation();
     const router = useRouter();
     const { currentSong, playbackSpeed } = usePlayingState();
     const insets = useSafeAreaInsets();

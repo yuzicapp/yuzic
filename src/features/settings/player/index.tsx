@@ -13,6 +13,7 @@ import SettingsCardHeader from '../components/SettingsCardHeader';
 import SettingsRow from '../components/SettingsRow';
 import StreamingQuality from './components/StreamingQuality';
 import Crossfade from './components/Crossfade';
+import Loudness from './components/Loudness';
 import { selectPreferredCodec, selectAutoplayEnabled, selectResumeLongTracksEnabled, setPreferredCodec, setAutoplayEnabled, setResumeLongTracksEnabled } from '@/features/settings/playback/state';
 import { useSimilarityService } from '@/providers/registry/similarityService';
 
@@ -100,6 +101,7 @@ const PlayerSettings: React.FC = () => {
 
       <SettingsCardHeader subtle title={t('settings.player.audio')} />
       <Crossfade />
+      <Loudness />
       <SettingsCard>
         {/*
           A row rather than the equalizer itself: inline, its rotated band

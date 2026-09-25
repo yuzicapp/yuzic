@@ -394,7 +394,13 @@
         "seguesSubtext": "連続再生の繋ぎは即切替のまま。オンで全てフェード。"
       },
       "showRating": "評価を表示",
-      "showRatingSubtext": "プレーヤーのタイトルの下に5つ星を表示します"
+      "showRatingSubtext": "プレーヤーのタイトルの下に5つ星を表示します",
+      "loudness": {
+        "label": "音量の正規化",
+        "subtext": "サーバーの測定値を使って、すべての曲を同じ音量に揃えます。測定されていないライブラリでは効果がありません。",
+        "preampLabel": "プリアンプ",
+        "preampSubtext": "正規化は大きい曲を下げるため全体が小さくなります。これで音量を戻せます（音割れは防がれます）。"
+      }
     },
     "listenBrainz": {
       "title": "ListenBrainz",
@@ -995,6 +1001,14 @@
       "album": "アルバム",
       "artist": "アーティスト",
       "playlist": "プレイリスト"
+    },
+    "browse": {
+      "title": "さがす",
+      "genres": "ジャンル",
+      "moods": "ムード",
+      "genre": "ジャンル",
+      "mood": "ムード",
+      "allGenres": "すべてのジャンル"
     }
   },
   "media": {
@@ -1479,7 +1493,11 @@
     },
     "play": "回再生",
     "plays": "回再生",
-    "similarAlbums": "似ているアルバム"
+    "similarAlbums": "似ているアルバム",
+    "header": {
+      "songs_one": "{{count}}曲",
+      "songs_other": "{{count}}曲"
+    }
   },
   "externalSourcePicker": {
     "empty": "この項目を解決できるソースがありません。",

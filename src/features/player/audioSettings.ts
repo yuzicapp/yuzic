@@ -23,6 +23,22 @@ export interface CrossfadeSettings {
 }
 
 /** One band. Frequency in Hz, gain in dB. */
+/**
+ * Levelling every track to one loudness, from the server's own measurements.
+ *
+ * Deliberately narrower than the engine's `ReplayGainOptions`: a switch and a
+ * preamp, where the engine also offers track/album/auto modes. Those three
+ * behave identically today because the engine's `Track` carries a single gain
+ * figure rather than a track/album pair, so offering the choice would be
+ * offering three names for one behaviour. Album mode wants an engine change,
+ * not a settings entry.
+ */
+export interface LoudnessSettings {
+  enabled: boolean;
+  /** Extra gain on top of the correction, in dB. */
+  preampDb: number;
+}
+
 export interface EqualizerBand {
   frequencyHz: number;
   gainDb: number;

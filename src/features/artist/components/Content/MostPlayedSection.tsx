@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { useTheme } from '@/features/theme/useTheme'
@@ -13,6 +13,7 @@ import TopTrackRow from '@/components/rows/TopTrackRow'
 import { rankMostPlayedTracks } from './mostPlayed'
 import type { Artist } from '@/domain/entities/Artist'
 import { spacing, typography } from '@/constants/design'
+import { MAX_TRACK_ROWS, ShowMoreTracks, visibleTrackRows } from './trackSection'
 
 type Props = {
   artist: Artist
@@ -29,13 +30,15 @@ export default function MostPlayedSection({ artist }: Props) {
   const playCounts = useSelector(selectSongPlayCounts)
   const { playSong } = usePlayingActions()
   const { resolvePlayableSong } = usePlayableSongResolver()
+  const [showAll, setShowAll] = useState(false)
 
   // `rankMostPlayedTracks` works over a generic `{ id, artistId }` shape —
   // play counts are keyed by nativeId (server-scoped), so that's what feeds
   // it, not the domain identity.
   const playCountTracks = tracks.map(track => ({ id: track.nativeId, artistId: track.artist.nativeId }))
-  const ranked = rankMostPlayedTracks(playCountTracks, playCounts, artist.nativeId)
+  const ranked = rankMostPlayedTracks(playCountTracks, playCounts, artist.nativeId).slice(0, MAX_TRACK_ROWS)
   if (ranked.length === 0) return null
+  const visible = ranked.slice(0, visibleTrackRows(ranked.length, showAll))
 
   // The store's index rather than one built here: this used to index every
   // track in the library on every render of every artist screen, to read back
@@ -58,7 +61,7 @@ export default function MostPlayedSection({ artist }: Props) {
           {t('artist.sections.mostPlayed')}
         </Text>
       </View>
-      {ranked.map((ranking, index) => {
+      {visible.map((ranking, index) => {
         const track = tracksByNativeId.get(ranking.id);
         if (!track) return null;
         return (
@@ -71,6 +74,7 @@ export default function MostPlayedSection({ artist }: Props) {
           />
         );
       })}
+      <ShowMoreTracks total={ranked.length} expanded={showAll} onToggle={() => setShowAll(v => !v)} />
     </View>
   )
 }

@@ -49,6 +49,25 @@ interface PlaybackSettingsState {
   crossfadeAlways: boolean;
   /** Per-band gains in dB, in `EQ_FREQUENCIES` order. All zero is flat. */
   equalizerGains: number[];
+  /**
+   * Level every track to the same loudness, using the server's own measurement.
+   *
+   * Off by default, because it is only ever as good as the tags: on a library
+   * nobody has scanned it does nothing, and a listener who turns it on and
+   * hears no change should be told why rather than left to guess. The engine
+   * has applied this since it was written — nothing had ever given it the
+   * figures.
+   */
+  loudnessNormalization: boolean;
+  /**
+   * Extra gain on top of the correction, in dB.
+   *
+   * ReplayGain levels *down* to a reference, so a fully normalised library is
+   * quieter than its loudest tracks were. This gives that headroom back for
+   * people who would rather turn the phone up less; clipping is held off by
+   * the engine's own peak guard, which is why this can be offered at all.
+   */
+  loudnessPreampDb: number;
 }
 
 const initialState: PlaybackSettingsState = {
@@ -69,6 +88,8 @@ const initialState: PlaybackSettingsState = {
   crossfadeSeconds: 0,
   crossfadeAlways: false,
   equalizerGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  loudnessNormalization: false,
+  loudnessPreampDb: 0,
 };
 
 const playbackSlice = createSlice({
@@ -126,6 +147,14 @@ const playbackSlice = createSlice({
     setEqualizerGains(state, action: PayloadAction<number[]>) {
       state.equalizerGains = action.payload;
     },
+    setLoudnessNormalization(state, action: PayloadAction<boolean>) {
+      state.loudnessNormalization = action.payload;
+    },
+    setLoudnessPreampDb(state, action: PayloadAction<number>) {
+      // Clamped here rather than at the slider: the engine takes any number and
+      // a persisted rogue value would survive every launch.
+      state.loudnessPreampDb = Math.min(Math.max(action.payload, -15), 15);
+    },
   },
 });
 
@@ -145,6 +174,8 @@ export const {
   setCrossfadeSeconds,
   setCrossfadeAlways,
   setEqualizerGains,
+  setLoudnessNormalization,
+  setLoudnessPreampDb,
 } = playbackSlice.actions;
 
 export default playbackSlice.reducer;
@@ -205,3 +236,9 @@ export const selectCrossfadeAlways = (state: PlaybackRootState): boolean =>
 
 export const selectEqualizerGains = (state: PlaybackRootState): number[] =>
   state.settingsPlayback.equalizerGains;
+
+export const selectLoudnessNormalization = (state: PlaybackRootState): boolean =>
+  state.settingsPlayback.loudnessNormalization;
+
+export const selectLoudnessPreampDb = (state: PlaybackRootState): number =>
+  state.settingsPlayback.loudnessPreampDb;

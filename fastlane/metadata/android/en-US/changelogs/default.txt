@@ -1,9 +1,8 @@
-Make the app look the way you want it.
+Search opens on your library instead of a blank page.
 
-- Set your own background, card and text colours, for light and dark
-- Draw the app over a photo or the cover that's playing, with blur and dim
-- Float the tab bar off the edges, make it translucent, name the tabs
-- Bigger or smaller text throughout
-- A compact player layout, so lyrics and more start sooner
-- The accent can follow each cover
-- Pull down on your library to ask the server right now
+- Browse by genre, sized by how much of each you own
+- The keyboard no longer forces itself open; recents appear when you tap the field
+- An artist's discography opens as a sortable list, not a "more" button
+- Loudness normalisation, from your server's own measurements (Settings > Player)
+- Albums read every genre and mood your files carry, and know a single from an EP
+- Jellyfin: tracks without lyrics no longer report an error

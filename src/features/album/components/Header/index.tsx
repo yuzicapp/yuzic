@@ -7,7 +7,7 @@ import { Ellipsis, Link, Play, Shuffle } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import type { Album } from '@/domain/entities/Album';
+import { albumSongCount, type Album } from '@/domain/entities/Album';
 import type { Song } from '@/domain/entities/Song';
 import type { CoverSource } from '@/domain/entities/Cover';
 import AlbumOptions from '@/components/options/AlbumOptions';
@@ -107,10 +107,16 @@ function AlbumOptionsButton({ album, isLocal }: { album: Album; isLocal: boolean
 
 function LocalMetaRow({ album, songs }: { album: Album | null; songs: Song[] }) {
   const navigation = useNavigation<any>();
+  const { t } = useTranslation();
 
+  // The server's own figures where it reported them, and the loaded tracks
+  // otherwise. Summing the tracks is only right once they are all here: before
+  // that this row said "0 songs" and "0:00" about an album the server had
+  // already told us the size of.
+  const trackCount = album ? albumSongCount(album) : songs.length;
   const totalDuration = useMemo(
-    () => songs.reduce((sum, song) => sum + song.durationSeconds, 0),
-    [songs]
+    () => album?.durationSeconds ?? songs.reduce((sum, song) => sum + song.durationSeconds, 0),
+    [album?.durationSeconds, songs]
   );
 
   const metadataItems = useMemo(() => {
@@ -122,11 +128,11 @@ function LocalMetaRow({ album, songs }: { album: Album | null; songs: Song[] }) 
     const year = Number(album.year);
     if (Number.isFinite(year) && year > 0) items.push({ label: String(year), type: 'info' });
     if (!items.length) {
-      items.push({ label: `${songs.length} songs`, type: 'info' });
+      items.push({ label: t('album.header.songs', { count: trackCount }), type: 'info' });
       items.push({ label: formatDuration(totalDuration), type: 'info' });
     }
     return items;
-  }, [album, songs.length, totalDuration]);
+  }, [album, trackCount, totalDuration, t]);
 
   const handleGenrePress = useCallback((genre: string) => {
     navigation.push('genreView', { genre });
