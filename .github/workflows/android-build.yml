@@ -59,6 +59,16 @@ jobs:
       - name: Install Node dependencies
         run: npm ci --omit=dev
 
+      # The --omit=dev above is why this check exists. `patch-package` was a
+      # devDependency, so --omit=dev did not install it, and postinstall was
+      # guarded on its binary being present — so from 2026-09-08 every release
+      # build silently applied no patches at all, for seventeen days and three
+      # releases. Nothing failed; the patches simply were not there. The fix is
+      # patch-package being a production dependency, and this asserts the result
+      # rather than trusting the mechanism.
+      - name: Verify patches are applied
+        run: ./tools/verify-patches.sh
+
       - name: Decode Android keystore
         run: |
           mkdir -p android/app
