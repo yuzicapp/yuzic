@@ -310,6 +310,25 @@ export function createEngineBackend(): PlayerBackend {
       );
     },
 
+    /**
+     * Off is sent as `mode: 'off'` rather than a zero preamp — the engine then
+     * skips the correction entirely instead of applying a measured gain and
+     * adding nothing to it.
+     *
+     * `preventClipping` stays on: the peak the tracks carry is exactly what it
+     * needs, and a positive preamp on an already-hot master is how loudness
+     * normalisation ends up sounding worse than none.
+     */
+    setLoudness(options) {
+      fire('setLoudness', async () =>
+        load().setReplayGain(
+          options.enabled
+            ? { mode: 'track', preampDb: options.preampDb, preventClipping: true }
+            : { mode: 'off' },
+        ),
+      );
+    },
+
     clearCache() { fire('clearCache', async () => load().clearCache()); },
     evict(mediaId) { fire('evict', async () => load().evict(mediaId)); },
 

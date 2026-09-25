@@ -1,4 +1,4 @@
-import { genresOf, moodsOf } from './tagLists';
+import { genresOf, loudnessOf, moodsOf } from './tagLists';
 
 describe('genresOf', () => {
   it('reads the OpenSubsonic list, in the order the server gave it', () => {
@@ -55,3 +55,46 @@ describe('moodsOf', () => {
     expect(moodsOf({ moods: ['Calm', null, 7, { name: 'Sad' }] })).toEqual(['Calm']);
   });
 });
+
+describe('loudnessOf', () => {
+  it('reads every figure the server measured', () => {
+    expect(
+      loudnessOf({
+        replayGain: {
+          trackGain: -6.5,
+          albumGain: -3,
+          trackPeak: 0.98,
+          albumPeak: 1,
+          baseGain: -2,
+          fallbackGain: -8,
+        },
+      })
+    ).toEqual({
+      trackGainDb: -6.5,
+      albumGainDb: -3,
+      trackPeak: 0.98,
+      albumPeak: 1,
+      baseGainDb: -2,
+      fallbackGainDb: -8,
+    })
+  })
+
+  it('keeps a measured zero, which is a real figure', () => {
+    expect(loudnessOf({ replayGain: { trackGain: 0 } })).toEqual({ trackGainDb: 0 })
+  })
+
+  /**
+   * The spec says the object is always present on a song, so "present and
+   * empty" is the normal shape for a library nobody has scanned. Reading that
+   * as a measurement of zero would correct every untagged track.
+   */
+  it('is undefined for an unscanned library, which reports the object empty', () => {
+    expect(loudnessOf({ replayGain: {} })).toBeUndefined()
+    expect(loudnessOf({})).toBeUndefined()
+  })
+
+  it('ignores figures that are not numbers', () => {
+    expect(loudnessOf({ replayGain: { trackGain: '-6' as never, albumGain: -3 } }))
+      .toEqual({ albumGainDb: -3 })
+  })
+})

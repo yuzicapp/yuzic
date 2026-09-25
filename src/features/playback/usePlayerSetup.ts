@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { getBackend } from '@/features/player/activeBackend';
 import { presetToBands } from '@/features/player/audioSettings';
-import { selectCrossfadeAlways, selectCrossfadeSeconds, selectEqualizerGains } from '@/features/settings/playback/state';
+import { selectCrossfadeAlways, selectCrossfadeSeconds, selectEqualizerGains, selectLoudnessNormalization, selectLoudnessPreampDb } from '@/features/settings/playback/state';
 
 /**
  * Whether the player has been set up this launch.
@@ -41,6 +41,8 @@ export function usePlayerSetup(): void {
   const crossfadeSeconds = useSelector(selectCrossfadeSeconds);
   const crossfadeAlways = useSelector(selectCrossfadeAlways);
   const equalizerGains = useSelector(selectEqualizerGains);
+  const loudnessNormalization = useSelector(selectLoudnessNormalization);
+  const loudnessPreampDb = useSelector(selectLoudnessPreampDb);
   const crossfade = useMemo(
     () =>
       crossfadeSeconds > 0
@@ -53,10 +55,15 @@ export function usePlayerSetup(): void {
     [crossfadeSeconds, crossfadeAlways],
   );
   const equalizerBands = useMemo(() => presetToBands(equalizerGains), [equalizerGains]);
+  const loudness = useMemo(
+    () => ({ enabled: loudnessNormalization, preampDb: loudnessPreampDb }),
+    [loudnessNormalization, loudnessPreampDb],
+  );
 
   // Pushed whenever they change, so a slider takes effect immediately rather
   // than at the next launch. Both are safe to re-send: the engine bypasses a
   // flat EQ and a null crossfade outright.
   useEffect(() => { getBackend().setCrossfade(crossfade); }, [crossfade]);
   useEffect(() => { getBackend().setEqualizer(equalizerBands); }, [equalizerBands]);
+  useEffect(() => { getBackend().setLoudness(loudness); }, [loudness]);
 }

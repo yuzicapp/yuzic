@@ -1,3 +1,4 @@
+import type { Loudness } from '@/domain/entities/Loudness';
 /**
  * What the app calls a playable item.
  *
@@ -64,4 +65,10 @@ export interface MediaItem {
    * Authorization header.
    */
   artworkHeaders?: Record<string, string>;
+  /**
+   * What the origin measured about the track's loudness. Unlike the headers
+   * above this is not ephemeral — it is a property of the recording, and the
+   * engine needs it on every queue item to level one track against the next.
+   */
+  loudness?: Loudness;
 }

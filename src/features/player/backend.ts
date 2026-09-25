@@ -1,5 +1,5 @@
 import type { BrowseCategory } from './browse';
-import type { CrossfadeSettings, EqualizerBand } from './audioSettings';
+import type { CrossfadeSettings, EqualizerBand, LoudnessSettings } from './audioSettings';
 import type { MediaItem } from './mediaItem';
 
 /**
@@ -63,6 +63,15 @@ export interface PlayerBackend {
 
   /** Bands in ascending frequency order. An empty array is flat. */
   setEqualizer(bands: EqualizerBand[]): void;
+
+  /**
+   * Level tracks to a reference loudness, from the figures each one carries.
+   *
+   * A policy, not a per-track call: the engine multiplies it against whatever
+   * `replayGainDb` the playing track was queued with, and re-reads it live, so
+   * changing this affects the track already playing rather than the next one.
+   */
+  setLoudness(options: LoudnessSettings): void;
 
   // State, answered synchronously.
   //

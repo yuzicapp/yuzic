@@ -1,6 +1,7 @@
 import type { CoverSource } from '@/domain/entities/Cover';
 import type { ContentKind } from '../playback/ContentKind';
 import type { EntityCore } from './EntityCore';
+import type { Loudness } from './Loudness';
 import type { AlbumRef, ArtistRef } from './EntityRef';
 
 /** Technical detail about the file behind a song, where the origin reports it. */
@@ -93,5 +94,13 @@ export interface Song extends EntityCore {
    * a list of ties.
    */
   userRating?: number;
+  /**
+   * What the origin measured about this track's loudness, where it did.
+   *
+   * The engine has applied ReplayGain since it was written and nothing ever
+   * gave it the figures — they arrive on every Subsonic song response and were
+   * dropped on the floor. See {@link Loudness}.
+   */
+  loudness?: Loudness;
   audio?: AudioProperties;
 }

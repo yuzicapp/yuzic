@@ -86,6 +86,8 @@ export function mapAlbum(dto: AnyAlbumDto, context: MapAlbumContext): Album {
     // whether or not the interface admitted it existed; the DTO now says so.
     serverPlayCount: dto.playCount,
     serverLastPlayedAt: dto.played ? Date.parse(dto.played) || undefined : undefined,
+    songCount: dto.songCount,
+    durationSeconds: dto.duration,
     userRating: reportedRating(dto.userRating),
     songIds: context.songIds ?? [],
   };

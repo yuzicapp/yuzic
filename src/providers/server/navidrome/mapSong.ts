@@ -12,7 +12,7 @@ import type { ExternalIds } from '@/domain/identity/ExternalIds';
 import { albumCoverSubject, missingCover, type CoverSource } from '@/domain/entities/Cover';
 import { reportedRating } from '@/domain/entities/Rating';
 import { albumRef, artistRef } from './mapRefs';
-import { genresOf, moodsOf } from './tagLists';
+import { genresOf, loudnessOf, moodsOf } from './tagLists';
 import type { SubsonicSong } from './types';
 import { internCover } from '@/domain/entities/internRef';
 
@@ -65,6 +65,7 @@ export function mapSong(dto: SubsonicSong, context: MapSongContext): Song {
     serverPlayCount: dto.playCount,
     serverLastPlayedAt: dto.played ? Date.parse(dto.played) || undefined : undefined,
     userRating: reportedRating(dto.userRating),
+    loudness: loudnessOf(dto),
     audio: {
       bitrateKbps: dto.bitRate,
       sampleRateHz: dto.samplingRate,

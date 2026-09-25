@@ -32,6 +32,15 @@ export interface SubsonicSong {
   genres?: (SubsonicGenreRef | string)[];
   /** OpenSubsonic extension; the track's mood tags, as the file carries them. */
   moods?: string[];
+  /** OpenSubsonic extension; the loudness figures, all in dB but the peaks. */
+  replayGain?: {
+    trackGain?: number;
+    albumGain?: number;
+    trackPeak?: number;
+    albumPeak?: number;
+    baseGain?: number;
+    fallbackGain?: number;
+  };
   /** 1-5 where the user has rated it, absent or 0 where they have not. */
   userRating?: number;
   /** OpenSubsonic extensions; used for matching, absent on older servers. */
@@ -56,6 +65,8 @@ export interface SubsonicAlbum {
   /** OpenSubsonic extension; the one secondary type reported as a flag. */
   isCompilation?: boolean;
   created?: string;
+  songCount?: number;
+  duration?: number;
   /** Reported on the ID3 object too, not only in a list. */
   playCount?: number;
   /** OpenSubsonic extension; when the origin last recorded a play. */
@@ -83,6 +94,7 @@ export interface SubsonicAlbumListEntry {
   isCompilation?: boolean;
   created?: string;
   songCount?: number;
+  duration?: number;
   playCount?: number;
   played?: string;
   userRating?: number;

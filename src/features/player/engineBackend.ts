@@ -1,4 +1,5 @@
 import type { MediaItem } from './mediaItem';
+import { loudnessFor, type Loudness } from '@/domain/entities/Loudness';
 import type { BrowseItem } from './browse';
 import type { BrowseNode, EngineEvent, Progress, Track } from 'yuzic-engine';
 
@@ -189,6 +190,7 @@ interface EngineTrackInput {
   continuous?: boolean;
   headers?: Record<string, string>;
   artworkHeaders?: Record<string, string>;
+  loudness?: Loudness;
 }
 
 /**
@@ -219,6 +221,25 @@ export function toEngineTrack(item: EngineTrackInput): Track {
     // server's Track is byte-for-byte what it was.
     ...(item.headers ? { headers: item.headers } : {}),
     ...(item.artworkHeaders ? { artworkHeaders: item.artworkHeaders } : {}),
+    // The measurement, not the decision. `Track` holds one gain figure, so the
+    // track figure is what it gets; whether to apply it at all is the engine's
+    // own `setReplayGain` policy, which it re-reads live — including for the
+    // track already playing. Sending the album figure instead would mean
+    // rebuilding the queue whenever the setting changed, which is why album
+    // mode waits on the engine carrying both.
+    ...engineGain(item.loudness),
+  };
+}
+
+/** The gain fields, present only for a track the origin actually measured. */
+function engineGain(loudness: Loudness | undefined): {
+  replayGainDb?: number;
+  replayGainPeak?: number;
+} {
+  const { gainDb, peak } = loudnessFor(loudness, 'track');
+  return {
+    ...(gainDb === undefined ? {} : { replayGainDb: gainDb }),
+    ...(peak === undefined ? {} : { replayGainPeak: peak }),
   };
 }
 

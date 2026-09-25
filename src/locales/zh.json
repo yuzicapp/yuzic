@@ -394,7 +394,13 @@
         "seguesSubtext": "专辑无缝衔接仍直切；开启则一并淡化。"
       },
       "showRating": "显示评分",
-      "showRatingSubtext": "在播放器标题下方显示五星评分"
+      "showRatingSubtext": "在播放器标题下方显示五星评分",
+      "loudness": {
+        "label": "音量标准化",
+        "subtext": "使用服务器自身的测量值，将所有曲目调整到相同音量。若媒体库尚未扫描测量值，则无效果。",
+        "preampLabel": "前置增益",
+        "preampSubtext": "标准化会降低音量较大的曲目，因此整体变轻。此项可补回音量，且不会造成失真。"
+      }
     },
     "listenBrainz": {
       "title": "ListenBrainz",
@@ -1486,7 +1492,11 @@
     },
     "play": "次播放",
     "plays": "次播放",
-    "similarAlbums": "相似专辑"
+    "similarAlbums": "相似专辑",
+    "header": {
+      "songs_one": "{{count}} 首歌曲",
+      "songs_other": "{{count}} 首歌曲"
+    }
   },
   "externalSourcePicker": {
     "empty": "没有来源能够解析此项目。",

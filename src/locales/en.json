@@ -395,7 +395,13 @@
         "seguesSubtext": "Gapless album joins stay hard-cut. On fades those too."
       },
       "showRating": "Show rating",
-      "showRatingSubtext": "Five stars under the title on the player"
+      "showRatingSubtext": "Five stars under the title on the player",
+      "loudness": {
+        "label": "Loudness normalisation",
+        "subtext": "Level every track to the same loudness, using your server's own measurements. Does nothing on a library that has not been scanned for them.",
+        "preampLabel": "Preamp",
+        "preampSubtext": "Normalising turns loud tracks down, so everything gets quieter. This gives the volume back without risking distortion."
+      }
     },
     "listenBrainz": {
       "title": "ListenBrainz",
@@ -1032,7 +1038,11 @@
     },
     "play": "play",
     "plays": "plays",
-    "similarAlbums": "Similar albums"
+    "similarAlbums": "Similar albums",
+    "header": {
+      "songs_one": "{{count}} song",
+      "songs_other": "{{count}} songs"
+    }
   },
   "explore": {
     "sections": {

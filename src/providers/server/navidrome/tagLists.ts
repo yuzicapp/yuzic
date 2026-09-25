@@ -1,3 +1,5 @@
+import type { Loudness } from '@/domain/entities/Loudness'
+
 /**
  * The tag lists Subsonic reports two ways.
  *
@@ -41,4 +43,38 @@ export function moodsOf(dto: { moods?: unknown }): string[] | undefined {
   if (!Array.isArray(dto.moods)) return undefined;
   const moods = dto.moods.filter((mood): mood is string => typeof mood === 'string' && mood.trim() !== '');
   return moods.length > 0 ? moods : undefined;
+}
+
+/**
+ * The loudness figures, where the origin measured any.
+ *
+ * Undefined when the object is absent or holds nothing usable, so that an
+ * untagged track stays distinguishable from one measured at 0 dB — see
+ * {@link Loudness}. The spec says the `replayGain` object is always present on
+ * a song, which means "present and empty" is the normal shape for a library
+ * nobody has scanned, and reading that as a measurement of zero would apply a
+ * correction to every untagged track.
+ */
+export function loudnessOf(dto: {
+  replayGain?: {
+    trackGain?: number
+    albumGain?: number
+    trackPeak?: number
+    albumPeak?: number
+    baseGain?: number
+    fallbackGain?: number
+  }
+}): Loudness | undefined {
+  const raw = dto.replayGain
+  if (!raw) return undefined
+
+  const loudness: Loudness = {}
+  if (typeof raw.trackGain === 'number') loudness.trackGainDb = raw.trackGain
+  if (typeof raw.albumGain === 'number') loudness.albumGainDb = raw.albumGain
+  if (typeof raw.trackPeak === 'number') loudness.trackPeak = raw.trackPeak
+  if (typeof raw.albumPeak === 'number') loudness.albumPeak = raw.albumPeak
+  if (typeof raw.baseGain === 'number') loudness.baseGainDb = raw.baseGain
+  if (typeof raw.fallbackGain === 'number') loudness.fallbackGainDb = raw.fallbackGain
+
+  return Object.keys(loudness).length > 0 ? loudness : undefined
 }
