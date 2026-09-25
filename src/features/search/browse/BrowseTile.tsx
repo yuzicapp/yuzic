@@ -9,8 +9,7 @@ import { useRadius } from '@/features/theme/useRadius'
 import { useTheme } from '@/features/theme/useTheme'
 import type { BrowseTile as Tile } from './browseTiles'
 
-/** Below this, the name needs the smaller type to fit on one line. */
-const COMPACT_TILE_WIDTH = 150
+
 
 /**
  * One way into the library.
@@ -42,11 +41,14 @@ export default function BrowseTile({
   const rad = useRadius()
   const cover = tile.covers[0]
 
-  // Three to a row leaves no room for 20pt type: "Electronic" broke across two
-  // lines mid-word, and "Cloud Rap" lost its second line to the tile's edge.
-  // The hero keeps the larger size, which is most of what makes it read as the
-  // hero in the first place.
-  const compact = width < COMPACT_TILE_WIDTH
+  // The wide tile takes the next size up, and that is the whole difference —
+  // a tag's name is a label on a grid cell, not a headline. At 20pt it was
+  // both illegible and shouting: "Electronic" broke across two lines mid-word
+  // while the screen read as scaled up against everything around it.
+  // Tiles are one cell tall, so anything wider than it is tall is the spanned
+  // one. Derived rather than passed: the caller already says how big the tile
+  // is, and a second prop saying which kind it is could disagree with that.
+  const wide = width > height
 
   return (
     <Touchable
@@ -82,7 +84,19 @@ export default function BrowseTile({
       />
 
       <View style={styles.caption}>
-        <Text style={[styles.label, compact && styles.labelCompact]} numberOfLines={2}>
+        {/*
+          Shrunk to fit rather than broken: a tag whose longest word is wider
+          than the tile wraps *inside* the word — "Contempora / ry R&B" — which
+          reads as a bug rather than as a long name. Two lines and a floor of
+          0.85 keeps it legible; below that the name is better ellipsised, and
+          `numberOfLines` still does that.
+        */}
+        <Text
+          style={[styles.label, wide && styles.labelWide]}
+          numberOfLines={2}
+          adjustsFontSizeToFit
+          minimumFontScale={0.85}
+        >
           {tile.label}
         </Text>
       </View>
@@ -99,11 +113,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
   },
-  labelCompact: {
+  labelWide: {
     ...typography.rowTitle,
   },
   label: {
-    ...typography.sectionTitle,
+    ...typography.compactRowTitle,
     // Always the light text: it sits on a scrim that is dark by construction,
     // whatever the theme and whatever the artwork behind it.
     color: onDark.text,

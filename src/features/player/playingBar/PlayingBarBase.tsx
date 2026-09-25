@@ -1,5 +1,5 @@
 import { cappedTypography, fontScaleCap, hitSlopFor, iconSize, radius, spacing } from '@/constants/design';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { InteractionManager, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Music, Play, Pause } from 'lucide-react-native';
@@ -51,8 +51,14 @@ const BAR_MIN_OPACITY = 0.02;
 /**
  * The now-playing row at the top of the tab dock. iOS and Android draw it the
  * same way; each platform's `PlayingBar` renders this.
+ *
+ * Memoised because of *where* it is mounted. It lives inside the tab bar, so
+ * that it survives tab switches and pushes — which also means it is a child of
+ * a component the navigator re-renders on every push and pop in any tab. It
+ * takes no props, so without this the entire bar rebuilt each time somebody
+ * opened an album.
  */
-export default function PlayingBarBase() {
+function PlayingBarBase() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const themeColor = colors.themeColor;
@@ -355,3 +361,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+export default memo(PlayingBarBase);

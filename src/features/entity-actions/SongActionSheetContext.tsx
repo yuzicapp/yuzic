@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -49,8 +50,18 @@ export function SongActionSheetProvider({ children }: { children: ReactNode }) {
     setPlaylistSong(null);
   }, []);
 
+  /*
+   * Memoised because of where this sits. The provider is mounted app-wide and
+   * holds three pieces of state, so opening a song's options re-renders it two
+   * or three times — and a fresh value each time force-renders every consumer
+   * past its own `React.memo`. The consumers are every song row in the app,
+   * plus the whole Search screen model. Tapping "…" on one row was re-rendering
+   * every row on every mounted tab.
+   */
+  const value = useMemo(() => ({ openSongOptions }), [openSongOptions]);
+
   return (
-    <SongActionSheetContext.Provider value={{ openSongOptions }}>
+    <SongActionSheetContext.Provider value={value}>
       {children}
       {selectedSong && (
         <SongOptions

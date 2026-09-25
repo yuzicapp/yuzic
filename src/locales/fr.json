@@ -1006,9 +1006,6 @@
       "playlist": "Playlist"
     },
     "browse": {
-      "title": "Parcourir",
-      "genres": "Genres",
-      "moods": "Ambiances",
       "genre": "Genre",
       "mood": "Ambiance",
       "allGenres": "Tous les genres"

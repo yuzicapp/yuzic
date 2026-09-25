@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, StyleSheet, Text, View } from 'react-native';
-import DraggableFlatList, { type DragEndParams, type RenderItemParams } from 'react-native-draggable-flatlist';
+import ReorderableList, {
+  type ReorderableListReorderEvent,
+  useIsActive,
+  useReorderableDrag,
+} from 'react-native-reorderable-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -41,6 +45,60 @@ function toEntries(songs: Song[]): Entry[] {
     seen.set(song.localId, nth + 1);
     return { key: `${song.localId}#${nth}`, song };
   });
+}
+
+type RowProps = {
+  item: Entry;
+  index: number;
+  isOffline: boolean;
+  onRemove: (entry: Entry, position: number) => void;
+};
+
+/**
+ * One row. Its own component because `useReorderableDrag` and `useIsActive`
+ * read the list's context, which only exists inside what `renderItem` renders.
+ */
+function EditRow({ item, index, isOffline, onRemove }: RowProps) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const drag = useReorderableDrag();
+  const isActive = useIsActive();
+
+  return (
+    <View
+      testID="playlist-edit-row"
+      style={[styles.row, isActive && { backgroundColor: colors.card }]}
+    >
+      <Touchable
+        testID="playlist-edit-remove"
+        accessibilityRole="button"
+        accessibilityLabel={t('a11y.playlist.removeSong', { title: item.song.title })}
+        hitSlop={hitSlopFor(iconSize.row)}
+        onPress={() => onRemove(item, index)}
+        style={styles.remove}
+      >
+        <MinusCircle size={iconSize.row} color={statusColor.destructive} />
+      </Touchable>
+      <MediaListRow
+        title={item.song.title}
+        subtitle={item.song.artist.name}
+        cover={item.song.cover}
+        style={styles.song}
+      />
+      {!isOffline && (
+        <Touchable
+          accessibilityRole="button"
+          accessibilityLabel={t('a11y.playlist.reorderSong', { title: item.song.title })}
+          hitSlop={hitSlopFor(iconSize.row)}
+          onPressIn={drag}
+          disabled={isActive}
+          style={styles.grip}
+        >
+          <GripVertical size={iconSize.row} color={colors.subtext} />
+        </Touchable>
+      )}
+    </View>
+  );
 }
 
 /**
@@ -95,7 +153,7 @@ export default function PlaylistEditList({ playlist, songs, onDone }: Props) {
     );
   }, [removeSong, playlist.nativeId, reportFailure]);
 
-  const handleDragEnd = useCallback(({ from, to }: DragEndParams<Entry>) => {
+  const handleReorder = useCallback(({ from, to }: ReorderableListReorderEvent) => {
     if (from === to) return;
     const moved = entries[from];
     if (!moved) return;
@@ -106,41 +164,9 @@ export default function PlaylistEditList({ playlist, songs, onDone }: Props) {
     );
   }, [entries, moveSong, playlist.nativeId, reportFailure]);
 
-  const renderItem = useCallback(({ item, getIndex, drag, isActive }: RenderItemParams<Entry>) => (
-    <View
-      testID="playlist-edit-row"
-      style={[styles.row, isActive && { backgroundColor: colors.card }]}
-    >
-      <Touchable
-        testID="playlist-edit-remove"
-        accessibilityRole="button"
-        accessibilityLabel={t('a11y.playlist.removeSong', { title: item.song.title })}
-        hitSlop={hitSlopFor(iconSize.row)}
-        onPress={() => handleRemove(item, getIndex() ?? 0)}
-        style={styles.remove}
-      >
-        <MinusCircle size={iconSize.row} color={statusColor.destructive} />
-      </Touchable>
-      <MediaListRow
-        title={item.song.title}
-        subtitle={item.song.artist.name}
-        cover={item.song.cover}
-        style={styles.song}
-      />
-      {!isOffline && (
-        <Touchable
-          accessibilityRole="button"
-          accessibilityLabel={t('a11y.playlist.reorderSong', { title: item.song.title })}
-          hitSlop={hitSlopFor(iconSize.row)}
-          onPressIn={drag}
-          disabled={isActive}
-          style={styles.grip}
-        >
-          <GripVertical size={iconSize.row} color={colors.subtext} />
-        </Touchable>
-      )}
-    </View>
-  ), [colors.card, colors.subtext, t, handleRemove, isOffline]);
+  const renderItem = useCallback(({ item, index }: { item: Entry; index: number }) => (
+    <EditRow item={item} index={index} isOffline={isOffline} onRemove={handleRemove} />
+  ), [handleRemove, isOffline]);
 
   const doneButton = useMemo(() => (
     <Touchable
@@ -161,12 +187,16 @@ export default function PlaylistEditList({ playlist, songs, onDone }: Props) {
         subtitle={isOffline ? t('playlist.edit.offlineReorder') : t('playlist.edit.title')}
         rightAction={doneButton}
       />
-      <DraggableFlatList
+      <ReorderableList
         data={entries}
         keyExtractor={item => item.key}
         renderItem={renderItem}
-        onDragEnd={handleDragEnd}
-        activationDistance={isOffline ? Number.POSITIVE_INFINITY : 0}
+        onReorder={handleReorder}
+        // Offline, a reorder cannot reach the server, so dragging is off
+        // outright rather than started and then refused.
+        dragEnabled={!isOffline}
+        // `useIsActive` in the row only re-renders when this is set.
+        shouldUpdateActiveItem
         ListEmptyComponent={<SectionEmptyState message={t('playlist.empty')} />}
         contentContainerStyle={{ paddingBottom: scrollClearance }}
       />

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import type { RootState } from '@/state/redux/store';
@@ -61,7 +61,18 @@ const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 const SHELF = 10;
 
 
-export function useListeningStats(now: number = Date.now()): ListeningStats {
+export function useListeningStats(at?: number): ListeningStats {
+  /*
+   * Read once, not per render. Defaulting the parameter to `Date.now()` made
+   * it a new value every render and it is a dependency of the memo below, so
+   * the whole body re-ran on any state change on this screen: a pass over
+   * every event, two rankings over every totals key, two summaries, the
+   * streak and the completion average. A caller that passes a time still
+   * controls it, which is what the tests do.
+   */
+  const rendered = useRef(Date.now());
+  const now = at ?? rendered.current;
+
   const events = useSelector((state: RootState) => state.listening.events);
   const totals = useSelector((state: RootState) => state.listening.totals);
   // The same model autoplay and Smart Shuffle ask. A screen that ranked by its

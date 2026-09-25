@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { notify } from '@/components/toast';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -134,8 +134,20 @@ export function ExternalResolutionProvider({ children }: { children: React.React
     artistPickerRef.current?.present();
   }, [artists, enabledSources, router]);
 
+  /*
+   * This provider wraps every tab and reads the whole catalog, so without the
+   * memo its value changed identity on each sync and each picker open — and
+   * its consumers are six Home shelves plus the Search model. That is the
+   * re-render-all-of-Home shape `useStableList` was written to kill,
+   * reintroduced one layer above it.
+   */
+  const value = useMemo(
+    () => ({ resolveAndNavigateToAlbum, resolveAndNavigateToArtist }),
+    [resolveAndNavigateToAlbum, resolveAndNavigateToArtist],
+  );
+
   return (
-    <ExternalResolutionContext.Provider value={{ resolveAndNavigateToAlbum, resolveAndNavigateToArtist }}>
+    <ExternalResolutionContext.Provider value={value}>
       {children}
       <ExternalSourcePickerSheet
         ref={albumPickerRef}

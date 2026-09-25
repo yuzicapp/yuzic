@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { ChevronLeft } from 'lucide-react-native'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTheme } from '@/features/theme/useTheme'
@@ -14,11 +14,19 @@ type Props = {
 
 export default function NotFoundView({ message }: Props) {
   const { t } = useTranslation()
-  const navigation = useNavigation<any>()
+  const router = useRouter()
   const { colors } = useTheme()
   // Defaulted here rather than in the signature so the fallback is translated
   // too — a default parameter can't reach `t`.
   const text = message ?? t('media.notFound')
+
+  // A cold deep link to something that does not exist has nothing behind it to
+  // pop, which would strand the reader here with a dead back arrow — the same
+  // case the settings header handles, for the same reason.
+  const handleBack = () => {
+    if (router.canGoBack()) router.back()
+    else router.replace('/(home)/(tabs)/(home)')
+  }
 
   return (
     <SafeAreaView edges={['top']} style={[styles.screen, { backgroundColor: colors.background }]}>
@@ -26,7 +34,7 @@ export default function NotFoundView({ message }: Props) {
         <Touchable
           accessibilityRole="button"
           accessibilityLabel={t('a11y.common.back')}
-          onPress={() => navigation.goBack()}
+          onPress={handleBack}
           style={styles.headerButton}
         >
           <ChevronLeft size={iconSize.header} color={colors.secondary} />

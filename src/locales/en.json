@@ -1006,9 +1006,6 @@
       "playlist": "Playlist"
     },
     "browse": {
-      "title": "Browse",
-      "genres": "Genres",
-      "moods": "Moods",
       "genre": "Genre",
       "mood": "Mood",
       "allGenres": "All genres"

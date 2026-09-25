@@ -1,7 +1,13 @@
 import { iconSize, onDark, spacing, tinted, typography } from '@/constants/design';
 import React, { useMemo } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
-import { NestableDraggableFlatList, NestableScrollContainer, type RenderItemParams } from 'react-native-draggable-flatlist';
+import {
+  NestedReorderableList,
+  ScrollViewContainer,
+  reorderItems,
+  useIsActive,
+  useReorderableDrag,
+} from 'react-native-reorderable-list';
 import { useTranslation } from 'react-i18next';
 import { Check, GripVertical } from 'lucide-react-native';
 
@@ -27,7 +33,56 @@ type Props = {
 };
 
 /** The scroll container a screen holding these lists hands `SettingsScreen`. */
-export const SourceListScrollContainer = NestableScrollContainer;
+export const SourceListScrollContainer = ScrollViewContainer;
+
+type SourceRowProps = {
+  item: SettingsSource;
+  canReorder: boolean;
+  showSubtext: boolean;
+};
+
+/**
+ * One source row. Separate because `useReorderableDrag` and `useIsActive` read
+ * the list's context, which exists only inside what `renderItem` renders.
+ */
+function SourceRow({ item, canReorder, showSubtext }: SourceRowProps) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const drag = useReorderableDrag();
+  const isActive = useIsActive();
+
+  return (
+    <View style={[styles.sourceRow, isActive && { backgroundColor: colors.background }]}>
+      <View style={styles.sourceCopy}>
+        <Text style={[styles.sourceLabel, { color: colors.secondary }]}>{item.label}</Text>
+        {showSubtext && item.subtext && (
+          <Text style={[styles.sourceSubtext, { color: colors.subtext }]}>{item.subtext}</Text>
+        )}
+      </View>
+      <View style={styles.sourceControls}>
+        {canReorder && item.enabled && (
+          <Touchable
+            testID={`source-drag-${item.id}`}
+            accessibilityRole="button"
+            accessibilityLabel={t('a11y.settings.reorderSource', { name: item.label })}
+            onLongPress={drag}
+            disabled={isActive}
+            style={styles.dragHandle}
+          >
+            <GripVertical size={iconSize.row} color={colors.border} />
+          </Touchable>
+        )}
+        <Switch
+          accessibilityLabel={item.label}
+          value={item.enabled}
+          onValueChange={item.onEnabledChange}
+          trackColor={{ true: colors.themeColor }}
+          thumbColor={onDark.text}
+        />
+      </View>
+    </View>
+  );
+}
 
 /**
  * A feature-owned fallback chain. Rendered inside a `SettingsScreen` given
@@ -53,39 +108,9 @@ const SettingsSourceList: React.FC<Props> = ({
   const enabledCount = useMemo(() => orderedSources.filter(source => source.enabled).length, [orderedSources]);
   const canReorder = enabledCount > 1;
 
-  const renderSource = ({ item, drag, isActive }: RenderItemParams<SettingsSource>) => {
-    return (
-      <View style={[styles.sourceRow, isActive && { backgroundColor: colors.background }]}>
-        <View style={styles.sourceCopy}>
-          <Text style={[styles.sourceLabel, { color: colors.secondary }]}>{item.label}</Text>
-          {showSubtext && item.subtext && (
-            <Text style={[styles.sourceSubtext, { color: colors.subtext }]}>{item.subtext}</Text>
-          )}
-        </View>
-        <View style={styles.sourceControls}>
-          {canReorder && item.enabled && (
-            <Touchable
-              testID={`source-drag-${item.id}`}
-              accessibilityRole="button"
-              accessibilityLabel={t('a11y.settings.reorderSource', { name: item.label })}
-              onLongPress={drag}
-              disabled={isActive}
-              style={styles.dragHandle}
-            >
-              <GripVertical size={iconSize.row} color={colors.border} />
-            </Touchable>
-          )}
-          <Switch
-            accessibilityLabel={item.label}
-            value={item.enabled}
-            onValueChange={item.onEnabledChange}
-            trackColor={{ true: colors.themeColor }}
-            thumbColor={onDark.text}
-          />
-        </View>
-      </View>
-    );
-  };
+  const renderSource = ({ item }: { item: SettingsSource }) => (
+    <SourceRow item={item} canReorder={canReorder} showSubtext={showSubtext} />
+  );
 
   return (
     <View>
@@ -104,11 +129,23 @@ const SettingsSourceList: React.FC<Props> = ({
         </View>
       )}
 
-      <NestableDraggableFlatList
+      <NestedReorderableList
         data={orderedSources}
         keyExtractor={source => source.id}
         renderItem={renderSource}
-        onDragEnd={({ data }) => onOrderChange(data.map(source => source.id))}
+        onReorder={({ from, to }) =>
+          onOrderChange(reorderItems(orderedSources, from, to).map(source => source.id))
+        }
+        // The page this sits in owns the scrolling; this list only reorders.
+        // `scrollable` is the library's autoscroll-during-drag behaviour and
+        // `scrollEnabled` the FlatList's own — both off, or React Native logs
+        // "VirtualizedLists should never be nested inside plain ScrollViews",
+        // which it decides purely on `scrollEnabled !== false`. The list is
+        // laid out at full height inside the page, so it has nothing to scroll.
+        scrollable={false}
+        scrollEnabled={false}
+        // `useIsActive` in the row only re-renders when this is set.
+        shouldUpdateActiveItem
       />
     </View>
   );

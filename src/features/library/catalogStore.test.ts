@@ -161,3 +161,45 @@ describe('lookups by native id', () => {
     expect(artistsOnly.provenance).toEqual(provenance);
   });
 });
+
+/**
+ * The catalog hydrates one resource at a time, so a cold start built this
+ * store four times over — and it walked the whole library each time, because
+ * every index was built in one pass regardless of which array had actually
+ * changed. Every index derives from exactly one array, so nothing should be
+ * rebuilt for an array that did not move.
+ */
+describe('rebuilding only what changed', () => {
+  const artists = [artist('ar-1')];
+  const albums = [album('al-1', 'ar-1', ['Jazz'])];
+  const playlists: Playlist[] = [];
+
+  it('keeps the album indexes when only the tracks array is replaced', () => {
+    const before = buildCatalogStore({ songs: [], albums, artists, playlists });
+    const after = buildCatalogStore({ songs: [song('s-1', 'al-1', 'ar-1')], albums, artists, playlists });
+
+    expect(after.albums).toBe(before.albums);
+    expect(after.albumByNativeId).toBe(before.albumByNativeId);
+    expect(after.albumIdsByArtist).toBe(before.albumIdsByArtist);
+    expect(after.albumIdsByGenre).toBe(before.albumIdsByGenre);
+    expect(after.artists).toBe(before.artists);
+  });
+
+  it('does rebuild the song indexes, since that is what changed', () => {
+    const before = buildCatalogStore({ songs: [], albums, artists, playlists });
+    const after = buildCatalogStore({ songs: [song('s-1', 'al-1', 'ar-1')], albums, artists, playlists });
+
+    expect(after.songByNativeId).not.toBe(before.songByNativeId);
+    expect(after.songByNativeId.get('s-1')).toBeDefined();
+  });
+
+  it('keeps the song indexes when only the albums array is replaced', () => {
+    const songs = [song('s-1', 'al-1', 'ar-1')];
+    const before = buildCatalogStore({ songs, albums, artists, playlists });
+    const after = buildCatalogStore({ songs, albums: [...albums, album('al-2', 'ar-1')], artists, playlists });
+
+    expect(after.songs).toBe(before.songs);
+    expect(after.songIdsByAlbum).toBe(before.songIdsByAlbum);
+    expect(after.albumByNativeId).not.toBe(before.albumByNativeId);
+  });
+});

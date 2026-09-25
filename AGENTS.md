@@ -35,6 +35,33 @@ support boundaries in `docs/`.
 - `.github/workflows/e2e.yml`: the Maestro suites on an iOS simulator, on demand only — not a PR gate and not a nightly, because the flows sign in through a public demo server and each run is forty minutes of a macOS runner. See [`.maestro/README.md`](.maestro/README.md).
 - `.github/workflows/release-on-version-bump.yml`: on push to `master`, if `package.json`'s `version` field changed from the previous commit, automatically calls both build workflows.
 
+## `patches/` must stay in release builds
+
+**`patch-package` belongs in `dependencies`, not `devDependencies`.** Release
+builds install with `npm ci --omit=dev` — deliberately, to keep
+`expo-dev-launcher` out of the artifact — and `--omit=dev` skips anything in
+`devDependencies`, tooling included. `patch-package` was in the wrong list from
+2026-09-08, and `postinstall` was guarded on its binary existing:
+
+```
+if [ -e node_modules/.bin/patch-package ]; then patch-package --error-on-fail; fi
+```
+
+so every release build applied **no patches at all**, exited zero, and said
+nothing. It held for seventeen days and three releases because everything works
+in development, where dev dependencies are installed. What it cost: the
+`expo-router` patch that lets the app mount when a car launches it with no phone
+window, so the CarPlay cold-launch fix was absent from the 2.11.0 that shipped
+it; and the `react-native-draggable-flatlist` patch for nested-list measurement
+on the new architecture, absent since 2.9.0.
+
+`postinstall` is unguarded now, so a missing `patch-package` fails the install
+instead of quietly skipping. `tools/verify-patches.sh` runs in both build
+workflows after the install and fails unless every patch in `patches/` is
+actually present in `node_modules` — it reverse-applies each one, which also
+catches a patch left stale by an upstream bump. Don't move `patch-package` back,
+and don't re-add a guard that turns a missing tool into a no-op.
+
 ## Version numbers — the stores are asked, never told
 
 Android versionCode and iOS build number are **queried from Play and App Store
@@ -64,6 +91,7 @@ Connect *accepted*, leaving testers on the older-numbered build.
 **What the stores held at the last release**, as a sanity check rather than a
 source of truth — the next run should come out one above these:
 
+- 2.11.0 (2026-09-25): TestFlight build **132**, Play version code **153**.
 - 2.10.0 (2026-09-24): TestFlight build **131**, Play version code **152**.
 - When the mechanism changed (2026-09-07): Play production **1.3.7 / 109**,
   alpha **1.4.0 / 132**; TestFlight **2.0.0 / 94**, plus the release run's
@@ -106,7 +134,16 @@ So after any release:
 3. Fill in and publish the draft release the run created. It is generated with
    an empty body and stays a draft until someone writes it, which is why the
    public releases page can lag the actual shipped version by months.
-4. If one platform failed, say so explicitly rather than re-running blind. The
+4. **Publish the changelog entry to `yuzic-web`** (`_pages/changelog.md`), and
+   move the `` ### `Latest` `` marker onto it. `fastlane/metadata/android/en-US/changelogs/default.txt`
+   is the source to expand from — it is already written for users, and it is
+   overwritten next release, so the site is the only place the note survives.
+   This step did not exist until 2026-09-25, and the site had silently fallen
+   seven releases behind: it read 2.6.0 while 2.11.0 was on both stores. The
+   site is the only release note a user who is not on GitHub will ever read,
+   so a release that is not on it did not, as far as they can tell, happen.
+   `changelog-current.yml` in `yuzic-web` fails daily while the site is behind.
+5. If one platform failed, say so explicitly rather than re-running blind. The
    fix usually belongs on `dev` and has to be promoted before a re-run can
    possibly succeed — which is exactly what did not happen after 1.4.0.
 
