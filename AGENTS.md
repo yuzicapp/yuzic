@@ -127,6 +127,14 @@ and its workflow still triggers on `v*` as well as `[0-9]*`, with the version
 check relaxed to `^v?[0-9]+\.[0-9]+\.[0-9]+$` so an old tag can still be
 re-run. New tags in either repo are bare.
 
+**The release *title* is a different field with a different job**, and it keeps
+the product: `Yuzic 2.13.0` here, `yuzic-engine 1.2.1` there. The tag is read
+by machines and is `package.json`'s version verbatim; the title is read by
+people on a releases page that says nothing else about what the software is.
+`release-on-version-bump.yml` creates the draft already titled, because leaving
+it to whoever publishes is how 2.12.0 and 2.13.0 went out bare against the
+forty before them. Both have been retitled.
+
 ## Releasing — check both halves
 
 A release is **two independent jobs**, and one can succeed while the other

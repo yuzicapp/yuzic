@@ -76,8 +76,14 @@ jobs:
             exit 0
           fi
           NOTES=$(printf '### **Version %s**\n\n#### What'"'"'s New\n- \n\n#### Bug Fixes\n- \n' "$VERSION")
+          # Tag and title are different jobs. The tag is read by machines and
+          # is `package.json`'s version verbatim; the title is read by people
+          # and carries the product, like the engine's "yuzic-engine 1.2.1".
+          # Creating the draft with the bare version left it to whoever
+          # published to remember, and 2.12.0 and 2.13.0 both went out titled
+          # "2.12.0" against forty releases called "Yuzic 2.11.0" and so on.
           gh release create "$VERSION" \
-            --title "$VERSION" \
+            --title "Yuzic $VERSION" \
             --notes "$NOTES" \
             --target "$TARGET" \
             --draft
