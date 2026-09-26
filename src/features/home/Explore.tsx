@@ -1,4 +1,5 @@
-import { iconSize, onDark, spacing, typography } from '@/constants/design';
+import { iconSize, spacing, typography } from '@/constants/design';
+import SourceBadge from '@/components/SourceBadge';
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { StyleSheet, ScrollView, View, RefreshControl } from 'react-native'
 import { Text } from '@/components/Text'
@@ -38,7 +39,6 @@ import { DownloadsInProgressBanner } from './components/DownloadsInProgressBanne
 import { RefreshSettler } from './components/RefreshSettler'
 import { useApi } from '@/providers/registry/useApi'
 import type { SectionConfig } from '@/features/home/homeLayout'
-import { useRadius } from '@/features/theme/useRadius'
 import { useScrollClearance } from '@/features/theme/useScrollClearance'
 import { useHasScreenBackground } from '@/features/theme/ScreenBackground'
 
@@ -91,7 +91,6 @@ export default function Home() {
 
   const { colors } = useTheme()
   const hasBackground = useHasScreenBackground('home')
-  const rad = useRadius()
   const [refreshKey, setRefreshKey] = useState(0)
   const { resume, library, server, sources } = useDailyLayout(refreshKey)
   const isOffline = useIsOffline()
@@ -185,9 +184,7 @@ export default function Home() {
           header={
             <View style={styles.sourceHeader}>
               {showSourceHeaders && (
-                <View style={[styles.sourceBadge, { backgroundColor: source.color, borderRadius: rad.pill }]}>
-                  <Text style={styles.sourceBadgeLetter}>{source.letter}</Text>
-                </View>
+                <SourceBadge letter={source.letter} color={source.color} />
               )}
               <Text style={[styles.sourceHeaderText, { color: colors.subtext }]}>
                 {source.label}
@@ -199,7 +196,7 @@ export default function Home() {
         </SourceGroup>
       )
     })
-  }, [t, colors.themeColor, colors.subtext, visibleServer, visibleSources, api.discovery, homeServerEnabled, sourceUses, isOffline, showSourceHeaders, rad.pill, refreshKey])
+  }, [t, colors.themeColor, colors.subtext, visibleServer, visibleSources, api.discovery, homeServerEnabled, sourceUses, isOffline, showSourceHeaders, refreshKey])
 
   return (
     <ScrollView
@@ -267,17 +264,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.roomy,
     paddingBottom: spacing.xs,
-  },
-  sourceBadge: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sourceBadgeLetter: {
-    ...typography.micro,
-    fontWeight: '600',
-    color: onDark.text,
   },
   sourceHeaderText: {
     ...typography.label,

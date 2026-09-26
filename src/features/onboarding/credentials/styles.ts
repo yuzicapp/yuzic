@@ -22,7 +22,8 @@ export const styles = StyleSheet.create({
         borderColor: onDark.mutedText,
         marginBottom: spacing.lg,
         paddingHorizontal: spacing.md,
-        height: 50,
+        // A minimum: the field's text grows with the text size.
+        minHeight: 50,
     },
     inputIcon: { marginRight: spacing.controlGap },
     input: { ...typography.body, flex: 1, color: onDark.text },

@@ -1,4 +1,5 @@
-import { onDark, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
+import SourceBadge from '@/components/SourceBadge';
 import React, { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Text } from '@/components/Text'
@@ -9,7 +10,6 @@ import { selectShowSourceHeaders } from '@/features/settings/appearance/state';
 import { usePreviewPlayer } from '@/features/playback/usePreviewPlayer'
 import TopTrackRow from '@/components/rows/TopTrackRow'
 import type { Song } from '@/domain/entities/Song'
-import { useRadius } from '@/features/theme/useRadius'
 import { MAX_TRACK_ROWS, ShowMoreTracks, visibleTrackRows } from './trackSection'
 import { ARTIST_CATALOGUE } from '@/providers/registry/artistSources'
 
@@ -25,7 +25,6 @@ type Props = {
 export default function PopularTracksSection({ topTracks, artistId, artistName }: Props) {
   const { colors } = useTheme()
   const { t } = useTranslation()
-  const rad = useRadius()
   const showSourceHeaders = useSelector(selectShowSourceHeaders)
   const { toggleInAlbum } = usePreviewPlayer()
   const [showAll, setShowAll] = useState(false)
@@ -43,9 +42,7 @@ export default function PopularTracksSection({ topTracks, artistId, artistName }
     <View>
       <View style={styles.sectionHeader}>
         {showSourceHeaders && (
-          <View style={[styles.badge, { backgroundColor: ARTIST_CATALOGUE.badge.color, borderRadius: rad.pill }]}>
-            <Text style={styles.badgeLetter}>{ARTIST_CATALOGUE.badge.letter}</Text>
-          </View>
+          <SourceBadge letter={ARTIST_CATALOGUE.badge.letter} color={ARTIST_CATALOGUE.badge.color} />
         )}
         <Text style={[styles.sectionTitle, { color: colors.secondary }]}>
           {t(ARTIST_CATALOGUE.popularTracksTitleKey)}
@@ -75,17 +72,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.controlGap,
     paddingHorizontal: spacing.lg,
-  },
-  badge: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeLetter: {
-    ...typography.micro,
-    fontWeight: '600',
-    color: onDark.text,
   },
   sectionTitle: {
     ...typography.navigationTitle,

@@ -220,7 +220,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: onDark.mutedText,
         paddingHorizontal: spacing.md,
-        height: 50,
+        // A minimum: the field's text grows with the text size.
+        minHeight: 50,
         marginBottom: spacing.controlGap,
     },
     schemeButton: {

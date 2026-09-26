@@ -152,7 +152,9 @@ const styles = StyleSheet.create({
   },
   badge: {
     minWidth: 28,
-    height: 28,
+    // Was a fixed 28 with a count inside, which clipped once the text size
+    // could change without a relaunch.
+    minHeight: 28,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.sm,

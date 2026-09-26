@@ -159,7 +159,8 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     flex: 1,
-    height: 44,
+    // A minimum, not a height: the label inside grows with the text size.
+    minHeight: 44,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
   },
   stepButton: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     backgroundColor: veil.cardInner,
     alignItems: 'center',
     justifyContent: 'center',

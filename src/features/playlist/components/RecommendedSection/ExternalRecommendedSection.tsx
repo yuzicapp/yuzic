@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import SourceBadge from '@/components/SourceBadge';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/components/Text';
 import { RefreshCw } from 'lucide-react-native';
@@ -9,7 +10,6 @@ import { notify } from '@/components/toast';
 
 import { useTheme } from '@/features/theme/useTheme';
 import { useIconSize } from '@/features/theme/useIconSize';
-import { useRadius } from '@/features/theme/useRadius';
 import IconActionButton from '@/components/IconActionButton';
 import SectionHeader from '@/components/SectionHeader';
 import SkeletonListRow from '@/components/SkeletonListRow';
@@ -28,7 +28,7 @@ import {
 } from '@/providers/registry/pageSources';
 import { ARTIST_CATALOGUE } from '@/providers/registry/artistSources';
 import { QueryKeys } from '@/state/query/queryKeys';
-import { onDark, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
 import { playlistArtistNames as computePlaylistArtistNames } from '@/features/playlist/recommendedSongs';
 import type { Album } from '@/domain/entities/Album';
 import type { Playlist } from '@/domain/entities/Playlist';
@@ -50,7 +50,6 @@ export const ExternalRecommendedSection: React.FC<Props> = ({ playlist, songs, o
   const { t } = useTranslation();
   const { colors } = useTheme();
   const icons = useIconSize();
-  const rad = useRadius();
   const showSourceHeaders = useSelector(selectShowSourceHeaders);
   const isOffline = useIsOffline();
   const catalogueEnabled = useSelector(selectSourceUse(CATALOGUE_TRACKS_RECOMMENDATIONS_USE));
@@ -114,9 +113,7 @@ export const ExternalRecommendedSection: React.FC<Props> = ({ playlist, songs, o
         title={t('playlist.recommended.catalogueTitle')}
         badge={
           showSourceHeaders ? (
-            <View style={[styles.sourceBadge, { backgroundColor: ARTIST_CATALOGUE.badge.color, borderRadius: rad.pill }]}>
-              <Text style={styles.sourceBadgeLetter}>{ARTIST_CATALOGUE.badge.letter}</Text>
-            </View>
+            <SourceBadge letter={ARTIST_CATALOGUE.badge.letter} color={ARTIST_CATALOGUE.badge.color} />
           ) : undefined
         }
         action={
@@ -172,11 +169,6 @@ const styles = StyleSheet.create({
     height: 22,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  sourceBadgeLetter: {
-    ...typography.micro,
-    fontWeight: '600',
-    color: onDark.text,
   },
   loader: { marginVertical: spacing.xl },
   emptyText: {

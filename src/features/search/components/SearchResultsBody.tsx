@@ -1,11 +1,11 @@
 import React from 'react';
+import SourceBadge from '@/components/SourceBadge';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
 
-import { onDark, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
-import { useRadius } from '@/features/theme/useRadius';
 import SkeletonListRow from '@/components/SkeletonListRow';
 import { getSourceMeta } from '@/features/sources/registry';
 import type { useSearchScreenModel } from '@/features/search/useSearchScreenModel';
@@ -26,7 +26,6 @@ type Model = ReturnType<typeof useSearchScreenModel>;
 export default function SearchResultsBody({ m }: { m: Model }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const rad = useRadius();
 
   /**
    * Nothing typed: browse, unless the field is focused and there is history.
@@ -91,9 +90,7 @@ export default function SearchResultsBody({ m }: { m: Model }) {
           <React.Fragment key={sourceId}>
             <View style={styles.sourceHeader}>
               {m.showSourceHeaders && (
-                <View style={[styles.sourceBadge, { backgroundColor: color, borderRadius: rad.pill }]}>
-                  <Text style={styles.sourceBadgeLetter}>{letter}</Text>
-                </View>
+                <SourceBadge letter={letter} color={color} />
               )}
               <Text style={[styles.sourceHeaderText, { color: colors.subtext }]}>{label}</Text>
             </View>
@@ -127,17 +124,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.roomy,
     paddingBottom: spacing.xs,
-  },
-  sourceBadge: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sourceBadgeLetter: {
-    ...typography.micro,
-    fontWeight: '500',
-    color: onDark.text,
   },
   sourceHeaderText: {
     ...typography.rowSubtitle,

@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo } from 'react'
+import SourceBadgeView from '@/components/SourceBadge';
 import { StyleSheet, View, useWindowDimensions } from 'react-native'
 import { Text } from '@/components/Text'
 import { FlashList } from '@shopify/flash-list'
 import { useNavigation } from '@react-navigation/native'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-import { onDark, spacing, statusColor, typography } from '@/constants/design'
+import { spacing, statusColor, typography } from '@/constants/design'
 import type { Artist } from '@/domain/entities/Artist'
 import type { CoverSource } from '@/domain/entities/Cover'
 import { useAlbums } from '@/features/album/useAlbums'
@@ -14,7 +15,6 @@ import { useServerSimilarArtists } from '@/features/artist/useServerSimilarArtis
 import MediaTile from '@/features/home/components/MediaTile'
 import { selectShowSourceHeaders } from '@/features/settings/appearance/state'
 import { useMatchedNavigation } from '@/features/sources/useMatchedNavigation'
-import { useRadius } from '@/features/theme/useRadius'
 import { useTheme } from '@/features/theme/useTheme'
 import {
   ARTIST_CATALOGUE,
@@ -61,7 +61,6 @@ function SimilarArtistsSubSection<T extends { name: string; cover: CoverSource }
 }) {
   const { t } = useTranslation()
   const { colors } = useTheme()
-  const rad = useRadius()
   const showSourceHeaders = useSelector(selectShowSourceHeaders)
 
   const renderArtist = useCallback(({ item }: { item: T }) => (
@@ -81,9 +80,7 @@ function SimilarArtistsSubSection<T extends { name: string; cover: CoverSource }
     <View style={styles.similarSection}>
       <View style={styles.similarTitleRow}>
         {showSourceHeaders && (
-          <View style={[styles.sourceBadge, { backgroundColor: badge.color, borderRadius: rad.pill }]}>
-            <Text style={styles.sourceBadgeLetter}>{badge.letter}</Text>
-          </View>
+          <SourceBadgeView letter={badge.letter} color={badge.color} />
         )}
         <Text style={[styles.sectionTitle, { color: colors.secondary }]}>
           {t('artist.sections.similarArtists')}
@@ -203,17 +200,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.navigationTitle,
-  },
-  sourceBadge: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sourceBadgeLetter: {
-    ...typography.micro,
-    fontWeight: '600',
-    color: onDark.text,
   },
   similarListContent: {
     paddingHorizontal: spacing.lg,
