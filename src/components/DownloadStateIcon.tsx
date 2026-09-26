@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useIconSize } from '@/features/theme/useIconSize';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,7 +10,6 @@ import { Check, Download } from 'lucide-react-native';
 import DownloadProgressRing from '@/components/DownloadProgressRing';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import { useReducedMotion } from '@/features/theme/useReducedMotion';
-import { iconSize } from '@/constants/design';
 
 type Props = {
   isDownloaded: boolean;
@@ -49,8 +49,12 @@ export default function DownloadStateIcon({
   isDownloading,
   progress,
   color,
-  size = iconSize.row,
+  size,
 }: Props) {
+  const icons = useIconSize();
+  // Resolved here rather than as a default parameter: a default is evaluated
+  // outside the component's hooks, so it could only ever be the static size.
+  const resolvedSize = size ?? icons.row;
   const reduced = useReducedMotion();
   const scale = useSharedValue(isDownloaded ? 1 : 0);
 
@@ -69,19 +73,19 @@ export default function DownloadStateIcon({
 
   if (isDownloading) {
     return progress === undefined ? (
-      <SpinningLoaderCircle size={size} color={color} />
+      <SpinningLoaderCircle size={resolvedSize} color={color} />
     ) : (
-      <DownloadProgressRing progress={progress} size={size} color={color} />
+      <DownloadProgressRing progress={progress} size={resolvedSize} color={color} />
     );
   }
 
   if (isDownloaded) {
     return (
       <Animated.View style={style}>
-        <Check size={size} color={color} />
+        <Check size={resolvedSize} color={color} />
       </Animated.View>
     );
   }
 
-  return <Download size={size} color={color} />;
+  return <Download size={resolvedSize} color={color} />;
 }

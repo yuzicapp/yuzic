@@ -1,4 +1,5 @@
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Text';
@@ -8,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { usePlayingActions, usePlayingState } from '@/features/playback/PlayingContext';
 import { usePlaybackSink } from '@/features/player/PlaybackSinkContext';
-import { iconSize, onDark, onDarkAlpha, spacing, typography, veil } from '@/constants/design';
+import { onDark, onDarkAlpha, spacing, typography, veil } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import { selection } from '@/components/haptics';
 
@@ -26,6 +27,7 @@ type Props = { contentWidth: number };
  */
 export default function VolumeCard({ contentWidth }: Props) {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const themeColor = useTheme().colors.themeColor;
   const rad = useRadius();
   const { volume: playerVolume } = usePlayingState();
@@ -59,7 +61,7 @@ export default function VolumeCard({ contentWidth }: Props) {
       ]}
     >
       <View style={styles.headerRow}>
-        <Icon size={iconSize.inline} color={isMuted ? themeColor : onDarkAlpha.quiet} />
+        <Icon size={icons.inline} color={isMuted ? themeColor : onDarkAlpha.quiet} />
         <Text style={[styles.label, isMuted && { color: themeColor }]}>
           {t(onServer ? 'playing.volumeOnServer' : 'playing.volume')}
         </Text>

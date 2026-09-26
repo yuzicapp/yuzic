@@ -1,4 +1,5 @@
 import { iconSize, onDark, spacing, stateLayer, typography } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/components/Text';
@@ -21,6 +22,7 @@ import ServerTypeIcon from '@/features/onboarding/ServerTypeIcon';
 export default function Connect() {
     const [selectedType, setSelectedType] = useState<ServerType | null>(null);
     const [isLayoutMounted, setIsLayoutMounted] = useState(false);
+    const icons = useIconSize();
     const [isTesting, setIsTesting] = useState(false);
 
     const { t } = useTranslation();
@@ -160,7 +162,7 @@ export default function Connect() {
                     disabled={isTesting}
                 >
                     {isTesting ? (
-                        <SpinningLoaderCircle size={iconSize.row} color={onDark.background} />
+                        <SpinningLoaderCircle size={icons.row} color={onDark.background} />
                     ) : (
                         <Text style={styles.nextButtonText}>{t('common.next')}</Text>
                     )}

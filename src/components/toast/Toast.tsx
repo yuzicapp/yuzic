@@ -1,4 +1,5 @@
-import { iconSize, shadow, spacing, tinted, typography } from '@/constants/design';
+import { shadow, spacing, tinted, typography } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Text';
@@ -36,10 +37,11 @@ const accentFor = (variant: ToastVariant, colors: ReturnType<typeof useTheme>['c
 };
 
 const VariantIcon: React.FC<{ variant: ToastVariant; color: string }> = ({ variant, color }) => {
-  if (variant === 'loading') return <SpinningLoaderCircle size={iconSize.row} color={color} />;
-  if (variant === 'success') return <Check size={iconSize.inline} color={color} />;
-  if (variant === 'error') return <AlertCircle size={iconSize.inline} color={color} />;
-  return <Info size={iconSize.inline} color={color} />;
+  const icons = useIconSize();
+  if (variant === 'loading') return <SpinningLoaderCircle size={icons.row} color={color} />;
+  if (variant === 'success') return <Check size={icons.inline} color={color} />;
+  if (variant === 'error') return <AlertCircle size={icons.inline} color={color} />;
+  return <Info size={icons.inline} color={color} />;
 };
 
 /**

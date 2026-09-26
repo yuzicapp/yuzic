@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/components/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +23,7 @@ import { selectOnboardingDiscoveryPrompted } from '@/features/settings/onboardin
 
 export default function LibrariesOnboarding() {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const router = useRouter();
   const dispatch = useDispatch();
   const rad = useRadius();
@@ -104,7 +106,7 @@ export default function LibrariesOnboarding() {
           <View style={styles.optionList}>
             <Touchable onPress={selectAll} style={[styles.optionRow, { borderRadius: rad.md }]}>
               <View style={[styles.checkbox, isAll && styles.checkboxSelected]}>
-                {isAll && <Check size={iconSize.badge} color={onDark.background} />}
+                {isAll && <Check size={icons.badge} color={onDark.background} />}
               </View>
               <Text style={styles.optionText}>{t('onboarding.libraries.allLibraries')}</Text>
             </Touchable>
@@ -118,7 +120,7 @@ export default function LibrariesOnboarding() {
                   style={[styles.optionRow, { borderRadius: rad.md }]}
                 >
                   <View style={[styles.checkbox, selected && styles.checkboxSelected]}>
-                    {selected && <Check size={iconSize.badge} color={onDark.background} />}
+                    {selected && <Check size={icons.badge} color={onDark.background} />}
                   </View>
                   <Text style={styles.optionText} numberOfLines={1}>
                     {lib.name}

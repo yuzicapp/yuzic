@@ -1,10 +1,11 @@
 import React from 'react';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Moon } from 'lucide-react-native';
 
 import Touchable from '@/components/Touchable';
-import { cappedTypography, iconSize, onDark, radius, spacing, stateLayer } from '@/constants/design';
+import { cappedTypography, onDark, radius, spacing, stateLayer } from '@/constants/design';
 import { useSleepTimer } from '../sleepTimer';
 import SleepTimerRemaining from './SleepTimerRemaining';
 
@@ -28,6 +29,7 @@ type Props = {
  */
 export default function SleepTimerIndicator({ onPress }: Props) {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const timer = useSleepTimer();
 
   if (timer.mode === 'off') return null;
@@ -41,7 +43,7 @@ export default function SleepTimerIndicator({ onPress }: Props) {
       style={styles.chip}
     >
       <View style={styles.content}>
-        <Moon size={iconSize.badge} color={onDark.text} />
+        <Moon size={icons.badge} color={onDark.text} />
         <SleepTimerRemaining timer={timer} style={styles.remaining} />
       </View>
     </Touchable>

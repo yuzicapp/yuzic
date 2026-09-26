@@ -1,4 +1,5 @@
 import React from 'react'
+import { useIconSize } from '@/features/theme/useIconSize';
 import { StyleSheet, View } from 'react-native'
 import { Text } from '@/components/Text'
 import { useNavigation } from '@react-navigation/native'
@@ -23,7 +24,7 @@ import { useApi } from '@/providers/registry/useApi'
 import { useServerSurface } from './useServerSurface'
 import { useTheme } from '@/features/theme/useTheme'
 import { useListDensity } from '@/features/theme/useListDensity'
-import { iconSize, spacing, typography } from '@/constants/design'
+import { spacing, typography } from '@/constants/design'
 import CoverMosaic from './CoverMosaic'
 import { useLibrarySummary, type LibraryEntryKey } from './useLibrarySummary'
 import type { LibraryCollectionType } from './librarySort'
@@ -67,6 +68,7 @@ type Section = {
 const LibraryEntryRows: React.FC = () => {
   const navigation = useNavigation<any>()
   const router = useRouter()
+  const icons = useIconSize();
   const { t } = useTranslation()
   const { colors } = useTheme()
   // The library's own density step, the same one LibraryItem uses. Without it
@@ -232,7 +234,7 @@ const LibraryEntryRows: React.FC = () => {
                       </Text>
                     )}
                   </View>
-                  <ChevronRight size={iconSize.row} color={colors.subtext} />
+                  <ChevronRight size={icons.row} color={colors.subtext} />
                 </View>
               </Touchable>
             )

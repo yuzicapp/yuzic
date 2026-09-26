@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useState } from 'react'
+import { useIconSize } from '@/features/theme/useIconSize';
 import { StyleSheet, View } from 'react-native'
 import { Text } from '@/components/Text'
 import { Ellipsis, Play } from 'lucide-react-native'
@@ -11,7 +12,7 @@ import Touchable from '@/components/Touchable'
 import SongOptions from '@/components/options/SongOptions'
 import { useSheetRef } from '@/components/useSheetRef'
 import { useSongActionSheets } from '@/features/entity-actions/SongActionSheetContext'
-import { hitSlopFor, iconSize, spacing, typography } from '@/constants/design'
+import { hitSlopFor, spacing, typography } from '@/constants/design'
 import { useRadius } from '@/features/theme/useRadius'
 
 /** The preview affordance on an external top-track row, drawn small on purpose
@@ -38,6 +39,7 @@ type Props = {
 
 function TopTrackRow({ song, index, artistName, onPress }: Props) {
   const { t } = useTranslation()
+  const icons = useIconSize();
   const { colors } = useTheme()
   const rad = useRadius()
   const external = isExternalTrack(song)
@@ -97,9 +99,9 @@ function TopTrackRow({ song, index, artistName, onPress }: Props) {
                 style={[styles.previewButton, { backgroundColor: colors.card, borderRadius: rad.pillFor(PREVIEW_BUTTON_SIZE) }]}
                 onPress={onPress}
                 disabled={!onPress}
-                hitSlop={hitSlopFor(iconSize.badge)}
+                hitSlop={hitSlopFor(icons.badge)}
               >
-                <Play size={iconSize.badge} color={colors.secondary} fill={colors.secondary} />
+                <Play size={icons.badge} color={colors.secondary} fill={colors.secondary} />
               </Touchable>
             ) : null}
             <Touchable
@@ -107,10 +109,10 @@ function TopTrackRow({ song, index, artistName, onPress }: Props) {
               accessibilityRole="button"
               accessibilityLabel={t('a11y.rows.options', { title: song.title })}
               onPress={handleOptions}
-              hitSlop={hitSlopFor(iconSize.row)}
+              hitSlop={hitSlopFor(icons.row)}
               feedback="control"
             >
-              <Ellipsis size={iconSize.row} color={colors.subtext} />
+              <Ellipsis size={icons.row} color={colors.subtext} />
             </Touchable>
           </View>
         }

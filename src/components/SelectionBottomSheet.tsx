@@ -1,4 +1,5 @@
 import React, { forwardRef, useMemo, useState, useCallback } from 'react'
+import { useIconSize } from '@/features/theme/useIconSize';
 import { View, StyleSheet } from 'react-native'
 import { Text } from '@/components/Text'
 import {
@@ -11,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/features/theme/useTheme'
 import { renderBackdrop } from '@/components/BottomSheetBackdrop'
 import Touchable from '@/components/Touchable'
-import { hitSlopFor, iconSize, spacing, typography } from '@/constants/design'
+import { hitSlopFor, spacing, typography } from '@/constants/design'
 import { useRadius } from '@/features/theme/useRadius'
 
 type Props = {
@@ -24,6 +25,7 @@ type Props = {
 const SelectionBottomSheet = forwardRef<BottomSheetModal, Props>(
   ({ items, onSelect, onRandomize, placeholder }, ref) => {
     const { t } = useTranslation()
+    const icons = useIconSize();
     const { colors } = useTheme()
     const rad = useRadius()
     const [query, setQuery] = useState('')
@@ -84,9 +86,9 @@ const SelectionBottomSheet = forwardRef<BottomSheetModal, Props>(
             accessibilityLabel={t('a11y.selection.randomize')}
             onPress={onRandomize}
             style={styles.shuffleButton}
-            hitSlop={hitSlopFor(iconSize.row)}
+            hitSlop={hitSlopFor(icons.row)}
           >
-            <Dices size={iconSize.row} color={colors.subtext} />
+            <Dices size={icons.row} color={colors.subtext} />
           </Touchable>
         </View>
 

@@ -1,4 +1,5 @@
-import { iconSize, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
 import SourceBadge from '@/components/SourceBadge';
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { StyleSheet, ScrollView, View, RefreshControl } from 'react-native'
@@ -81,6 +82,7 @@ function renderSection(config: SectionConfig, refreshKey: number) {
 
 export default function Home() {
   const { t } = useTranslation()
+  const icons = useIconSize();
   const scrollClearance = useScrollClearance()
 
   // Re-tapping the active tab returns to the top of the feed, the way every
@@ -219,7 +221,7 @@ export default function Home() {
           is largest — every discovery shelf goes, because each is a request. */}
       {isOffline && (
         <StatusBanner
-          icon={<CloudOff size={iconSize.badge} color={colors.subtext} />}
+          icon={<CloudOff size={icons.badge} color={colors.subtext} />}
           text={t('explore.offlineBanner')}
           style={styles.offlineBanner}
           testID="home-offline-banner"

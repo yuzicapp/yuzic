@@ -1,4 +1,5 @@
 import { iconSize, onDark, spacing, statusColor } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { styles } from './styles';
 import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, TextInput, View } from 'react-native';
@@ -21,6 +22,7 @@ import { useCodeAuth } from './useCodeAuth';
 
 export default function Credentials() {
     const { t } = useTranslation();
+    const icons = useIconSize();
     const dispatch = useDispatch();
     const router = useRouter();
     const rad = useRadius();
@@ -173,7 +175,7 @@ export default function Credentials() {
                             )}
                             {phase.status === 'waiting' ? (
                                 <View style={styles.codeAuthWaiting}>
-                                    <SpinningLoaderCircle size={iconSize.inline} color={onDark.mutedText} />
+                                    <SpinningLoaderCircle size={icons.inline} color={onDark.mutedText} />
                                     <Text style={styles.codeAuthWaitingText}>
                                         {t('onboarding.credentials.codeAuth.waiting')}
                                     </Text>
@@ -221,16 +223,16 @@ export default function Credentials() {
                                 style={styles.proxyToggle}
                                 onPress={() => setProxyExpanded(v => !v)}
                             >
-                                <Shield size={iconSize.inline} color={onDark.mutedText} style={styles.proxyToggleIcon} />
+                                <Shield size={icons.inline} color={onDark.mutedText} style={styles.proxyToggleIcon} />
                                 <Text style={styles.proxyToggleText}>{t('onboarding.credentials.proxy.toggle')}</Text>
-                                {proxyExpanded ? <ChevronUp size={iconSize.inline} color={onDark.mutedText} /> : <ChevronDown size={iconSize.inline} color={onDark.mutedText} />}
+                                {proxyExpanded ? <ChevronUp size={icons.inline} color={onDark.mutedText} /> : <ChevronDown size={icons.inline} color={onDark.mutedText} />}
                             </Touchable>
 
                             {proxyExpanded && (
                                 <View style={styles.proxySection}>
                                     {insecureWithProxy && (
                                         <View style={[styles.warningRow, { borderRadius: rad.md }]}>
-                                            <TriangleAlert size={iconSize.inline} color={statusColor.warningText} />
+                                            <TriangleAlert size={icons.inline} color={statusColor.warningText} />
                                             <Text style={styles.warningText}>
                                                 {t('onboarding.credentials.proxy.insecureWarning')}
                                             </Text>
@@ -275,9 +277,9 @@ export default function Credentials() {
                                     onPress={startCodeAuth}
                                     disabled={isTesting}
                                 >
-                                    <QrCode size={iconSize.inline} color={onDark.mutedText} style={styles.proxyToggleIcon} />
+                                    <QrCode size={icons.inline} color={onDark.mutedText} style={styles.proxyToggleIcon} />
                                     <Text style={styles.proxyToggleText}>{t(codeAuth.actionKey)}</Text>
-                                    <ChevronRight size={iconSize.inline} color={onDark.mutedText} />
+                                    <ChevronRight size={icons.inline} color={onDark.mutedText} />
                                 </Touchable>
                             )}
                         </>
@@ -292,7 +294,7 @@ export default function Credentials() {
                             disabled={isTesting}
                         >
                             {isTesting
-                                ? <SpinningLoaderCircle size={iconSize.row} color={onDark.background} />
+                                ? <SpinningLoaderCircle size={icons.row} color={onDark.background} />
                                 : <Text style={styles.nextButtonText}>{t('common.done')}</Text>
                             }
                         </Touchable>

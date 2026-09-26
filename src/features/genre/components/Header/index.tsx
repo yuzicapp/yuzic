@@ -1,4 +1,5 @@
 import { controlSize, coverFade, iconSize, onDark, shade, spacing, typography, veil } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
 import React, { useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { View, StyleSheet, Platform } from 'react-native'
@@ -47,6 +48,7 @@ type Props = {
 const GenreHeader: React.FC<Props> = ({ genre, albums, showNavigation = true }) => {
   const navigation = useNavigation<any>()
   const queryClient = useQueryClient()
+  const icons = useIconSize();
   const api = useApi()
   const { isDarkMode, colors } = useTheme()
   const rad = useRadius()
@@ -195,9 +197,9 @@ const GenreHeader: React.FC<Props> = ({ genre, albums, showNavigation = true }) 
           accessibilityLabel={t('a11y.detail.shuffle')}
         >
           {songsLoading ? (
-            <SpinningLoaderCircle size={iconSize.row} color={colors.secondary} />
+            <SpinningLoaderCircle size={icons.row} color={colors.secondary} />
           ) : (
-            <Shuffle size={iconSize.row} color={colors.secondary} />
+            <Shuffle size={icons.row} color={colors.secondary} />
           )}
         </DetailCircleAction>
 
@@ -207,7 +209,7 @@ const GenreHeader: React.FC<Props> = ({ genre, albums, showNavigation = true }) 
           accessibilityLabel={t('a11y.detail.play')}
         >
           {songsLoading ? (
-            <SpinningLoaderCircle size={iconSize.row} color={colors.onThemeColor} />
+            <SpinningLoaderCircle size={icons.row} color={colors.onThemeColor} />
           ) : (
             <Play size={iconSize.header} color={colors.onThemeColor} fill={colors.onThemeColor} />
           )}

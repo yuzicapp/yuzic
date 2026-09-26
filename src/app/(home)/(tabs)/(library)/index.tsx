@@ -1,4 +1,5 @@
 import React, { useRef } from 'react'
+import { useIconSize } from '@/features/theme/useIconSize';
 import { RefreshControl, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ScreenBackground } from '@/features/theme/ScreenBackground'
@@ -16,7 +17,7 @@ import StatusBanner from '@/components/StatusBanner'
 import LibraryEntryRows from '@/features/library/LibraryEntryRows'
 import { useScrollClearance } from '@/features/theme/useScrollClearance'
 import { useLibraryRefresh } from '@/features/library/useLibraryRefresh'
-import { iconSize, spacing } from '@/constants/design'
+import { spacing } from '@/constants/design'
 import { CloudOff } from 'lucide-react-native'
 
 /**
@@ -33,6 +34,7 @@ import { CloudOff } from 'lucide-react-native'
  */
 export default function LibraryScreen() {
   const { t } = useTranslation()
+  const icons = useIconSize();
   const { colors } = useTheme()
   const scrollClearance = useScrollClearance()
   const activeServer = useSelector(selectActiveServer)
@@ -72,7 +74,7 @@ export default function LibraryScreen() {
       >
         {!serverReachable && (
           <StatusBanner
-            icon={<CloudOff size={iconSize.badge} color={colors.subtext} />}
+            icon={<CloudOff size={icons.badge} color={colors.subtext} />}
             text={t('library.offlineBanner')}
             style={styles.offlineBanner}
             testID="library-offline-banner"

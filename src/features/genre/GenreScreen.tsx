@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { useIconSize } from '@/features/theme/useIconSize';
 import { StyleSheet, View } from 'react-native'
 import { useRoute } from '@react-navigation/native'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -14,12 +15,13 @@ import StatusBanner from '@/components/StatusBanner'
 import GenreContent from './components/Content'
 import LoadingGenreContent from './components/Content/Loading'
 import { DETAIL_BAR_HEIGHT } from '@/components/DetailHeader'
-import { iconSize, spacing } from '@/constants/design'
+import { spacing } from '@/constants/design'
 
 const GenreScreen: React.FC = () => {
   const route = useRoute<any>()
   const { genre } = route.params
   const { t } = useTranslation()
+  const icons = useIconSize();
   const { colors } = useTheme()
   // Still the source of the load and reachability state; the list itself comes
   // from the store below.
@@ -51,7 +53,7 @@ const GenreScreen: React.FC = () => {
           style={[styles.degradedBanner, { top: insets.top + DETAIL_BAR_HEIGHT }]}
         >
           <StatusBanner
-            icon={<CloudOff size={iconSize.badge} color={colors.subtext} />}
+            icon={<CloudOff size={icons.badge} color={colors.subtext} />}
             text={t('common.serverUnreachableBanner')}
             closable
             testID="server-unreachable-banner"

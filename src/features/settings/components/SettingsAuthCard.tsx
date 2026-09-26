@@ -1,4 +1,5 @@
 import React from 'react';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useTranslation } from 'react-i18next';
 
 import SettingsCard from './SettingsCard';
@@ -7,7 +8,7 @@ import SettingsInputField from './SettingsInputField';
 import SettingsInfoRow from './SettingsInfoRow';
 import ConnectivityIndicator from './ConnectivityIndicator';
 import Touchable from '@/components/Touchable';
-import { hitSlopFor, iconSize, spacing } from '@/constants/design';
+import { hitSlopFor, spacing } from '@/constants/design';
 
 type AuthField = {
   label: string;
@@ -33,6 +34,7 @@ const SettingsAuthCard: React.FC<Props> = ({
   onConnectivityPress,
 }) => {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const indicator = (
     <ConnectivityIndicator isLoading={isLoading} isConnected={isAuthenticated} />
   );
@@ -51,7 +53,7 @@ const SettingsAuthCard: React.FC<Props> = ({
               accessibilityRole="button"
               accessibilityLabel={t('a11y.common.checkConnection')}
               onPress={onConnectivityPress}
-              hitSlop={hitSlopFor(iconSize.badge)}
+              hitSlop={hitSlopFor(icons.badge)}
             >
               {indicator}
             </Touchable>

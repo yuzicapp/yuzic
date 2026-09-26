@@ -1,4 +1,5 @@
 import { iconSize, onDark, spacing, stateLayer, typography } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Text';
@@ -20,6 +21,7 @@ import { selectOnboardingDiscoveryPrompted } from '@/features/settings/onboardin
  * so a document provider revoking its temporary URI cannot break playback. */
 export default function LocalImport() {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const router = useRouter();
   const rad = useRadius();
   const [importing, setImporting] = useState(false);
@@ -54,7 +56,7 @@ export default function LocalImport() {
       </View>
       <View style={styles.actions}>
         <Touchable style={[styles.primary, { borderRadius: rad.pill }, importing && styles.disabled]} onPress={pick} disabled={importing}>
-          {importing ? <SpinningLoaderCircle size={iconSize.row} color={onDark.background} /> : <Text style={styles.primaryText}>{t('onboarding.local.choose')}</Text>}
+          {importing ? <SpinningLoaderCircle size={icons.row} color={onDark.background} /> : <Text style={styles.primaryText}>{t('onboarding.local.choose')}</Text>}
         </Touchable>
         <Touchable style={[styles.secondary, { borderRadius: rad.pill }]} onPress={finishOnboarding}>
           <Text style={styles.secondaryText}>{t('onboarding.local.finish')}</Text>

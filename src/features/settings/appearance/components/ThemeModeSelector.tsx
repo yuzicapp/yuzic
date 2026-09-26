@@ -1,11 +1,15 @@
 import React from 'react';
+import { iconSize } from '@/constants/design';
 import { Sun, Moon, Smartphone } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectThemeMode, setThemeMode, ThemeMode } from '@/features/settings/appearance/state';
 import SettingsIconSelectCard from '../../components/SettingsIconSelectCard';
-import { iconSize } from '@/constants/design';
 
+// Module-level, so these keep the static token: a hook cannot reach a constant
+// declared outside the component. They are fixed-size glyphs in a settings
+// picker rather than icons sitting beside a line of body text, so holding
+// still is also the right answer here.
 const OPTIONS: { id: ThemeMode; icon: React.ReactElement<{ color?: string }> }[] = [
   { id: 'light', icon: <Sun size={iconSize.row} /> },
   { id: 'dark', icon: <Moon size={iconSize.row} /> },

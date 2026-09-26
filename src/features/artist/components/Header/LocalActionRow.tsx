@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
@@ -27,6 +28,7 @@ import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 /** Shuffle, play and download-all for an artist in the library. */
 export default function LocalActionRow({ artist }: { artist: Artist }) {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const { isDarkMode, colors } = useTheme();
   const queryClient = useQueryClient();
   const api = useApi();
@@ -113,9 +115,9 @@ export default function LocalActionRow({ artist }: { artist: Artist }) {
         accessibilityLabel={t('a11y.detail.shuffle')}
       >
         {songsLoading ? (
-          <SpinningLoaderCircle size={iconSize.row} color={colors.secondary} />
+          <SpinningLoaderCircle size={icons.row} color={colors.secondary} />
         ) : (
-          <Shuffle size={iconSize.row} color={colors.secondary} />
+          <Shuffle size={icons.row} color={colors.secondary} />
         )}
       </DetailCircleAction>
 
@@ -125,7 +127,7 @@ export default function LocalActionRow({ artist }: { artist: Artist }) {
         accessibilityLabel={t('a11y.detail.play')}
       >
         {songsLoading ? (
-          <SpinningLoaderCircle size={iconSize.row} color={colors.onThemeColor} />
+          <SpinningLoaderCircle size={icons.row} color={colors.onThemeColor} />
         ) : (
           <Play size={iconSize.header} color={colors.onThemeColor} fill={colors.onThemeColor} />
         )}

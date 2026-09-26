@@ -1,4 +1,5 @@
-import { iconSize, spacing, typography } from '@/constants/design'
+import { spacing, typography } from '@/constants/design'
+import { useIconSize } from '@/features/theme/useIconSize';
 import React, { useCallback, useMemo, useState } from 'react'
 import { useRadius } from '@/features/theme/useRadius'
 import { StyleSheet, View } from 'react-native'
@@ -55,6 +56,7 @@ const INITIAL_RELEASE_ROWS = 3
 
 export default function ArtistContent({ model }: Props) {
   const scrollClearance = useScrollClearance()
+  const icons = useIconSize();
   const { listInset, fullBleed } = useContentInset()
   const navigation = useNavigation<any>()
   // The params that identify this artist, forwarded so the releases list
@@ -213,8 +215,8 @@ export default function ArtistContent({ model }: Props) {
         >
           <View style={[styles.showMoreIcon, { backgroundColor: colors.card, borderRadius: rad.thumb }]}>
             {isUnowned
-              ? <Globe size={iconSize.row} color={colors.secondary} />
-              : <Ellipsis size={iconSize.row} color={colors.secondary} />
+              ? <Globe size={icons.row} color={colors.secondary} />
+              : <Ellipsis size={icons.row} color={colors.secondary} />
             }
           </View>
           <Text style={[styles.showMoreText, { color: colors.secondary }]}>
@@ -241,7 +243,7 @@ export default function ArtistContent({ model }: Props) {
         subtextOverride={releaseYearLabel(item.album) ?? undefined}
       />
     )
-  }, [colors, rad.thumb, artist, isLocal, model, navigation, navigateToAlbum, routeParams, setShowUnownedAlbums, setShowUnownedSingles, t])
+  }, [colors, rad.thumb, artist, isLocal, model, navigation, navigateToAlbum, routeParams, setShowUnownedAlbums, setShowUnownedSingles, t, icons])
 
   // The list is mostly a column of album rows, so it is capped and centred
   // like every other column of rows — but five of its item kinds are not

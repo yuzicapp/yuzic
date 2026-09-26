@@ -1,4 +1,5 @@
 import { iconSize, onDark, onDarkAlpha, spacing, stateLayer, typography, veil } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useTheme } from '@/features/theme/useTheme';
 import React, { useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
@@ -18,6 +19,7 @@ type Props = { contentWidth: number };
 
 export default function PlaybackSpeedCard({ contentWidth }: Props) {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const themeColor = useTheme().colors.themeColor;
   const rad = useRadius();
   const { playbackSpeed, currentSong } = usePlayingState();
@@ -65,7 +67,7 @@ export default function PlaybackSpeedCard({ contentWidth }: Props) {
       {/* Header */}
       <View style={styles.headerRow}>
         <Gauge
-          size={iconSize.inline}
+          size={icons.inline}
           color={isAltered ? themeColor : onDarkAlpha.quiet}
         />
         <Text style={[styles.label, isAltered && { color: themeColor }]}>

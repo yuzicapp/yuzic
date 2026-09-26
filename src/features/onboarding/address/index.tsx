@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { View, TextInput, ScrollView, StyleSheet } from 'react-native';
 import { Text } from '@/components/Text';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -20,6 +21,7 @@ type Scheme = 'https' | 'http';
 
 export default function Address() {
     const { t } = useTranslation();
+    const icons = useIconSize();
     const router = useRouter();
     const { type } = useLocalSearchParams<{ type: ServerType }>();
     const rad = useRadius();
@@ -83,7 +85,7 @@ export default function Address() {
                                 onPress={() => schemeSheetRef.current?.present()}
                             >
                                 <Text style={styles.schemeText}>{scheme}://</Text>
-                                <ChevronDown size={iconSize.badge} color={onDark.mutedText} style={{ marginLeft: spacing.xs }} />
+                                <ChevronDown size={icons.badge} color={onDark.mutedText} style={{ marginLeft: spacing.xs }} />
                             </Touchable>
 
                             <TextInput
@@ -128,7 +130,7 @@ export default function Address() {
                             disabled={checking}
                         >
                             {checking
-                                ? <SpinningLoaderCircle size={iconSize.row} color={onDark.background} />
+                                ? <SpinningLoaderCircle size={icons.row} color={onDark.background} />
                                 : <Text style={styles.nextButtonText}>{t('common.next')}</Text>}
                         </Touchable>
 
@@ -165,8 +167,8 @@ export default function Address() {
                             >
                                 <View style={styles.schemeOptionLeft}>
                                     {s === 'https'
-                                      ? <Lock size={iconSize.row} color={isSelected ? onDark.text : onDark.mutedText} style={{ marginRight: spacing.controlGap }} />
-                                      : <LockOpen size={iconSize.row} color={isSelected ? onDark.text : onDark.mutedText} style={{ marginRight: spacing.controlGap }} />
+                                      ? <Lock size={icons.row} color={isSelected ? onDark.text : onDark.mutedText} style={{ marginRight: spacing.controlGap }} />
+                                      : <LockOpen size={icons.row} color={isSelected ? onDark.text : onDark.mutedText} style={{ marginRight: spacing.controlGap }} />
                                     }
                                     <View>
                                         <Text style={[styles.schemeOptionText, isSelected && styles.schemeOptionTextSelected]}>

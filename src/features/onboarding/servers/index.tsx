@@ -1,4 +1,5 @@
 import { fixedColor, hitSlopFor, iconSize, onDark, spacing, typography } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
 import React from 'react';
 import { View, StyleSheet, Platform, FlatList, Alert } from 'react-native';
 import { Text } from '@/components/Text';
@@ -24,6 +25,7 @@ import ServerTypeIcon from '@/features/onboarding/ServerTypeIcon';
 
 export default function Servers() {
     const { t } = useTranslation();
+    const icons = useIconSize();
     const router = useRouter();
     const dispatch = useDispatch();
     const rad = useRadius();
@@ -112,10 +114,10 @@ export default function Servers() {
                     accessibilityRole="button"
                     accessibilityLabel={t('a11y.onboarding.serverOptions', { url: item.serverUrl })}
                     style={[styles.menuButton, { borderRadius: rad.md }]}
-                    hitSlop={hitSlopFor(iconSize.row)}
+                    hitSlop={hitSlopFor(icons.row)}
                     onPress={() => confirmDelete(item.id, item.serverUrl)}
                 >
-                    <Ellipsis size={iconSize.row} color={onDark.mutedText} />
+                    <Ellipsis size={icons.row} color={onDark.mutedText} />
                 </Touchable>
             </View>
         );

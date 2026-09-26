@@ -20,6 +20,10 @@ import SettingsToggleRow from '../../components/SettingsToggleRow';
 
 type Choice = ScreenBackgroundSource['kind'];
 
+// Module-level, so these keep the static token: a hook cannot reach a constant
+// declared outside the component. They are fixed-size glyphs in a settings
+// picker rather than icons sitting beside a line of body text, so holding
+// still is also the right answer here.
 const OPTIONS: { id: Choice; icon: React.ReactElement<{ color?: string }> }[] = [
   { id: 'none', icon: <Ban size={iconSize.row} /> },
   { id: 'image', icon: <ImageIcon size={iconSize.row} /> },

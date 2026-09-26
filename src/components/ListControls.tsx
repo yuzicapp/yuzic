@@ -1,11 +1,12 @@
 import React from 'react'
+import { useIconSize } from '@/features/theme/useIconSize';
 import { StyleSheet, View } from 'react-native'
 import { Text } from '@/components/Text'
 import { useTranslation } from 'react-i18next'
 import { ArrowUpDown, Grid2x2, List, ListFilter } from 'lucide-react-native'
 
 import Touchable from '@/components/Touchable'
-import { controlSize, hitSlopFor, iconSize, spacing, typography } from '@/constants/design'
+import { controlSize, hitSlopFor, spacing, typography } from '@/constants/design'
 import { useRadius } from '@/features/theme/useRadius'
 import { useTheme } from '@/features/theme/useTheme'
 
@@ -51,6 +52,7 @@ export default function ListControls({
   onToggleView,
 }: Props) {
   const { t } = useTranslation()
+  const icons = useIconSize();
   const { colors } = useTheme()
   const rad = useRadius()
 
@@ -75,7 +77,7 @@ export default function ListControls({
             onPress={onSortPress}
             accessibilityRole="button"
           >
-            <ArrowUpDown size={iconSize.row} color={colors.secondary} />
+            <ArrowUpDown size={icons.row} color={colors.secondary} />
             <Text style={[styles.pillLabel, { color: colors.secondary }]}>{sortLabel}</Text>
           </Touchable>
         )}
@@ -87,7 +89,7 @@ export default function ListControls({
             onPress={onFilterPress}
             accessibilityRole="button"
           >
-            <ListFilter size={iconSize.row} color={colors.secondary} />
+            <ListFilter size={icons.row} color={colors.secondary} />
             <Text style={[styles.pillLabel, { color: colors.secondary }]}>{filterLabel}</Text>
           </Touchable>
         )}
@@ -105,8 +107,8 @@ export default function ListControls({
           }
         >
           {isGridView
-            ? <List size={iconSize.row} color={colors.secondary} />
-            : <Grid2x2 size={iconSize.row} color={colors.secondary} />}
+            ? <List size={icons.row} color={colors.secondary} />
+            : <Grid2x2 size={icons.row} color={colors.secondary} />}
         </Touchable>
       )}
     </View>

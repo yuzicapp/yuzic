@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useIconSize } from '@/features/theme/useIconSize';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -16,10 +17,11 @@ import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 import { selectQueueSyncEnabled, setQueueSyncEnabled } from '@/features/settings/playback/state';
 import { selectServerNowPlayingShelfEnabled, setServerNowPlayingShelfEnabled } from '@/features/settings/home/state';
 import Touchable from '@/components/Touchable';
-import { hitSlopFor, iconSize } from '@/constants/design';
+import { hitSlopFor } from '@/constants/design';
 
 const ServerSettings: React.FC = () => {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const api = useApi();
   const dispatch = useDispatch();
 
@@ -128,7 +130,7 @@ const ServerSettings: React.FC = () => {
               accessibilityRole="button"
               accessibilityLabel={t('a11y.common.checkConnection')}
               onPress={ping}
-              hitSlop={hitSlopFor(iconSize.badge)}
+              hitSlop={hitSlopFor(icons.badge)}
             >
               <ConnectivityIndicator isLoading={isLoading} isConnected={isConnected} />
             </Touchable>

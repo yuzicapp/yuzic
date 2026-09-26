@@ -1,4 +1,5 @@
 import { cappedTypography, controlSize, fontScaleCap, hitSlopFor, iconSize, motion, onDark, spacing } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
 import React, { useCallback } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Text';
@@ -40,6 +41,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function PlayPauseButton({ isPlaying, isBuffering, onPress }: { isPlaying: boolean; isBuffering: boolean; onPress: () => void }) {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const scale = useSharedValue(1);
   const rad = useRadius();
   const reduced = useReducedMotion();
@@ -58,7 +60,7 @@ function PlayPauseButton({ isPlaying, isBuffering, onPress }: { isPlaying: boole
       style={[styles.playButton, { borderRadius: rad.pillFor(controlSize.playerPrimary) }, animStyle]}
     >
       {isBuffering
-        ? <SpinningLoaderCircle size={iconSize.row} color={onDark.background} />
+        ? <SpinningLoaderCircle size={icons.row} color={onDark.background} />
         : isPlaying
           ? <Pause size={iconSize.loader} color={onDark.background} fill={onDark.background} />
           : <Play size={iconSize.loader} color={onDark.background} fill={onDark.background} />
