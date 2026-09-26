@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Skeleton } from 'moti/skeleton';
 import { useTheme } from '@/features/theme/useTheme';
-import { controlSize, spacing } from '@/constants/design';
+import { radius, controlSize, spacing } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 
 const LoadingPlaylistHeader: React.FC = () => {
@@ -21,7 +21,7 @@ const LoadingPlaylistHeader: React.FC = () => {
         <Skeleton
           width={24}
           height={24}
-          radius={4}
+          radius={radius.xs}
           colorMode={colorMode}
         />
 
@@ -29,7 +29,7 @@ const LoadingPlaylistHeader: React.FC = () => {
         <Skeleton
           width={24}
           height={24}
-          radius={4}
+          radius={radius.xs}
           colorMode={colorMode}
         />
       </View>
@@ -49,7 +49,7 @@ const LoadingPlaylistHeader: React.FC = () => {
         <Skeleton
           width="72%"
           height={24}
-          radius={6}
+          radius={rad.thumb}
           colorMode={colorMode}
         />
 
@@ -57,31 +57,31 @@ const LoadingPlaylistHeader: React.FC = () => {
           <Skeleton
             width={58}
             height={14}
-            radius={6}
+            radius={rad.thumb}
             colorMode={colorMode}
           />
           <Skeleton
             width={8}
             height={8}
-            radius={4}
+            radius={radius.xs}
             colorMode={colorMode}
           />
           <Skeleton
             width={88}
             height={14}
-            radius={6}
+            radius={rad.thumb}
             colorMode={colorMode}
           />
           <Skeleton
             width={8}
             height={8}
-            radius={4}
+            radius={radius.xs}
             colorMode={colorMode}
           />
           <Skeleton
             width={52}
             height={14}
-            radius={6}
+            radius={rad.thumb}
             colorMode={colorMode}
           />
         </View>

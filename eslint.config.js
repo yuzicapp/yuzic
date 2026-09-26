@@ -128,6 +128,36 @@ module.exports = defineConfig([
           message:
             "Use components/Touchable instead of TouchableOpacity. It gives Android a bounded ripple and every other platform an opacity dip, from one file so the two can't drift apart per screen.",
         },
+        // A corner written as a bare number is a corner the radius preset
+        // cannot move. Only `size` was linted as a JSX attribute, so the
+        // loading placeholders quietly kept `radius={6}` while the content
+        // they stand in for went through `useRadius` — under `sharp` the
+        // skeleton was rounder than the thing it was standing in for.
+        {
+          selector: "JSXAttribute[name.name='radius'] > JSXExpressionContainer > Literal",
+          message:
+            "Use a radius token — `useRadius()` for a shape the preset owns, or `radius.xs`/`radius.sm` for a structural nudge. A literal corner cannot follow the user's choice.",
+        },
+        // `radius.*` and `rad.*` are both legal and mean different things, and
+        // nothing could tell them apart — which is how the playing bar's cover
+        // art and every options sheet's artwork ended up pinned to a corner
+        // the user had not picked. The shape tokens belong to the preset; the
+        // structural nudges (`none`/`xs`/`sm`) are deliberately static and are
+        // not matched here.
+        {
+          selector:
+            "Property[key.name='borderRadius'] > MemberExpression[object.name='radius'][property.name=/^(thumb|md|card|lg|panel|pill)$/]",
+          message:
+            "Read this from `useRadius()` so it follows the corner preset. `radius.none`/`xs`/`sm` stay static on purpose; if this one genuinely must too, disable the rule here and say why.",
+        },
+        // `allowFontScaling={false}` ignores the reader's text size outright.
+        // `maxFontSizeMultiplier` bounds it instead, which is what every
+        // fixed-height surface in the app uses.
+        {
+          selector: "JSXAttribute[name.name='allowFontScaling'] > JSXExpressionContainer > Literal[value=false]",
+          message:
+            "Don't opt out of text scaling. Bound it with `maxFontSizeMultiplier={fontScaleCap.*}`, and use `appScaling={false}` from components/Text if this is drawn artwork rather than text.",
+        },
         // The same argument for text. The user's text size is applied by
         // `components/Text` as it draws, so a platform `Text` renders at the
         // written size and quietly ignores the setting — invisible at the

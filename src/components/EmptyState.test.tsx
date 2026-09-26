@@ -6,6 +6,9 @@ import EmptyState from './EmptyState';
 
 let mockBottomOverlayHeight = 0;
 
+jest.mock('@/features/theme/useRadius', () => ({
+  useRadius: () => ({ thumb: 6, md: 8, card: 12, lg: 16, panel: 24, pill: 999, pillFor: (n: number) => n / 2 }),
+}));
 jest.mock('@/features/theme/useTheme', () => ({
   useTheme: () => ({ colors: { subtext: '#666', border: '#333', text: '#fff' } }),
 }));

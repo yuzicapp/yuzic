@@ -1,8 +1,9 @@
 import React from 'react';
+import { useRadius } from '@/features/theme/useRadius';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/features/theme/useTheme';
-import { spacing, typography, radius } from '@/constants/design';
+import { controlSize, spacing, typography } from '@/constants/design';
 import { useBottomOverlayHeight } from '@/features/theme/useScrollClearance';
 import Touchable from './Touchable';
 
@@ -26,6 +27,7 @@ type Props = {
  * what to do next, a failed one offers a retry.
  */
 const EmptyState: React.FC<Props> = ({ icon, message, action }) => {
+  const rad = useRadius();
   const { colors } = useTheme();
   const bottomOverlayHeight = useBottomOverlayHeight();
 
@@ -38,7 +40,7 @@ const EmptyState: React.FC<Props> = ({ icon, message, action }) => {
           accessibilityRole="button"
           accessibilityLabel={action.label}
           onPress={action.onPress}
-          style={[styles.action, { borderColor: colors.border }]}
+          style={[styles.action, { borderColor: colors.border, borderRadius: rad.pillFor(controlSize.minimumTarget) }]}
         >
           <Text style={[styles.actionLabel, { color: colors.text }]}>{action.label}</Text>
         </Touchable>
@@ -59,7 +61,6 @@ const styles = StyleSheet.create({
   action: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
   },
   actionLabel: { ...typography.button },

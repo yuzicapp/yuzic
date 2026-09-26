@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Skeleton } from 'moti/skeleton';
 import { useTheme } from '@/features/theme/useTheme';
-import { controlSize, spacing } from '@/constants/design';
+import { radius, controlSize, spacing } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 
 const LoadingArtistHeader: React.FC = () => {
@@ -28,7 +28,7 @@ const LoadingArtistHeader: React.FC = () => {
           <Skeleton
             width={120}
             height={120}
-            radius={60}
+            radius={rad.thumb}
             colorMode={colorMode}
           />
         </View>
@@ -40,7 +40,7 @@ const LoadingArtistHeader: React.FC = () => {
           <Skeleton
             width={180}
             height={28}
-            radius={6}
+            radius={rad.thumb}
             colorMode={colorMode}
           />
 
@@ -48,19 +48,19 @@ const LoadingArtistHeader: React.FC = () => {
             <Skeleton
               width={70}
               height={14}
-              radius={6}
+              radius={rad.thumb}
               colorMode={colorMode}
             />
             <Skeleton
               width={8}
               height={8}
-              radius={4}
+              radius={radius.xs}
               colorMode={colorMode}
             />
             <Skeleton
               width={70}
               height={14}
-              radius={6}
+              radius={rad.thumb}
               colorMode={colorMode}
             />
           </View>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { radius } from '@/constants/design';
 import { StyleSheet, View } from 'react-native'
 import { Skeleton } from 'moti/skeleton'
 import { useRadius } from '@/features/theme/useRadius'
@@ -23,9 +24,9 @@ export default function SkeletonTile({ size, variant, colorMode }: Props) {
     <View style={{ width: size }}>
       <Skeleton width={size} height={size} radius={artRadius} colorMode={colorMode} />
       <View style={styles.titleSpacer} />
-      <Skeleton width={size * 0.82} height={13} radius={4} colorMode={colorMode} />
+      <Skeleton width={size * 0.82} height={13} radius={radius.xs} colorMode={colorMode} />
       <View style={styles.subtitleSpacer} />
-      <Skeleton width={size * 0.56} height={11} radius={4} colorMode={colorMode} />
+      <Skeleton width={size * 0.56} height={11} radius={radius.xs} colorMode={colorMode} />
     </View>
   )
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRadius } from '@/features/theme/useRadius';
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +7,7 @@ import RNRestart from 'react-native-restart';
 import { TriangleAlert } from 'lucide-react-native';
 
 import Touchable from '@/components/Touchable';
-import { iconSize, radius, spacing, typography } from '@/constants/design';
+import { iconSize, spacing, typography } from '@/constants/design';
 
 type ScreenErrorPalette = {
   background: string;
@@ -32,6 +33,7 @@ type Props = {
  * is what a bug report needs.
  */
 export default function ScreenError({ error, retry, palette }: Props) {
+  const rad = useRadius();
   const { t } = useTranslation();
 
   return (
@@ -49,7 +51,7 @@ export default function ScreenError({ error, retry, palette }: Props) {
           <Touchable
             testID="screen-error-retry"
             accessibilityRole="button"
-            style={[styles.button, { backgroundColor: palette.surface, borderColor: palette.border }]}
+            style={[styles.button, { backgroundColor: palette.surface, borderColor: palette.border, borderRadius: rad.md }]}
             onPress={() => void retry()}
           >
             <Text style={[styles.buttonText, { color: palette.text }]}>{t('common.retry')}</Text>
@@ -58,7 +60,7 @@ export default function ScreenError({ error, retry, palette }: Props) {
         <Touchable
           testID="screen-error-restart"
           accessibilityRole="button"
-          style={[styles.button, { borderColor: palette.border }]}
+          style={[styles.button, { borderColor: palette.border, borderRadius: rad.md }]}
           onPress={() => RNRestart.Restart()}
         >
           <Text style={[styles.buttonText, { color: palette.text }]}>{t('common.error.restart')}</Text>
@@ -96,7 +98,6 @@ const styles = StyleSheet.create({
   button: {
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
-    borderRadius: radius.md,
     borderWidth: 1,
   },
   buttonText: {

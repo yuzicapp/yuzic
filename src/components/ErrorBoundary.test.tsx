@@ -5,6 +5,9 @@ import { act, fireEvent, render } from '@testing-library/react-native';
 import { ErrorBoundary } from './ErrorBoundary';
 
 const mockRestart = jest.fn();
+jest.mock('@/features/theme/useRadius', () => ({
+  useRadius: () => ({ thumb: 6, md: 8, card: 12, lg: 16, panel: 24, pill: 999, pillFor: (n: number) => n / 2 }),
+}));
 jest.mock('react-native-restart', () => ({ __esModule: true, default: { Restart: () => mockRestart() } }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 jest.mock('@/features/theme/useTheme', () => ({ useTheme: () => ({ colors: {}, isDarkMode: true }) }));

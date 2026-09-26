@@ -17,9 +17,9 @@ const LoadingGenreHeader: React.FC = () => {
       </View>
 
       <View style={styles.content}>
-        <Skeleton width={160} height={28} radius={6} colorMode={colorMode} />
+        <Skeleton width={160} height={28} radius={rad.thumb} colorMode={colorMode} />
         <View style={styles.subtextGap}>
-          <Skeleton width={80} height={14} radius={6} colorMode={colorMode} />
+          <Skeleton width={80} height={14} radius={rad.thumb} colorMode={colorMode} />
         </View>
       </View>
 

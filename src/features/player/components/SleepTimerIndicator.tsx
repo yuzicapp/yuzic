@@ -52,6 +52,11 @@ export default function SleepTimerIndicator({ onPress }: Props) {
 
 const styles = StyleSheet.create({
   chip: {
+    // Round at every preset by identity, not by shape language: this is the
+    // countdown pip on the player, and a squared one reads as a different
+    // component rather than a sharper one. `useRadius`'s own note makes the
+    // same distinction.
+    // eslint-disable-next-line no-restricted-syntax
     borderRadius: radius.pill,
     backgroundColor: stateLayer.rippleDark,
     paddingHorizontal: spacing.sm,

@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Skeleton } from 'moti/skeleton';
 import { useTheme } from '@/features/theme/useTheme';
-import { controlSize, spacing } from '@/constants/design';
+import { radius, controlSize, spacing } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 
 const LoadingAlbumHeader: React.FC = () => {
@@ -20,7 +20,7 @@ const LoadingAlbumHeader: React.FC = () => {
                 <Skeleton
                     width={24}
                     height={24}
-                    radius={4}
+                    radius={radius.xs}
                     colorMode={colorMode}
                 />
 
@@ -28,7 +28,7 @@ const LoadingAlbumHeader: React.FC = () => {
                 <Skeleton
                     width={24}
                     height={24}
-                    radius={4}
+                    radius={radius.xs}
                     colorMode={colorMode}
                 />
             </View>
@@ -48,7 +48,7 @@ const LoadingAlbumHeader: React.FC = () => {
                 <Skeleton
                     width="70%"
                     height={24}
-                    radius={6}
+                    radius={rad.thumb}
                     colorMode={colorMode}
                 />
 
@@ -57,14 +57,14 @@ const LoadingAlbumHeader: React.FC = () => {
                         <Skeleton
                             width={20}
                             height={20}
-                            radius={10}
+                            radius={rad.pill}
                             colorMode={colorMode}
                         />
                         <View style={{ width: 8 }} />
                         <Skeleton
                             width={120}
                             height={14}
-                            radius={6}
+                            radius={rad.thumb}
                             colorMode={colorMode}
                         />
                     </View>
@@ -72,7 +72,7 @@ const LoadingAlbumHeader: React.FC = () => {
                     <Skeleton
                         width={150}
                         height={14}
-                        radius={6}
+                        radius={rad.thumb}
                         colorMode={colorMode}
                     />
                 </View>
