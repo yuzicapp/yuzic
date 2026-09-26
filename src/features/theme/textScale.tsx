@@ -1,5 +1,6 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
+import { typography } from '@/constants/design';
 import { useActiveTheme } from './useActiveTheme';
 
 /**
@@ -20,4 +21,25 @@ export function TextScaleProvider({ children }: { children: React.ReactNode }) {
 
 export function useTextScale(): number {
   return useContext(TextScaleContext);
+}
+
+/**
+ * The type roles at the size they are actually drawn.
+ *
+ * `typography` holds the written sizes; `components/Text` multiplies them as it
+ * draws. Anything that needs the drawn number rather than a rendered string —
+ * a loading placeholder standing in for a line of text, say — has to do the
+ * same multiplication, and this is it in one place.
+ */
+export function useDrawnTypography(): typeof typography {
+  const scale = useTextScale();
+  return useMemo(() => {
+    if (scale === 1) return typography;
+    return Object.fromEntries(
+      Object.entries(typography).map(([role, style]) => [
+        role,
+        { ...style, fontSize: Math.round(style.fontSize * scale), lineHeight: Math.round(style.lineHeight * scale) },
+      ]),
+    ) as typeof typography;
+  }, [scale]);
 }

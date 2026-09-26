@@ -5,6 +5,8 @@ import { Skeleton } from 'moti/skeleton'
 import { useTheme } from '@/features/theme/useTheme'
 import { spacing } from '@/constants/design'
 import { useListDensity } from '@/features/theme/useListDensity'
+import { useDrawnTypography } from '@/features/theme/textScale'
+import { useRadius } from '@/features/theme/useRadius'
 
 const PLACEHOLDER_ROWS = 10
 
@@ -19,14 +21,16 @@ const LoadingGenreList: React.FC = () => {
   // Matches GenresScreen's real rows, so the list does not resize under the
   // user when the genres arrive.
   const density = useListDensity()
+  const type = useDrawnTypography()
+  const rad = useRadius()
 
   return (
     <View style={styles.wrapper}>
       {rows.map((_, index) => (
         <View key={`genre-loading-${index}`} style={{ paddingVertical: density.rowPadding }}>
-          <Skeleton width="45%" height={16} radius={6} colorMode={colorMode} />
+          <Skeleton width="45%" height={type.rowTitle.fontSize} radius={rad.thumb} colorMode={colorMode} />
           <View style={styles.lineSpacer} />
-          <Skeleton width="22%" height={12} radius={6} colorMode={colorMode} />
+          <Skeleton width="22%" height={type.caption.fontSize} radius={rad.thumb} colorMode={colorMode} />
         </View>
       ))}
     </View>

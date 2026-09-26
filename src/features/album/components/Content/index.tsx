@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { useAlbumRowHeights } from '@/features/album/useAlbumRowHeights';
 import { View, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +22,6 @@ import SimilarAlbumsSection from '../SimilarAlbumsSection';
 import type { AlbumScreenModel } from '@/features/album/useAlbumScreenModel';
 import { playableSongs } from '@/features/album/trackPlayability';
 import {
-  ALBUM_ESTIMATED_ROW_HEIGHT,
   ALBUM_DISC_HEADER_HEIGHT,
 } from '@/features/album/constants';
 import { SHELF_GAP, SHELF_INSET, shelfItemWidth } from '@/features/layout/shelf';
@@ -53,6 +53,7 @@ type ListItem = DiscHeader | SongItem | SkeletonItem;
  * chrome (header, stats, `SongRow`).
  */
 const AlbumContent: React.FC<Props> = ({ model }) => {
+  const rowHeights = useAlbumRowHeights();
   const scrollClearance = useScrollClearance();
   const { listInset, fullBleed } = useContentInset();
   const { t } = useTranslation();
@@ -234,7 +235,7 @@ const AlbumContent: React.FC<Props> = ({ model }) => {
         getItemType={(item) => item.type}
         overrideItemLayout={(layout, item) => {
           (layout as { size?: number }).size =
-            item.type === 'disc-header' ? ALBUM_DISC_HEADER_HEIGHT : ALBUM_ESTIMATED_ROW_HEIGHT;
+            item.type === 'disc-header' ? rowHeights.discHeader : rowHeights.track;
         }}
         ListHeaderComponent={
           <View style={fullBleed}>
