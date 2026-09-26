@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react-native';
 
-import { iconSize, spacing, startupTextScale, TEXT_SCALES, typography } from '@/constants/design';
+import { iconSize, spacing, TEXT_SCALES, typography } from '@/constants/design';
 import Touchable from '@/components/Touchable';
 import { editTheme, selectActiveTheme } from '@/features/settings/appearance/state';
 import { useTheme } from '@/features/theme/useTheme';
@@ -22,9 +23,9 @@ const LABELS: Record<(typeof TEXT_SCALES)[number], string> = {
 /**
  * How big the app's text is, on top of the system text size.
  *
- * Each option previews itself with an "Aa" at its own size. The type scale is
- * built once when the app starts, so a new size says it waits for the next
- * start rather than appearing to do nothing.
+ * Each option previews itself with an "Aa" at its own size. The choice applies
+ * as soon as it is made: `components/Text` reads the size as it draws, so the
+ * screen behind this one has already changed by the time the sheet closes.
  */
 export const TextSizeSelector: React.FC = () => {
   const { t } = useTranslation();
@@ -49,6 +50,10 @@ export const TextSizeSelector: React.FC = () => {
                   onPress={() => dispatch(editTheme({ shape: { textScale: scale } }))}
                 >
                   <Text
+                    // Each option previews its own size, not the one in force,
+                    // so this is the one Text in the app that must not be
+                    // scaled again on the way out.
+                    appScaling={false}
                     style={[styles.sample, { fontSize: Math.round(typography.rowTitle.fontSize * scale), color: colors.secondary }]}
                   >
                     Aa
@@ -63,9 +68,6 @@ export const TextSizeSelector: React.FC = () => {
           })}
         </View>
       </SettingsCard>
-      {selected !== startupTextScale && (
-        <Text style={[styles.hint, { color: colors.subtext }]}>{t('settings.appearance.textSize.restart')}</Text>
-      )}
     </>
   );
 };
@@ -84,10 +86,5 @@ const styles = StyleSheet.create({
   label: {
     ...typography.rowTitle,
     flex: 1,
-  },
-  hint: {
-    ...typography.caption,
-    marginTop: spacing.sm,
-    paddingHorizontal: spacing.xs,
   },
 });

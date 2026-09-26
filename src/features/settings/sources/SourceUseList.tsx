@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { Info } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';

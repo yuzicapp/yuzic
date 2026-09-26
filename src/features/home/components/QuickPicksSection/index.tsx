@@ -1,11 +1,6 @@
 import React, { useMemo, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
+import { View, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { Text } from '@/components/Text';
 import { Ellipsis } from 'lucide-react-native';
 import { notify } from '@/components/toast';
 import { useSelector } from 'react-redux';

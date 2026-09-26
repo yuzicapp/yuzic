@@ -1,6 +1,7 @@
 import { iconSize, onDark, spacing, typography } from '@/constants/design';
 import React, { useCallback, useMemo, useRef, useState } from 'react'
-import { StyleSheet, ScrollView, View, Text, RefreshControl } from 'react-native'
+import { StyleSheet, ScrollView, View, RefreshControl } from 'react-native'
+import { Text } from '@/components/Text'
 import { CloudOff } from 'lucide-react-native'
 import { useScrollToTop } from '@react-navigation/native'
 import { useSelector } from 'react-redux'

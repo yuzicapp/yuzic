@@ -1,6 +1,7 @@
 import { hitSlopFor, iconSize, radius, spacing, typography } from '@/constants/design';
 import React, { memo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
 import { Ellipsis } from 'lucide-react-native';
 import { MediaImage } from '@/components/MediaImage';

@@ -207,8 +207,7 @@
         "small": "Small",
         "default": "Default",
         "large": "Large",
-        "larger": "Larger",
-        "restart": "The new size applies the next time Yuzic starts."
+        "larger": "Larger"
       },
       "accentFromCover": "Accent from what's playing",
       "accentFromCoverSubtext": "The accent changes with each cover. Picking a colour turns this off.",

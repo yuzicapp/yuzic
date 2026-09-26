@@ -1,10 +1,7 @@
 import React, { useState, useCallback, memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import ReorderableList, { reorderItems, useReorderableDrag } from 'react-native-reorderable-list';
 import { GripVertical, ChevronLeft, Pause, Play, SkipForward } from 'lucide-react-native';
 import { usePlayingState, usePlayingActions, usePlayingQueueVersion } from '@/features/playback/PlayingContext';

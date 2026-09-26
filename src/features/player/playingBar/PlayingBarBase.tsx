@@ -1,6 +1,7 @@
 import { cappedTypography, fontScaleCap, hitSlopFor, iconSize, spacing } from '@/constants/design';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { InteractionManager, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { InteractionManager, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Text } from '@/components/Text';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Music, Play, Pause } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
@@ -223,6 +224,7 @@ function PlayingBarBase() {
                       testID="playing-bar-title"
                       numberOfLines={1}
                       maxFontSizeMultiplier={fontScaleCap.control}
+                      appScaling={false}
                       style={[styles.title, { color: colors.secondary }]}
                     >
                       {currentSong?.title || t('playing.bar.noSong')}
@@ -230,6 +232,7 @@ function PlayingBarBase() {
                     <Text
                       numberOfLines={1}
                       maxFontSizeMultiplier={fontScaleCap.control}
+                      appScaling={false}
                       style={[styles.artist, { color: colors.subtext }]}
                     >
                       {currentSong?.artist.name || t('playing.bar.selectTrack')}

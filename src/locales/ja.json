@@ -207,8 +207,7 @@
         "small": "小",
         "default": "標準",
         "large": "大",
-        "larger": "特大",
-        "restart": "新しいサイズは次回 Yuzic を起動したときに適用されます。"
+        "larger": "特大"
       },
       "accentFromCover": "再生中の曲からアクセント",
       "accentFromCoverSubtext": "アクセントがジャケットごとに変わります。色を選ぶとオフになります。",

@@ -1,12 +1,8 @@
 import { controlSize, coverFade, iconSize, onDark, shade, spacing, typography, veil } from '@/constants/design';
 import React, { useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import {
-  View,
-  Text,
-  StyleSheet,
-  Platform,
-} from 'react-native'
+import { View, StyleSheet, Platform } from 'react-native'
+import { Text } from '@/components/Text'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native'
 import { ChevronLeft, Ellipsis, Shuffle, Play } from 'lucide-react-native'

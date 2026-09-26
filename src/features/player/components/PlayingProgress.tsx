@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 
 import { onDark, spacing, typography } from '@/constants/design';
 import { usePlayingActions, usePlayingProgress } from '@/features/playback/PlayingContext';

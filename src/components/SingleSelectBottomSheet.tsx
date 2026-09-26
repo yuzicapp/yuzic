@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { Check } from 'lucide-react-native';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 

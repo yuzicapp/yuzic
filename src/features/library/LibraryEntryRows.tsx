@@ -1,5 +1,6 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+import { Text } from '@/components/Text'
 import { useNavigation } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'

@@ -1,9 +1,6 @@
 import React, { memo, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { Ellipsis, Link, ArrowDownCircle } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 

@@ -1,6 +1,7 @@
 import { onDark, spacing, typography } from '@/constants/design';
 import React, { useMemo } from 'react'
-import { View, Text, StyleSheet, ScrollView, useWindowDimensions } from 'react-native'
+import { View, StyleSheet, ScrollView, useWindowDimensions } from 'react-native'
+import { Text } from '@/components/Text'
 import { useSelector } from 'react-redux'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'

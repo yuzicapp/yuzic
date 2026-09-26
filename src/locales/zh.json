@@ -207,8 +207,7 @@
         "small": "小",
         "default": "默认",
         "large": "大",
-        "larger": "特大",
-        "restart": "新的文字大小将在下次启动 Yuzic 时生效。"
+        "larger": "特大"
       },
       "accentFromCover": "跟随正在播放的强调色",
       "accentFromCoverSubtext": "强调色随每张封面变化。选择颜色会关闭此选项。",

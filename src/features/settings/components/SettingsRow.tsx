@@ -1,6 +1,7 @@
 import { iconSize, onDark, radius, spacing, typography } from '@/constants/design';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { Check, ChevronRight } from 'lucide-react-native';
 import { useTheme } from '@/features/theme/useTheme';
 import { SETTINGS_STATUS_COLORS } from '@/features/settings/constants';

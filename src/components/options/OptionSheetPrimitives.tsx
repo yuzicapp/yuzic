@@ -1,12 +1,8 @@
 import { iconSize, onDark, shade, spacing, stateLayer, typography, veil } from '@/constants/design';
 import React from 'react';
 import { useRadius } from '@/features/theme/useRadius';
-import {
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { MediaImage } from '@/components/MediaImage';
 import { useTheme } from '@/features/theme/useTheme';
 import type { CoverSource } from '@/domain/entities/Cover';

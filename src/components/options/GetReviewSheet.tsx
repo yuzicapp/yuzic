@@ -1,6 +1,7 @@
 import { iconSize, spacing, stateLayer, typography } from '@/constants/design';
 import React, { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import {
   BottomSheetModal,
   BottomSheetScrollView,

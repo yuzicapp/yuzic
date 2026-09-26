@@ -1,6 +1,7 @@
 import { iconSize, onDark, spacing, typography } from '@/constants/design';
 import React from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { CloudUpload, RotateCcw, Trash2 } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';

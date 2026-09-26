@@ -1,6 +1,7 @@
 import { iconSize, onDark, spacing, tinted, typography } from '@/constants/design';
 import React, { useMemo } from 'react';
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
+import { Text } from '@/components/Text';
 import {
   NestedReorderableList,
   ScrollViewContainer,

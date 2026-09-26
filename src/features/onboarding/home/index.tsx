@@ -1,13 +1,8 @@
 import { onDark, shadow, spacing, typography } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    TouchableWithoutFeedback,
-    StyleSheet,
-    Platform,
-} from 'react-native';
+import { View, TouchableWithoutFeedback, StyleSheet, Platform } from 'react-native';
+import { Text } from '@/components/Text';
 import { Image } from 'expo-image';
 import { Redirect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';

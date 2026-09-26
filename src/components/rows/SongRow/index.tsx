@@ -1,11 +1,8 @@
 import { fontScaleCap, hitSlopFor, iconSize, motion, spacing, stateLayer, statusColor, typography } from '@/constants/design';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useListDensity } from '@/features/theme/useListDensity';
-import {
-  Text,
-  View,
-  StyleSheet,
-} from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,

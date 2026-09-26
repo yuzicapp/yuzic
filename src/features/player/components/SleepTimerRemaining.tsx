@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Text, type StyleProp, type TextStyle } from 'react-native';
+import { type StyleProp, type TextStyle } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
 import { formatSleepCountdown, sleepTimerSecondsLeft, type SleepTimer } from '../sleepTimer';
 

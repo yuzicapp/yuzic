@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { StyleSheet, Text, View, Platform, type LayoutChangeEvent } from 'react-native';
+import { StyleSheet, View, Platform, type LayoutChangeEvent } from 'react-native';
+import { Text } from '@/components/Text';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Library, Search } from 'lucide-react-native';
@@ -91,6 +92,7 @@ function TabButton({
           style={[styles.tabLabel, { color: active ? activeColor : inactiveColor }, active && styles.tabLabelActive]}
           numberOfLines={1}
           maxFontSizeMultiplier={fontScaleCap.control}
+          appScaling={false}
         >
           {label}
         </Text>

@@ -1,13 +1,7 @@
 import { fixedColor, hitSlopFor, iconSize, onDark, spacing, typography } from '@/constants/design';
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Platform,
-  FlatList,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, Platform, FlatList, Alert } from 'react-native';
+import { Text } from '@/components/Text';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';

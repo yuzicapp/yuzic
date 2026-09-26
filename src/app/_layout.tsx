@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { enableFreeze } from 'react-native-screens';
 import { PlayingProvider } from '@/features/playback/PlayingContext';
+import { TextScaleProvider } from '@/components/Text';
 import { DlnaProvider } from '@/features/player/DlnaContext';
 import { PlaybackSinkProvider } from '@/features/player/PlaybackSinkContext';
 import { SongActionSheetProvider } from '@/features/entity-actions/SongActionSheetContext';
@@ -248,6 +249,10 @@ function AppShell() {
 
   return (
     <ThemeProvider value={isDarkMode ? DarkTheme : DefaultTheme}>
+      {/* Above everything that draws text: it publishes the user's text size
+          once so `components/Text` can apply it live, instead of the size
+          being multiplied into the type roles at startup. */}
+      <TextScaleProvider>
       <DownloadProvider>
         <DlnaProvider>
         <PlaybackSinkProvider>
@@ -289,6 +294,7 @@ function AppShell() {
         </PlaybackSinkProvider>
         </DlnaProvider>
       </DownloadProvider>
+      </TextScaleProvider>
     </ThemeProvider>
   );
 }

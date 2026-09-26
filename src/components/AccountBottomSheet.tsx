@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Settings, RefreshCw, LogOut } from 'lucide-react-native';
 import { useSelector, useDispatch } from 'react-redux';

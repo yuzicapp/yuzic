@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
-import { View, Text, StyleSheet, ScrollView, useWindowDimensions } from 'react-native'
+import { View, StyleSheet, ScrollView, useWindowDimensions } from 'react-native'
+import { Text } from '@/components/Text'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useNavigation } from '@react-navigation/native'

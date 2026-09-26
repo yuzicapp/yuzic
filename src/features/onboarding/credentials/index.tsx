@@ -1,12 +1,8 @@
 import { iconSize, onDark, spacing, statusColor } from '@/constants/design';
 import { styles } from './styles';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ScrollView, TextInput, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { User, Lock, Shield, ChevronUp, ChevronDown, TriangleAlert, QrCode, ChevronRight } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';

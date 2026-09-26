@@ -1,10 +1,6 @@
 import React, { forwardRef, useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Platform,
-} from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
+import { Text } from '@/components/Text';
 import { FormSheet, FormSheetField } from '@/components/FormSheet';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Airplay, Cast, Check, Plus, RotateCcw, Server, Smartphone } from 'lucide-react-native';

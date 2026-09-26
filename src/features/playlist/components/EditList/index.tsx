@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import ReorderableList, {
   type ReorderableListReorderEvent,
   useIsActive,

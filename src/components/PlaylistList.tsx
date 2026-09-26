@@ -5,12 +5,8 @@ import React, {
   forwardRef,
   useMemo,
 } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-} from 'react-native';
+import { View, StyleSheet, TextInput } from 'react-native';
+import { Text } from '@/components/Text';
 import {
   BottomSheetModal,
   BottomSheetFlatList,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text } from '@/components/Text';
 import { act, fireEvent, render } from '@testing-library/react-native';
 
 import { ErrorBoundary } from './ErrorBoundary';

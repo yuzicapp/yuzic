@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react'
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native'
+import { StyleSheet, View, useWindowDimensions } from 'react-native'
+import { Text } from '@/components/Text'
 import { FlashList } from '@shopify/flash-list'
 import { useNavigation } from '@react-navigation/native'
 import { useTranslation } from 'react-i18next'

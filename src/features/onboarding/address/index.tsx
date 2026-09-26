@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { View, TextInput, ScrollView, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { notify } from '@/components/toast';

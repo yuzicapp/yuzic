@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-    ScrollView,
-    View,
-    Text,
-    Image,
-    StyleSheet,
-    Alert,
-    Linking,
-} from 'react-native';
+import { ScrollView, View, Image, StyleSheet, Alert, Linking } from 'react-native';
+import { Text } from '@/components/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Server, Library, Volume2, Palette, Puzzle, Github, Newspaper, FileText, ShieldCheck, ScrollText, House as HomeIcon, Tags, Disc3, Search, ChartColumn } from 'lucide-react-native';
 import Constants from 'expo-constants';

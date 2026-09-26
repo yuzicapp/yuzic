@@ -1,6 +1,7 @@
 import { hitSlopFor, iconSize, spacing, statusColor, typography } from '@/constants/design';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { Plus, X } from 'lucide-react-native';

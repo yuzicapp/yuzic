@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
-import { Text, View, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
 import { FlashList } from '@shopify/flash-list';
 import { useNavigation } from '@react-navigation/native';
