@@ -5,8 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { AlertCircle, CheckCircle } from 'lucide-react-native';
 
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
-import { iconSize, spacing, statusColor, typography } from '@/constants/design';
+import { spacing, statusColor, typography } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import type { WantStatus } from './jobStatus';
 
 /**
@@ -20,6 +21,7 @@ import type { WantStatus } from './jobStatus';
 export default function WantStatusBadge({ status }: { status: WantStatus }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
 
   if (status.kind === 'saved') return null;
 
@@ -36,11 +38,11 @@ export default function WantStatusBadge({ status }: { status: WantStatus }) {
   return (
     <View testID={`want-status-${status.kind}`} style={styles.badge}>
       {status.kind === 'queued' || status.kind === 'downloading' ? (
-        <SpinningLoaderCircle size={iconSize.badge} color={color} />
+        <SpinningLoaderCircle size={icons.badge} color={color} />
       ) : status.kind === 'arrived' ? (
-        <CheckCircle size={iconSize.badge} color={color} />
+        <CheckCircle size={icons.badge} color={color} />
       ) : (
-        <AlertCircle size={iconSize.badge} color={color} />
+        <AlertCircle size={icons.badge} color={color} />
       )}
       <Text style={[styles.label, { color }]} numberOfLines={1}>{label}</Text>
     </View>

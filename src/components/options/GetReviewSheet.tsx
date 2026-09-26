@@ -1,4 +1,4 @@
-import { iconSize, spacing, stateLayer, typography } from '@/constants/design';
+import { spacing, stateLayer, typography } from '@/constants/design';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Text';
@@ -11,6 +11,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useRadius } from '@/features/theme/useRadius';
 import { useTranslation } from 'react-i18next';
 import {
@@ -70,6 +71,7 @@ interface Props {
 const GetReviewSheet: React.FC<Props> = ({ album, track, wantLocalId, onDismiss, sheetRef }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const dispatch = useDispatch();
 
@@ -241,7 +243,7 @@ const GetReviewSheet: React.FC<Props> = ({ album, track, wantLocalId, onDismiss,
             <OptionSheetSectionLabel label={t('externalAlbum.review.qualityProfile')} />
             {qualityProfilesLoading ? (
               <View style={styles.qualityLoading}>
-                <SpinningLoaderCircle size={iconSize.row} color={colors.themeColor} />
+                <SpinningLoaderCircle size={icons.row} color={colors.themeColor} />
               </View>
             ) : (
               qualityProfiles.map((profile) => {

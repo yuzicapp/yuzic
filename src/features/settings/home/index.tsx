@@ -10,13 +10,14 @@ import { useTranslation } from 'react-i18next';
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 import { useSourceScreenSummary } from '../sources/useSourceScreenSummary';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import Header from '../components/Header';
 import SettingsCard from '../components/SettingsCard';
 import SettingsDivider from '../components/SettingsDivider';
 import SettingsRow from '../components/SettingsRow';
 import Touchable from '@/components/Touchable';
 import UserAvatar from '@/components/UserAvatar';
-import { controlSize, iconSize, radius, spacing, typography } from '@/constants/design';
+import { controlSize, radius, spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import { useScrollClearance } from '@/features/theme/useScrollClearance';
 
@@ -29,6 +30,7 @@ export default function Settings() {
     const searchSummary = useSourceScreenSummary('search');
 
     const { colors } = useTheme();
+  const icons = useIconSize();
     const rad = useRadius();
     // The version line is the last thing on this screen, so it is what sits
     // behind the tabs when the dock is translucent and takes no layout space.
@@ -107,26 +109,26 @@ export default function Settings() {
                 <SettingsCard>
                     <SettingsRow
                         label={t('settings.rows.server')}
-                        leftIcon={<Server size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Server size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/serverView')}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         testID="settings-row-library"
                         label={t('settings.rows.library')}
-                        leftIcon={<Library size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Library size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/libraryView')}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         label={t('settings.rows.player')}
-                        leftIcon={<Volume2 size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Volume2 size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/playerView')}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         label={t('settings.rows.appearance')}
-                        leftIcon={<Palette size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Palette size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/appearanceView')}
                     />
                     <SettingsDivider />
@@ -134,7 +136,7 @@ export default function Settings() {
                         testID="settings-row-metadata"
                         label={t('settings.metadata.title')}
                         rightText={metadataSummary}
-                        leftIcon={<Tags size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Tags size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/metadataView')}
                     />
                 </SettingsCard>
@@ -145,7 +147,7 @@ export default function Settings() {
                 <SettingsCard>
                     <SettingsRow
                         label={t('settings.home.title')}
-                        leftIcon={<HomeIcon size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<HomeIcon size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/homeView')}
                     />
                     <SettingsDivider />
@@ -153,7 +155,7 @@ export default function Settings() {
                         testID="settings-row-pages"
                         label={t('settings.pages.title')}
                         rightText={pagesSummary}
-                        leftIcon={<FileText size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<FileText size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/pagesView')}
                     />
                     <SettingsDivider />
@@ -161,19 +163,19 @@ export default function Settings() {
                         testID="settings-row-search"
                         label={t('settings.search.title')}
                         rightText={searchSummary}
-                        leftIcon={<Search size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Search size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/searchView')}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         label={t('settings.listening.title')}
-                        leftIcon={<ChartColumn size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<ChartColumn size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/listeningView')}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         label={t('settings.scrobbling.title')}
-                        leftIcon={<Disc3 size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Disc3 size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/scrobblingView')}
                     />
                 </SettingsCard>
@@ -199,7 +201,7 @@ export default function Settings() {
                 <SettingsCard>
                     <SettingsRow
                         label={t('settings.sections.connections')}
-                        leftIcon={<Puzzle size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Puzzle size={icons.secondary} color={colors.secondary} />}
                         onPress={() => router.push('/settings/connectionsView')}
                     />
                 </SettingsCard>
@@ -218,25 +220,25 @@ export default function Settings() {
                     <SettingsRow
                         testID="settings-row-changelog"
                         label={t('settings.rows.changelog')}
-                        leftIcon={<Newspaper size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Newspaper size={icons.secondary} color={colors.secondary} />}
                         onPress={() => openLink('https://yuzicapp.github.io/yuzic-web/changelog/')}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         label={t('settings.rows.github')}
-                        leftIcon={<Github size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<Github size={icons.secondary} color={colors.secondary} />}
                         onPress={() => openLink('https://github.com/yuzicapp/yuzic')}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         label={t('settings.rows.privacyPolicy')}
-                        leftIcon={<ShieldCheck size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<ShieldCheck size={icons.secondary} color={colors.secondary} />}
                         onPress={() => openLink('https://yuzicapp.github.io/yuzic-web/privacypolicy/')}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         label={t('settings.rows.termsOfUse')}
-                        leftIcon={<ScrollText size={iconSize.secondary} color={colors.secondary} />}
+                        leftIcon={<ScrollText size={icons.secondary} color={colors.secondary} />}
                         onPress={() => openLink('https://yuzicapp.github.io/yuzic-web/tos/')}
                     />
                 </SettingsCard>

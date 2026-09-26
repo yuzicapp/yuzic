@@ -11,6 +11,7 @@ import { disconnect } from '@/state/redux/slices/serversSlice';
 import { notify } from '@/components/toast';
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
@@ -21,7 +22,7 @@ import {
 } from '@/components/options/OptionSheetPrimitives';
 import Touchable from '@/components/Touchable';
 import UserAvatar from '@/components/UserAvatar';
-import { controlSize, iconSize, radius, spacing, typography } from '@/constants/design';
+import { controlSize, radius, spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import { dismissSheetRef } from '@/features/entity-actions/shared/sheetRef';
 import { clearCatalog } from '@/features/library/catalogPersistence';
@@ -35,6 +36,7 @@ type Props = {
 const AccountBottomSheet = forwardRef<BottomSheetModal, Props>(({ onDismiss }, ref) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -129,17 +131,17 @@ const AccountBottomSheet = forwardRef<BottomSheetModal, Props>(({ onDismiss }, r
 
         {/* Actions */}
         <Touchable testID="account-settings" style={styles.row} onPress={handleSettings}>
-          <Settings size={iconSize.row} color={colors.subtext} />
+          <Settings size={icons.row} color={colors.subtext} />
           <Text style={[styles.rowText, { color: colors.secondary }]}>{t('home.account.settings')}</Text>
         </Touchable>
 
         <Touchable style={styles.row} onPress={handleScan}>
-          <RefreshCw size={iconSize.row} color={colors.subtext} />
+          <RefreshCw size={icons.row} color={colors.subtext} />
           <Text style={[styles.rowText, { color: colors.secondary }]}>{t('home.account.triggerScan')}</Text>
         </Touchable>
 
         <Touchable style={styles.row} onPress={handleSignOut}>
-          <LogOut size={iconSize.row} color={destructiveColor} />
+          <LogOut size={icons.row} color={destructiveColor} />
           <Text style={[styles.rowText, { color: destructiveColor }]}>{t('home.account.signOut')}</Text>
         </Touchable>
       </BottomSheetView>

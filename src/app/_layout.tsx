@@ -14,7 +14,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { enableFreeze } from 'react-native-screens';
 import { PlayingProvider } from '@/features/playback/PlayingContext';
-import { TextScaleProvider } from '@/components/Text';
+import { TextScaleProvider } from '@/features/theme/textScale';
 import { DlnaProvider } from '@/features/player/DlnaContext';
 import { PlaybackSinkProvider } from '@/features/player/PlaybackSinkContext';
 import { SongActionSheetProvider } from '@/features/entity-actions/SongActionSheetContext';

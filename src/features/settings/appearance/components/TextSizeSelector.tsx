@@ -5,10 +5,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react-native';
 
-import { iconSize, spacing, TEXT_SCALES, typography } from '@/constants/design';
+import { spacing, TEXT_SCALES, typography } from '@/constants/design';
 import Touchable from '@/components/Touchable';
 import { editTheme, selectActiveTheme } from '@/features/settings/appearance/state';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import SettingsCard from '../../components/SettingsCard';
 import SettingsCardHeader from '../../components/SettingsCardHeader';
 import SettingsDivider from '../../components/SettingsDivider';
@@ -31,6 +32,7 @@ export const TextSizeSelector: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const selected = useSelector(selectActiveTheme).shape.textScale;
 
   return (
@@ -61,7 +63,7 @@ export const TextSizeSelector: React.FC = () => {
                   <Text style={[styles.label, { color: colors.secondary }]}>
                     {t(`settings.appearance.textSize.${LABELS[scale]}`)}
                   </Text>
-                  {active && <Check size={iconSize.row} color={colors.themeColor} />}
+                  {active && <Check size={icons.row} color={colors.themeColor} />}
                 </Touchable>
               </React.Fragment>
             );

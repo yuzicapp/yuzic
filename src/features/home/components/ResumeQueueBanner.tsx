@@ -1,4 +1,4 @@
-import { hitSlopFor, iconSize, onDark, spacing, typography } from '@/constants/design';
+import { hitSlopFor, onDark, spacing, typography } from '@/constants/design';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Text';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import Touchable from '@/components/Touchable';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useRadius } from '@/features/theme/useRadius';
 import { useResumableServerQueue } from '@/features/playback/useResumableServerQueue';
 /**
@@ -21,6 +22,7 @@ import { useResumableServerQueue } from '@/features/playback/useResumableServerQ
 export function ResumeQueueBanner() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const { available, resuming, resume, dismiss } = useResumableServerQueue();
 
@@ -41,8 +43,8 @@ export function ResumeQueueBanner() {
       >
         <View style={[styles.iconWrap, { backgroundColor: colors.themeColor, borderRadius: rad.pill }]}>
           {resuming
-            ? <SpinningLoaderCircle size={iconSize.inline} color={onDark.background} />
-            : <Play size={iconSize.inline} color={onDark.background} fill={onDark.background} />
+            ? <SpinningLoaderCircle size={icons.inline} color={onDark.background} />
+            : <Play size={icons.inline} color={onDark.background} fill={onDark.background} />
           }
         </View>
         <View style={styles.text}>
@@ -64,7 +66,7 @@ export function ResumeQueueBanner() {
         accessibilityRole="button"
         accessibilityLabel={t('common.dismiss')}
       >
-        <X size={iconSize.row} color={colors.subtext} />
+        <X size={icons.row} color={colors.subtext} />
       </Touchable>
     </View>
   );

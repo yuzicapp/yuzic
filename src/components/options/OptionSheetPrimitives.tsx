@@ -1,10 +1,11 @@
-import { iconSize, onDark, shade, spacing, stateLayer, typography, veil } from '@/constants/design';
+import { onDark, shade, spacing, stateLayer, typography, veil } from '@/constants/design';
 import React from 'react';
 import { useRadius } from '@/features/theme/useRadius';
 import { StyleSheet, Switch, View } from 'react-native';
 import { Text } from '@/components/Text';
 import { MediaImage } from '@/components/MediaImage';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import type { CoverSource } from '@/domain/entities/Cover';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import Touchable from '@/components/Touchable';
@@ -72,7 +73,8 @@ export function OptionSheetRow({
   testID,
 }: RowProps) {
   const { colors } = useTheme();
-  const leading = loading ? <SpinningLoaderCircle size={iconSize.row} color={colors.subtext} /> : icon;
+  const icons = useIconSize();
+  const leading = loading ? <SpinningLoaderCircle size={icons.row} color={colors.subtext} /> : icon;
 
   return (
     <Touchable

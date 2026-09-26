@@ -1,4 +1,4 @@
-import { iconSize, onDark, spacing, tinted, typography } from '@/constants/design';
+import { onDark, spacing, tinted, typography } from '@/constants/design';
 import React, { useMemo } from 'react';
 import { StyleSheet, Switch, View } from 'react-native';
 import { Text } from '@/components/Text';
@@ -14,6 +14,7 @@ import { Check, GripVertical } from 'lucide-react-native';
 
 import Touchable from '@/components/Touchable';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useRadius } from '@/features/theme/useRadius';
 
 type SettingsSource = {
@@ -49,6 +50,7 @@ type SourceRowProps = {
 function SourceRow({ item, canReorder, showSubtext }: SourceRowProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const drag = useReorderableDrag();
   const isActive = useIsActive();
 
@@ -70,7 +72,7 @@ function SourceRow({ item, canReorder, showSubtext }: SourceRowProps) {
             disabled={isActive}
             style={styles.dragHandle}
           >
-            <GripVertical size={iconSize.row} color={colors.border} />
+            <GripVertical size={icons.row} color={colors.border} />
           </Touchable>
         )}
         <Switch
@@ -101,6 +103,7 @@ const SettingsSourceList: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const orderedSources = useMemo(() => {
     const position = new Map(sourceOrder.map((id, index) => [id, index]));
@@ -122,7 +125,7 @@ const SettingsSourceList: React.FC<Props> = ({
             <Text style={[styles.sourceSubtext, { color: colors.subtext }]}>{pinnedSource.subtext}</Text>
           </View>
           <View style={[styles.alwaysFirst, { backgroundColor: tinted(colors.themeColor, 'surface'), borderRadius: rad.pill }]}>
-            <Check size={iconSize.badge} color={colors.themeColor} />
+            <Check size={icons.badge} color={colors.themeColor} />
             <Text style={[styles.alwaysFirstText, { color: colors.themeColor }]}>
               {t('settings.sources.alwaysFirst')}
             </Text>

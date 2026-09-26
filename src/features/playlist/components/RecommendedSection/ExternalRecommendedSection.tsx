@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { notify } from '@/components/toast';
 
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useRadius } from '@/features/theme/useRadius';
 import IconActionButton from '@/components/IconActionButton';
 import SectionHeader from '@/components/SectionHeader';
@@ -27,7 +28,7 @@ import {
 } from '@/providers/registry/pageSources';
 import { ARTIST_CATALOGUE } from '@/providers/registry/artistSources';
 import { QueryKeys } from '@/state/query/queryKeys';
-import { iconSize, onDark, spacing, typography } from '@/constants/design';
+import { onDark, spacing, typography } from '@/constants/design';
 import { playlistArtistNames as computePlaylistArtistNames } from '@/features/playlist/recommendedSongs';
 import type { Album } from '@/domain/entities/Album';
 import type { Playlist } from '@/domain/entities/Playlist';
@@ -48,6 +49,7 @@ type Props = {
 export const ExternalRecommendedSection: React.FC<Props> = ({ playlist, songs, onRefreshExternal }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const showSourceHeaders = useSelector(selectShowSourceHeaders);
   const isOffline = useIsOffline();
@@ -119,7 +121,7 @@ export const ExternalRecommendedSection: React.FC<Props> = ({ playlist, songs, o
         }
         action={
           <IconActionButton
-            icon={<RefreshCw size={iconSize.row} color={colors.subtext} />}
+            icon={<RefreshCw size={icons.row} color={colors.subtext} />}
             onPress={onRefreshExternal}
             loading={externalQuery.isFetching}
             accessibilityLabel={t('playlist.recommended.refresh')}

@@ -2,11 +2,12 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import SettingsCard from './SettingsCard';
 import SettingsDivider from './SettingsDivider';
 import SettingsRow from './SettingsRow';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
-import { iconSize, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
 
 type SelectItem = { key: string; label: string };
 
@@ -30,6 +31,7 @@ const SettingsSelectCard: React.FC<Props> = ({
   disabled = false,
 }) => {
   const { colors } = useTheme();
+  const icons = useIconSize();
 
   return (
     <>
@@ -39,7 +41,7 @@ const SettingsSelectCard: React.FC<Props> = ({
       <SettingsCard>
         {isLoading ? (
           <View style={styles.loader}>
-            <SpinningLoaderCircle size={iconSize.row} color={colors.themeColor} />
+            <SpinningLoaderCircle size={icons.row} color={colors.themeColor} />
           </View>
         ) : (
           items.map((item, index) => (

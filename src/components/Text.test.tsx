@@ -2,7 +2,8 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { render } from '@testing-library/react-native';
 
-import { Text, TextScaleProvider } from './Text';
+import { Text } from './Text';
+import { TextScaleProvider } from '@/features/theme/textScale';
 
 let mockTextScale = 1;
 jest.mock('@/features/theme/useActiveTheme', () => ({

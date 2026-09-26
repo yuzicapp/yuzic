@@ -1,4 +1,4 @@
-import { hitSlopFor, iconSize, radius, spacing, typography } from '@/constants/design';
+import { hitSlopFor, radius, spacing, typography } from '@/constants/design';
 import React, { memo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/components/Text';
@@ -7,6 +7,7 @@ import { Ellipsis } from 'lucide-react-native';
 import { MediaImage } from '@/components/MediaImage';
 import { CoverSource } from '@/domain/entities/Cover';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useRadius } from '@/features/theme/useRadius';
 import { useListDensity } from '@/features/theme/useListDensity';
 import Touchable from '@/components/Touchable';
@@ -55,6 +56,7 @@ const LibraryItem: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const density = useListDensity();
 
@@ -103,7 +105,7 @@ const LibraryItem: React.FC<Props> = ({
           hitSlop={hitSlopFor(18)}
           feedback="control"
         >
-          <Ellipsis size={iconSize.row} color={colors.subtext} />
+          <Ellipsis size={icons.row} color={colors.subtext} />
         </Touchable>
       )}
     </Touchable>

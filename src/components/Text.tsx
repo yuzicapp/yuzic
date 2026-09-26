@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 // The one file allowed to reach for the platform Text; everything else comes
 // through this wrapper, which is what the lint rule is there to hold.
 // eslint-disable-next-line no-restricted-syntax
 import { StyleSheet, Text as PlatformText, type TextProps, type TextStyle } from 'react-native';
 
-import { useActiveTheme } from '@/features/theme/useActiveTheme';
+import { useTextScale } from '@/features/theme/textScale';
 
 /**
  * The app's text size, applied when text is drawn rather than when the app
@@ -21,19 +21,6 @@ import { useActiveTheme } from '@/features/theme/useActiveTheme';
  * At the default size this returns the caller's own style object untouched, so
  * the common case costs nothing beyond a context read.
  */
-const TextScaleContext = createContext(1);
-
-/** Publishes the user's text size once, so 400-odd `Text`s read a context
- *  rather than each subscribing to the store. */
-export function TextScaleProvider({ children }: { children: React.ReactNode }) {
-  const scale = useActiveTheme().shape.textScale;
-  return <TextScaleContext.Provider value={scale}>{children}</TextScaleContext.Provider>;
-}
-
-function useTextScale(): number {
-  return useContext(TextScaleContext);
-}
-
 type AppTextProps = TextProps & {
   /**
    * Opt out of the app's text size — not the system's, which `maxFontSizeMultiplier`

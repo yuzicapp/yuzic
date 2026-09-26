@@ -1,9 +1,10 @@
-import { iconSize, onDark, radius, spacing, typography } from '@/constants/design';
+import { onDark, radius, spacing, typography } from '@/constants/design';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/components/Text';
 import { Check, ChevronRight } from 'lucide-react-native';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { SETTINGS_STATUS_COLORS } from '@/features/settings/constants';
 import Touchable from '@/components/Touchable';
 import { useRadius } from '@/features/theme/useRadius';
@@ -21,6 +22,7 @@ import { useRadius } from '@/features/theme/useRadius';
 
 const SettingsRow: React.FC<Props> = ({ label, onPress, leftIcon, rightText, status, selected, checked, testID }) => {
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const isRadio = selected !== undefined;
   const isCheckbox = checked !== undefined;
@@ -55,10 +57,10 @@ const SettingsRow: React.FC<Props> = ({ label, onPress, leftIcon, rightText, sta
               ? { backgroundColor: colors.themeColor, borderColor: colors.themeColor }
               : { borderColor: colors.border },
           ]}>
-            {checked && <Check size={iconSize.badge} color={onDark.text} strokeWidth={3} />}
+            {checked && <Check size={icons.badge} color={onDark.text} strokeWidth={3} />}
           </View>
         ) : (
-          <ChevronRight size={iconSize.row} color={colors.border} />
+          <ChevronRight size={icons.row} color={colors.border} />
         )}
       </View>
     </Touchable>

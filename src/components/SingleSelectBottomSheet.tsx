@@ -5,6 +5,7 @@ import { Check } from 'lucide-react-native';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useRadius } from '@/features/theme/useRadius';
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
 import {
@@ -42,6 +43,7 @@ type Props = {
 const SingleSelectBottomSheet = forwardRef<BottomSheetModal, Props>(
   ({ selected, options, title, onSelect, testID }, ref) => {
     const { colors } = useTheme();
+  const icons = useIconSize();
     const themeColor = colors.themeColor;
     const rad = useRadius();
     const sheetBg = useOptionSheetBackground();
@@ -74,7 +76,7 @@ const SingleSelectBottomSheet = forwardRef<BottomSheetModal, Props>(
                 onPress={() => onSelect(option.value)}
               >
                 <View style={styles.pickerLeft}>
-                  <option.Icon size={iconSize.row} color={isSelected ? themeColor : colors.subtext} />
+                  <option.Icon size={icons.row} color={isSelected ? themeColor : colors.subtext} />
                   <Text style={[styles.pickerText, { color: colors.secondary, fontWeight: isSelected ? '600' : '400' }]}>
                     {option.label}
                   </Text>

@@ -1,4 +1,4 @@
-import { iconSize, radius, shadow, spacing, themeColorPreset, typography } from '@/constants/design';
+import { radius, shadow, spacing, themeColorPreset, typography } from '@/constants/design';
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/components/Text';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectThemeColor, setThemeColor } from '@/features/settings/appearance/state';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import SettingsCardHeader from '../../components/SettingsCardHeader';
 import SettingsCard from '../../components/SettingsCard';
 import Touchable from '@/components/Touchable';
@@ -24,6 +25,7 @@ export const ThemeColor: React.FC = () => {
   const themeColor = useSelector(selectThemeColor);
   const [open, setOpen] = useState(false);
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
 
   return (
@@ -58,8 +60,8 @@ export const ThemeColor: React.FC = () => {
             </Text>
           </View>
           {open
-            ? <ChevronUp size={iconSize.row} color={colors.subtext} />
-            : <ChevronDown size={iconSize.row} color={colors.subtext} />
+            ? <ChevronUp size={icons.row} color={colors.subtext} />
+            : <ChevronDown size={icons.row} color={colors.subtext} />
           }
         </Touchable>
 

@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { notify } from '@/components/toast';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
 import {
   optionSheetStyles,
@@ -22,7 +23,7 @@ import { useJukeboxAvailability } from '@/features/player/useJukeboxAvailability
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 import { getServerProvider } from '@/providers/registry/serverConnections';
 import Touchable from '@/components/Touchable';
-import { iconSize, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import { withAlpha } from '@/features/theme/coverAccent';
 
@@ -35,6 +36,7 @@ const {
 const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const themeColor = colors.themeColor;
   const sheetBg = useOptionSheetBackground();
@@ -110,7 +112,7 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
         <View style={styles.titleRow}>
           <Text style={[styles.title, { color: colors.secondary }]}>{t('playing.output.title')}</Text>
           <IconActionButton
-            icon={<RotateCcw size={iconSize.inline} color={colors.subtext} />}
+            icon={<RotateCcw size={icons.inline} color={colors.subtext} />}
             onPress={scan}
             loading={isScanning}
             accessibilityLabel={t('a11y.scanForDevices')}
@@ -127,10 +129,10 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
           }}
         >
           <View style={styles.itemLeft}>
-            <Smartphone size={iconSize.row} color={isLocal ? themeColor : colors.subtext} />
+            <Smartphone size={icons.row} color={isLocal ? themeColor : colors.subtext} />
             <Text style={[styles.itemLabel, { color: colors.secondary }]}>{t('playing.output.thisDevice')}</Text>
           </View>
-          {isLocal && <Check size={iconSize.row} color={themeColor} />}
+          {isLocal && <Check size={icons.row} color={themeColor} />}
         </Touchable>
 
         {/* The server's own speakers. Sits with "This device" rather than under
@@ -145,12 +147,12 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
             disabled={isSwitching}
           >
             <View style={styles.itemLeft}>
-              <Server size={iconSize.row} color={sink.kind === 'jukebox' ? themeColor : colors.subtext} />
+              <Server size={icons.row} color={sink.kind === 'jukebox' ? themeColor : colors.subtext} />
               <Text style={[styles.itemLabel, { color: colors.secondary }]}>
                 {t('playing.output.playOnServer', { server: serverName })}
               </Text>
             </View>
-            {sink.kind === 'jukebox' && <Check size={iconSize.row} color={themeColor} />}
+            {sink.kind === 'jukebox' && <Check size={icons.row} color={themeColor} />}
           </Touchable>
         )}
 
@@ -158,7 +160,7 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
         {Platform.OS === 'ios' && AirplayButton && (
           <View style={[styles.item, { backgroundColor: airplayDevice ? withAlpha(themeColor, 0.13) : 'transparent', borderRadius: rad.md }]}>
             <View style={styles.itemLeft}>
-              <Airplay size={iconSize.row} color={airplayDevice ? themeColor : colors.subtext} />
+              <Airplay size={icons.row} color={airplayDevice ? themeColor : colors.subtext} />
               <Text style={[
                 styles.itemLabel,
                 { color: colors.secondary, fontWeight: airplayDevice ? '600' : '400' },
@@ -167,7 +169,7 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
                 {airplayDevice ? airplayDevice.portName : t('playing.output.airplay')}
               </Text>
             </View>
-            {airplayDevice && <Check size={iconSize.row} color={themeColor} />}
+            {airplayDevice && <Check size={icons.row} color={themeColor} />}
             <AirplayButton
               style={StyleSheet.absoluteFillObject}
               tintColor="transparent"
@@ -191,12 +193,12 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
             onPress={selectLocal}
           >
             <View style={styles.itemLeft}>
-              <Cast size={iconSize.row} color={themeColor} />
+              <Cast size={icons.row} color={themeColor} />
               <Text style={[styles.itemLabel, { color: colors.secondary, fontWeight: '600' }]}>
                 {activeDlna.name}
               </Text>
             </View>
-            <Check size={iconSize.row} color={themeColor} />
+            <Check size={icons.row} color={themeColor} />
           </Touchable>
         )}
 
@@ -211,10 +213,10 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
               disabled={isSwitching}
             >
               <View style={styles.itemLeft}>
-                <Cast size={iconSize.row} color={colors.subtext} />
+                <Cast size={icons.row} color={colors.subtext} />
                 <Text style={[styles.itemLabel, { color: colors.secondary }]}>{device.name}</Text>
               </View>
-              {connectingDlnaUdn === device.udn && <SpinningLoaderCircle size={iconSize.row} color={colors.subtext} />}
+              {connectingDlnaUdn === device.udn && <SpinningLoaderCircle size={icons.row} color={colors.subtext} />}
             </Touchable>
           );
         })}
@@ -222,7 +224,7 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
         {/* Scanning / empty state */}
         {isScanning && devices.length === 0 && !activeDlna && (
           <View style={styles.searchingRow}>
-            <SpinningLoaderCircle size={iconSize.inline} color={colors.subtext} />
+            <SpinningLoaderCircle size={icons.inline} color={colors.subtext} />
             <Text style={[styles.empty, { color: colors.subtext, paddingVertical: 0 }]}>
               {t('playing.output.searching')}
             </Text>
@@ -243,8 +245,8 @@ const OutputDeviceSheet = forwardRef<BottomSheetModal>((_, ref) => {
         >
           <View style={styles.itemLeft}>
             {isProbing
-              ? <SpinningLoaderCircle size={iconSize.row} color={colors.subtext} />
-              : <Plus size={iconSize.row} color={colors.subtext} />
+              ? <SpinningLoaderCircle size={icons.row} color={colors.subtext} />
+              : <Plus size={icons.row} color={colors.subtext} />
             }
             <Text style={[styles.itemLabel, { color: colors.subtext }]}>{t('playing.output.addManually')}</Text>
           </View>

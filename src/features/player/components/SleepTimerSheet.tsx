@@ -13,8 +13,9 @@ import {
   useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives';
 import { dismissSheetRef } from '@/features/entity-actions/shared/sheetRef';
-import { iconSize, spacing, statusColor, typography } from '@/constants/design';
+import { spacing, statusColor, typography } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import {
   cancelSleepTimer,
   sleepAtEndOfTrack,
@@ -35,6 +36,7 @@ const DURATIONS = [5, 10, 15, 30, 45, 60];
 const SleepTimerSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const sheetBg = useOptionSheetBackground();
   const sheetContent = useOptionSheetContentStyle();
   const timer = useSleepTimer();
@@ -43,7 +45,7 @@ const SleepTimerSheet = forwardRef<BottomSheetModal>((_, ref) => {
     run();
     dismissSheetRef(ref);
   };
-  const tick = <Check size={iconSize.row} color={colors.themeColor} />;
+  const tick = <Check size={icons.row} color={colors.themeColor} />;
 
   return (
     <BottomSheetModal

@@ -10,6 +10,7 @@ import { promptConnectDownloader } from '@/features/downloaders/connectDownloade
 import { useWantToggle } from '@/features/entity-actions/shared/wantActions';
 import { useLocalFirst } from '@/features/library/useLocalFirst';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import ArtistGetSheet from '@/features/wants/ArtistGetSheet';
 import { useWantGet } from '@/features/wants/useWantGet';
 
@@ -39,6 +40,7 @@ import { useWantGet } from '@/features/wants/useWantGet';
 export default function ExternalActionRow({ artist }: { artist: Artist }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const { canGetArtist } = useWantGet();
   const getSheetRef = useSheetRef();
   const { isWanted, toggle } = useWantToggle(artist.localId, 'artist', 'artist-page');
@@ -82,7 +84,7 @@ export default function ExternalActionRow({ artist }: { artist: Artist }) {
           accessibilityLabel={t(isWanted ? 'a11y.detail.wanted' : 'a11y.detail.want')}
         >
           <Heart
-            size={iconSize.row}
+            size={icons.row}
             color={isWanted ? statusColor.success : colors.secondary}
             fill={isWanted ? statusColor.success : 'none'}
           />

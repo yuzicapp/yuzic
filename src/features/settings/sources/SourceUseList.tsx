@@ -7,8 +7,9 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Touchable from '@/components/Touchable';
 import { useSheetRef } from '@/components/useSheetRef';
-import { hitSlopFor, iconSize, onDark, spacing, typography } from '@/constants/design';
+import { hitSlopFor, onDark, spacing, typography } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { SOURCES, usesFor, type SourceId, type SourcePurpose } from '@/providers/registry/sources';
 import SettingsCard from '../components/SettingsCard';
 import SettingsDivider from '../components/SettingsDivider';
@@ -33,6 +34,7 @@ type Props = {
 export default function SourceUseList({ purpose, source }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const dispatch = useDispatch();
   const uses = useSelector(selectSourceUses);
   const sheetRef = useSheetRef();
@@ -69,9 +71,9 @@ export default function SourceUseList({ purpose, source }: Props) {
                   accessibilityRole="button"
                   accessibilityLabel={t('a11y.settings.sourceDetails', { name })}
                   onPress={() => openDetails(entry.source)}
-                  hitSlop={hitSlopFor(iconSize.row)}
+                  hitSlop={hitSlopFor(icons.row)}
                 >
-                  <Info size={iconSize.row} color={colors.subtext} />
+                  <Info size={icons.row} color={colors.subtext} />
                 </Touchable>
                 <Switch
                   testID={`source-use-${entry.id}`}

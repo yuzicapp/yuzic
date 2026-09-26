@@ -1,8 +1,9 @@
 import React from 'react';
-import { iconSize, statusColor } from '@/constants/design';
+import { statusColor } from '@/constants/design';
 import { View, StyleSheet } from 'react-native';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useRadius } from '@/features/theme/useRadius';
 
 type Props = {
@@ -12,10 +13,11 @@ type Props = {
 
 const ConnectivityIndicator: React.FC<Props> = ({ isLoading, isConnected }) => {
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
 
   if (isLoading) {
-    return <SpinningLoaderCircle size={iconSize.badge} color={colors.themeColor} />;
+    return <SpinningLoaderCircle size={icons.badge} color={colors.themeColor} />;
   }
 
   return (

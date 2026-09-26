@@ -1,4 +1,4 @@
-import { hitSlopFor, iconSize, spacing, statusColor, typography } from '@/constants/design';
+import { hitSlopFor, spacing, statusColor, typography } from '@/constants/design';
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { Text } from '@/components/Text';
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, X } from 'lucide-react-native';
 
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { updateServer } from '@/state/redux/slices/serversSlice';
 import { forgetReachable } from '@/providers/http/urlFailover';
 import { useRadius } from '@/features/theme/useRadius';
@@ -23,6 +24,7 @@ type Props = {
 const FallbackUrlsCard: React.FC<Props> = ({ server }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const dispatch = useDispatch();
   const [draft, setDraft] = useState('');
@@ -87,9 +89,9 @@ const FallbackUrlsCard: React.FC<Props> = ({ server }) => {
                 accessibilityRole="button"
                 accessibilityLabel={t('settings.server.fallbackUrls.removeAria', { url })}
                 onPress={() => handleRemove(index)}
-                hitSlop={hitSlopFor(iconSize.row)}
+                hitSlop={hitSlopFor(icons.row)}
               >
-                <X size={iconSize.row} color={colors.subtext} />
+                <X size={icons.row} color={colors.subtext} />
               </Touchable>
             </View>
             {index < urls.length - 1 && <SettingsDivider />}
@@ -118,7 +120,7 @@ const FallbackUrlsCard: React.FC<Props> = ({ server }) => {
             onPress={handleAdd}
             style={[styles.addButton, { backgroundColor: colors.muted, borderRadius: rad.md }]}
           >
-            <Plus size={iconSize.row} color={colors.secondary} />
+            <Plus size={icons.row} color={colors.secondary} />
           </Touchable>
         </View>
         {error && (

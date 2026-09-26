@@ -12,13 +12,14 @@ import { CloudOff } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import NotFoundView from '@/components/NotFoundView';
 import StatusBanner from '@/components/StatusBanner';
 
 import AlbumContent from '@/features/album/components/Content';
 import LoadingAlbumContent from '@/features/album/components/Content/Loading';
 import { DETAIL_BAR_HEIGHT } from '@/components/DetailHeader';
-import { iconSize, spacing } from '@/constants/design';
+import { spacing } from '@/constants/design';
 import { useAlbumScreenModel, type AlbumRouteParams } from './useAlbumScreenModel';
 
 const AlbumScreen: React.FC = () => {
@@ -27,6 +28,7 @@ const AlbumScreen: React.FC = () => {
 
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const insets = useSafeAreaInsets();
 
   const model = useAlbumScreenModel(params);
@@ -52,7 +54,7 @@ const AlbumScreen: React.FC = () => {
           style={[styles.degradedBanner, { top: insets.top + DETAIL_BAR_HEIGHT }]}
         >
           <StatusBanner
-            icon={<CloudOff size={iconSize.badge} color={colors.subtext} />}
+            icon={<CloudOff size={icons.badge} color={colors.subtext} />}
             text={t('common.serverUnreachableBanner')}
             closable
             testID="server-unreachable-banner"

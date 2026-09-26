@@ -18,6 +18,7 @@ import { PodcastChannelOptions, PodcastListOptions } from '@/components/options/
 import EmptyState from '@/components/EmptyState';
 import SkeletonListRow from '@/components/SkeletonListRow';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useScrollClearance } from '@/features/theme/useScrollClearance';
 import { contentWidth, hitSlopFor, iconSize, spacing, statusColor, typography } from '@/constants/design';
 import { QueryKeys } from '@/state/query/queryKeys';
@@ -30,6 +31,7 @@ const LATEST_EPISODE_COUNT = 5;
 export default function PodcastsScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const api = useApi();
   const navigation = useNavigation<any>();
   const queryClient = useQueryClient();
@@ -152,26 +154,26 @@ export default function PodcastsScreen() {
           // show's own blurb, so the row says which one it is.
           subtitleTrailing={
             item.errorMessage
-              ? <AlertTriangle size={iconSize.badge} color={statusColor.warningText} />
+              ? <AlertTriangle size={icons.badge} color={statusColor.warningText} />
               : undefined
           }
           trailing={
             <Touchable
               testID="podcast-channel-options"
               onPress={() => setOptionsFor(item)}
-              hitSlop={hitSlopFor(iconSize.row)}
+              hitSlop={hitSlopFor(icons.row)}
               style={styles.rowAction}
               feedback="control"
               accessibilityRole="button"
               accessibilityLabel={t('a11y.rows.options', { title: item.title })}
             >
-              <Ellipsis size={iconSize.row} color={colors.subtext} />
+              <Ellipsis size={icons.row} color={colors.subtext} />
             </Touchable>
           }
         />
       );
     },
-    [navigation, colors.subtext, t]
+    [navigation, colors.subtext, t, icons]
   );
 
   return (

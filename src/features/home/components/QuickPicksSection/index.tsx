@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { selectHomeShelfItemCount } from '@/features/settings/home/state';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { usePlayingActions } from '@/features/playback/PlayingContext';
 import { usePlayableSongResolver } from '@/features/song/usePlayableSongResolver';
 import { useSongActionSheets } from '@/features/entity-actions/SongActionSheetContext';
@@ -27,7 +28,7 @@ import {
   QUICK_PICKS_PEEK,
   SECTION_H_PADDING,
 } from '@/features/home/constants';
-import { contentWidth, iconSize, spacing, typography } from '@/constants/design';
+import { contentWidth, spacing, typography } from '@/constants/design';
 
 function useQuickPicks(refreshKey: number, itemCount: number): Song[] {
   const songsById = useSongsById();
@@ -64,6 +65,7 @@ type Props = { refreshKey?: number };
 export default function QuickPicksSection({ refreshKey = 0 }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const { playSong } = usePlayingActions();
   const { resolvePlayableSong } = usePlayableSongResolver();
   const itemCount = useSelector(selectHomeShelfItemCount);
@@ -138,7 +140,7 @@ export default function QuickPicksSection({ refreshKey = 0 }: Props) {
                 rowStyle={styles.row}
                 trailing={
                   <IconActionButton
-                    icon={<Ellipsis size={iconSize.row} color={colors.secondary} />}
+                    icon={<Ellipsis size={icons.row} color={colors.secondary} />}
                     onPress={() => { void handleOptions(song); }}
                     accessibilityLabel={t('a11y.rows.options', { title: song.title })}
                     size="compact"

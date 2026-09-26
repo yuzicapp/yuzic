@@ -8,7 +8,8 @@ import { File } from 'expo-file-system';
 import { ShieldCheck, X } from 'lucide-react-native';
 
 import { useTheme } from '@/features/theme/useTheme';
-import { hitSlopFor, iconSize, spacing, typography } from '@/constants/design';
+import { useIconSize } from '@/features/theme/useIconSize';
+import { hitSlopFor, spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import SettingsCard from '../../components/SettingsCard';
 import SettingsCardHeader from '../../components/SettingsCardHeader';
@@ -41,6 +42,7 @@ type Props = {
 const ClientCertificateCard: React.FC<Props> = ({ server }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const { reapply } = useClientCertificate();
 
@@ -132,19 +134,19 @@ const ClientCertificateCard: React.FC<Props> = ({ server }) => {
 
       {installed ? (
         <View style={styles.row}>
-          <ShieldCheck size={iconSize.row} color={colors.text} />
+          <ShieldCheck size={icons.row} color={colors.text} />
           <Text style={[styles.installed, { color: colors.text }]} numberOfLines={1}>
             {t('settings.server.clientCertificate.installed')}
           </Text>
           <Touchable
             onPress={onRemove}
             disabled={busy}
-            hitSlop={hitSlopFor(iconSize.row)}
+            hitSlop={hitSlopFor(icons.row)}
             accessibilityLabel={t('settings.server.clientCertificate.remove')}
             accessibilityRole="button"
             testID="client-certificate-remove"
           >
-            <X size={iconSize.row} color={colors.subtext} />
+            <X size={icons.row} color={colors.subtext} />
           </Touchable>
         </View>
       ) : (

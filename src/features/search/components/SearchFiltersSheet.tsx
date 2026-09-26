@@ -5,6 +5,7 @@ import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Check } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { renderBackdrop } from '@/components/BottomSheetBackdrop';
 import {
   OptionSheetDivider,
@@ -17,7 +18,7 @@ import {
 import { ALL_SOURCES, getSourceMeta, type SourceId } from '@/features/sources/registry';
 import { promptSourceUse } from '@/features/settings/sources/sourceUsePrompt';
 import { searchUseOf } from '@/providers/registry/sources';
-import { iconSize, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
 import type { SearchEntityType } from '@/features/search/SearchContext';
 import type { SearchResultScope } from '@/features/search/searchLegs';
 
@@ -55,6 +56,7 @@ const SearchFiltersSheet = forwardRef<BottomSheetModal, Props>(
   ({ resultScope, onChangeScope, availableSourceIds, selectedSourceIds, onToggleSource, selectedEntityTypes, onToggleEntityType }, ref) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
+  const icons = useIconSize();
     const sheetBg = useOptionSheetBackground();
     const sheetContent = useOptionSheetContentStyle();
 
@@ -95,7 +97,7 @@ const SearchFiltersSheet = forwardRef<BottomSheetModal, Props>(
                 testID={`search-filters-scope-${scope}`}
                 label={t(`search.scope.${scope}`)}
                 onPress={() => onChangeScope(scope)}
-                trailing={checked ? <Check size={iconSize.secondary} color={colors.themeColor} /> : undefined}
+                trailing={checked ? <Check size={icons.secondary} color={colors.themeColor} /> : undefined}
               />
             );
           })}
@@ -116,7 +118,7 @@ const SearchFiltersSheet = forwardRef<BottomSheetModal, Props>(
                     label={label}
                     description={isOn ? undefined : t('search.filters.sourceOff', { name: label })}
                     onPress={() => (isOn ? onToggleSource(sourceId) : askToTurnOn(sourceId))}
-                    trailing={checked ? <Check size={iconSize.secondary} color={colors.themeColor} /> : undefined}
+                    trailing={checked ? <Check size={icons.secondary} color={colors.themeColor} /> : undefined}
                   />
                 );
               })}
@@ -137,7 +139,7 @@ const SearchFiltersSheet = forwardRef<BottomSheetModal, Props>(
                     testID={`search-filters-entity-${entityType}`}
                     label={entityTypeLabel(entityType)}
                     onPress={() => onToggleEntityType(entityType)}
-                    trailing={checked ? <Check size={iconSize.secondary} color={colors.themeColor} /> : undefined}
+                    trailing={checked ? <Check size={icons.secondary} color={colors.themeColor} /> : undefined}
                   />
                 );
               })}

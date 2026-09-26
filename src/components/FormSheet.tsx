@@ -15,9 +15,10 @@ import {
   useOptionSheetBackground,
   useSheetBottomInset,
 } from '@/components/options/sheetScaffold';
-import { controlSize, iconSize, spacing, typography } from '@/constants/design';
+import { controlSize, spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useSheetRef } from '@/components/useSheetRef';
 
 type FormSheetProps = {
@@ -64,6 +65,7 @@ export function FormSheet({
 }: FormSheetProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const sheetRef = useSheetRef();
   const sheetBg = useOptionSheetBackground();
@@ -148,7 +150,7 @@ export function FormSheet({
             accessibilityState={{ disabled: !submitEnabled }}
           >
             {submitting ? (
-              <SpinningLoaderCircle size={iconSize.row} color={colors.onThemeColor} />
+              <SpinningLoaderCircle size={icons.row} color={colors.onThemeColor} />
             ) : (
               <Text
                 style={[

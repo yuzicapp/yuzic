@@ -8,8 +8,8 @@ import SettingsDivider from '../components/SettingsDivider';
 import SettingsRow from '../components/SettingsRow';
 import { LanguageSelector } from './components/LanguageSelector';
 import { APPEARANCE_SECTIONS, type AppearanceSectionId } from './AppearanceSection';
-import { iconSize } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 
 const ICONS: Record<AppearanceSectionId, React.ComponentType<{ size?: number; color?: string }>> = {
   colours: Palette,
@@ -24,6 +24,7 @@ const AppearanceSettings: React.FC = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { colors } = useTheme();
+  const icons = useIconSize();
 
   return (
     <SettingsScreen title={t('settings.appearance.title')}>
@@ -37,7 +38,7 @@ const AppearanceSettings: React.FC = () => {
               <SettingsRow
                 testID={`appearance-${section}`}
                 label={t(`settings.appearance.sections.${section}`)}
-                leftIcon={<Icon size={iconSize.row} color={colors.subtext} />}
+                leftIcon={<Icon size={icons.row} color={colors.subtext} />}
                 onPress={() => router.push({ pathname: '/settings/appearanceSectionView', params: { section } })}
               />
             </React.Fragment>

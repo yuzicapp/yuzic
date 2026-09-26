@@ -20,6 +20,7 @@ import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import EmptyState from '@/components/EmptyState';
 import SkeletonListRow from '@/components/SkeletonListRow';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useScrollClearance } from '@/features/theme/useScrollClearance';
 import { useListDensity } from '@/features/theme/useListDensity';
 import { hitSlopFor, iconSize, spacing, typography } from '@/constants/design';
@@ -48,6 +49,7 @@ function formatDuration(seconds: number | undefined): string {
 export default function PodcastChannelScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const scrollClearance = useScrollClearance();
   const density = useListDensity();
   const api = useApi();
@@ -178,7 +180,7 @@ export default function PodcastChannelScreen() {
           </View>
           <View style={styles.action}>
             {isDownloading ? (
-              <SpinningLoaderCircle size={iconSize.row} color={colors.subtext} />
+              <SpinningLoaderCircle size={icons.row} color={colors.subtext} />
             ) : playable ? (
               // Play stays on the row — it is what the row is for. Deleting
               // the server's copy moves behind the "…", where every other
@@ -190,7 +192,7 @@ export default function PodcastChannelScreen() {
                   accessibilityLabel={t('podcasts.play')}
                   hitSlop={hitSlopFor(22)}
                 >
-                  <Play size={iconSize.secondary} color={colors.themeColor} fill={colors.themeColor} />
+                  <Play size={icons.secondary} color={colors.themeColor} fill={colors.themeColor} />
                 </Touchable>
                 <Touchable
                   testID="episode-options"
@@ -200,11 +202,11 @@ export default function PodcastChannelScreen() {
                   hitSlop={hitSlopFor(22)}
                   feedback="control"
                 >
-                  <Ellipsis size={iconSize.row} color={colors.subtext} />
+                  <Ellipsis size={icons.row} color={colors.subtext} />
                 </Touchable>
               </View>
             ) : item.status === 'completed' ? (
-              <CheckCircle size={iconSize.secondary} color={colors.subtext} />
+              <CheckCircle size={icons.secondary} color={colors.subtext} />
             ) : (
               <Touchable
                 onPress={() => void handleDownload(item)}
@@ -212,14 +214,14 @@ export default function PodcastChannelScreen() {
                 accessibilityLabel={t('podcasts.download')}
                 hitSlop={hitSlopFor(22)}
               >
-                <ArrowDownCircle size={iconSize.secondary} color={colors.secondary} />
+                <ArrowDownCircle size={icons.secondary} color={colors.secondary} />
               </Touchable>
             )}
           </View>
         </View>
       );
     },
-    [colors.secondary, colors.subtext, colors.themeColor, handlePlay, handleDownload, t, density.rowPadding]
+    [colors.secondary, colors.subtext, colors.themeColor, handlePlay, handleDownload, t, density.rowPadding, icons]
   );
 
   return (
