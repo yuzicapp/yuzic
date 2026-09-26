@@ -195,8 +195,10 @@
         "blur": "Blur",
         "dim": "Dim",
         "pickFailed": "Couldn't use that photo.",
-        "everyTab": "Behind every tab",
-        "everyTabSubtext": "Home, Search and Library. Off, just Home."
+        "scope": "Where it shows",
+        "scopeHome": "Home only",
+        "scopeTabs": "Home, Search and Library",
+        "scopeEverywhere": "Every screen"
       },
       "floatingDock": "Floating dock",
       "floatingDockSubtext": "Lift the tab bar off the screen's edges.",
@@ -740,7 +742,8 @@
     "dismiss": "Dismiss",
     "retry": "Retry",
     "loadFailed": "Couldn't load. Check your connection.",
-    "all": "All"
+    "all": "All",
+    "selected": "Selected"
   },
   "onboarding": {
     "home": {

@@ -195,8 +195,10 @@
         "blur": "ぼかし",
         "dim": "暗さ",
         "pickFailed": "この写真は使用できませんでした。",
-        "everyTab": "すべてのタブに表示",
-        "everyTabSubtext": "ホーム・検索・ライブラリ。オフのときはホームのみ。"
+        "scope": "表示する範囲",
+        "scopeHome": "ホームのみ",
+        "scopeTabs": "ホーム・検索・ライブラリ",
+        "scopeEverywhere": "すべての画面"
       },
       "floatingDock": "フローティングドック",
       "floatingDockSubtext": "タブバーを画面の端から浮かせて表示します。",
@@ -739,7 +741,8 @@
     "dismiss": "閉じる",
     "retry": "再試行",
     "loadFailed": "読み込めませんでした。接続を確認してください。",
-    "all": "すべて"
+    "all": "すべて",
+    "selected": "選択中"
   },
   "onboarding": {
     "home": {

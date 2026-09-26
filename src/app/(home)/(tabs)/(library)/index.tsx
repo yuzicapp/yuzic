@@ -2,7 +2,6 @@ import React, { useRef } from 'react'
 import { useIconSize } from '@/features/theme/useIconSize';
 import { RefreshControl, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { ScreenBackground } from '@/features/theme/ScreenBackground'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useScrollToTop } from '@react-navigation/native'
@@ -52,7 +51,6 @@ export default function LibraryScreen() {
       edges={['top']}
       style={[styles.screen, { backgroundColor: colors.background }]}
     >
-      <ScreenBackground screen="library" />
       <TabHeader
         title={t('library.title')}
         username={username}

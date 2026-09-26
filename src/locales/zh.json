@@ -195,8 +195,10 @@
         "blur": "模糊",
         "dim": "遮罩",
         "pickFailed": "无法使用这张照片。",
-        "everyTab": "所有标签页",
-        "everyTabSubtext": "主页、搜索和资料库。关闭时仅主页。"
+        "scope": "显示范围",
+        "scopeHome": "仅主页",
+        "scopeTabs": "主页、搜索和资料库",
+        "scopeEverywhere": "所有页面"
       },
       "floatingDock": "悬浮底栏",
       "floatingDockSubtext": "让标签栏脱离屏幕边缘悬浮显示。",
@@ -739,7 +741,8 @@
     "dismiss": "忽略",
     "retry": "重试",
     "loadFailed": "加载失败。请检查网络连接。",
-    "all": "全部"
+    "all": "全部",
+    "selected": "已选择"
   },
   "onboarding": {
     "home": {

@@ -16,9 +16,10 @@ import SettingsCard from '../../components/SettingsCard';
 import SettingsDivider from '../../components/SettingsDivider';
 import SettingsIconSelectCard from '../../components/SettingsIconSelectCard';
 import SettingsRow from '../../components/SettingsRow';
-import SettingsToggleRow from '../../components/SettingsToggleRow';
 
 type Choice = ScreenBackgroundSource['kind'];
+
+const SCOPES = ['home', 'tabs', 'everywhere'] as const;
 
 // Module-level, so these keep the static token: a hook cannot reach a constant
 // declared outside the component. They are fixed-size glyphs in a settings
@@ -91,12 +92,20 @@ export const BackgroundSelector: React.FC = () => {
               <SettingsDivider />
             </>
           )}
-          <SettingsToggleRow
-            label={t('settings.appearance.background.everyTab')}
-            subtext={t('settings.appearance.background.everyTabSubtext')}
-            value={surface.backgroundScope === 'tabs'}
-            onValueChange={v => dispatch(editTheme({ surface: { backgroundScope: v ? 'tabs' : 'home' } }))}
-          />
+          {/* Three reaches rather than a switch: "behind every tab" stopped at
+              the three tab roots, so an album, a playlist or settings never
+              showed it however the switch was set. */}
+          {SCOPES.map(scope => (
+            <React.Fragment key={scope}>
+              <SettingsRow
+                label={t(`settings.appearance.background.scope${scope[0].toUpperCase()}${scope.slice(1)}`)}
+                selected={surface.backgroundScope === scope}
+                rightText={surface.backgroundScope === scope ? t('common.selected') : undefined}
+                onPress={() => dispatch(editTheme({ surface: { backgroundScope: scope } }))}
+              />
+              <SettingsDivider />
+            </React.Fragment>
+          ))}
           <SettingsDivider />
           <SliderRow
             label={t('settings.appearance.background.blur')}

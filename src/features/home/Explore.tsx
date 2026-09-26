@@ -41,7 +41,6 @@ import { RefreshSettler } from './components/RefreshSettler'
 import { useApi } from '@/providers/registry/useApi'
 import type { SectionConfig } from '@/features/home/homeLayout'
 import { useScrollClearance } from '@/features/theme/useScrollClearance'
-import { useHasScreenBackground } from '@/features/theme/ScreenBackground'
 
 function renderSection(config: SectionConfig, refreshKey: number) {
   switch (config.type) {
@@ -92,7 +91,6 @@ export default function Home() {
   useScrollToTop(scrollRef)
 
   const { colors } = useTheme()
-  const hasBackground = useHasScreenBackground('home')
   const [refreshKey, setRefreshKey] = useState(0)
   const { resume, library, server, sources } = useDailyLayout(refreshKey)
   const isOffline = useIsOffline()
@@ -204,7 +202,7 @@ export default function Home() {
     <ScrollView
       ref={scrollRef}
       // Transparent over the theme's background image, which HomeScreen draws behind it.
-      style={[styles.container, { backgroundColor: hasBackground ? 'transparent' : colors.background }]}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={[styles.content, { paddingBottom: scrollClearance }]}
       showsVerticalScrollIndicator={false}
       refreshControl={

@@ -44,8 +44,13 @@ export interface Theme {
     coverTint: boolean;
     /** What the tab screens are drawn over: their plain colour, a photo, or what is playing. */
     background: ScreenBackgroundSource;
-    /** Behind Home alone, or behind every tab's root screen. */
-    backgroundScope: 'home' | 'tabs';
+    /**
+     * How far the background reaches: Home alone, every tab's root screen, or
+     * every screen in the app. `everywhere` excludes the full-screen player,
+     * which draws the cover as its own background — two images layered read as
+     * a mistake rather than a choice.
+     */
+    backgroundScope: 'home' | 'tabs' | 'everywhere';
     /** Blur radius applied to the background image, in points. */
     backgroundBlur: number;
     /**

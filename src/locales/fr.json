@@ -195,8 +195,10 @@
         "blur": "Flou",
         "dim": "Assombrissement",
         "pickFailed": "Impossible d'utiliser cette photo.",
-        "everyTab": "Derrière chaque onglet",
-        "everyTabSubtext": "Accueil, Recherche et Bibliothèque. Désactivé : l'accueil seulement."
+        "scope": "Où il apparaît",
+        "scopeHome": "Accueil seulement",
+        "scopeTabs": "Accueil, Recherche et Bibliothèque",
+        "scopeEverywhere": "Tous les écrans"
       },
       "floatingDock": "Barre flottante",
       "floatingDockSubtext": "Détacher la barre d'onglets des bords de l'écran.",
@@ -740,7 +742,8 @@
     "dismiss": "Ignorer",
     "retry": "Réessayer",
     "loadFailed": "Chargement impossible. Vérifiez votre connexion.",
-    "all": "Tout"
+    "all": "Tout",
+    "selected": "Sélectionné"
   },
   "onboarding": {
     "home": {

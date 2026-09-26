@@ -5,7 +5,7 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import { BackgroundSelector } from './BackgroundSelector';
 import settingsAppearanceReducer, { editTheme, selectActiveTheme } from '../state';
-import { ScreenBackground, useHasScreenBackground } from '@/features/theme/ScreenBackground';
+import { ScreenBackgroundProvider } from '@/features/theme/ScreenBackground';
 import { pickBackgroundImage, removeBackgroundImage } from '@/features/theme/backgroundImage';
 
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
@@ -18,6 +18,9 @@ jest.mock('@/features/theme/backgroundImage', () => ({
 }));
 let mockSong: { cover: { kind: 'url'; url: string } } | null = null;
 jest.mock('@/features/playback/PlayingContext', () => ({ usePlayingState: () => ({ currentSong: mockSong }) }));
+// The route decides how far the background reaches, so the tests drive it.
+let mockSegments: string[] = ['(tabs)', '(home)', 'index'];
+jest.mock('expo-router', () => ({ useSegments: () => mockSegments }));
 jest.mock('@/providers/registry/covers', () => ({
   buildCover: (cover: { kind: string; url?: string }) => (cover.kind === 'url' ? cover.url : null),
 }));
@@ -36,6 +39,7 @@ const background = (store: ReturnType<typeof setup>['store']) => selectActiveThe
 beforeEach(() => {
   jest.clearAllMocks();
   mockSong = null;
+  mockSegments = ['(tabs)', '(home)', 'index'];
 });
 
 describe('BackgroundSelector', () => {
@@ -84,9 +88,11 @@ describe('BackgroundSelector', () => {
 });
 
 describe('ScreenBackground', () => {
-  const Probe = ({ screen = 'home' }: { screen?: 'home' | 'search' }) => (
-    <>{useHasScreenBackground(screen) ? <ScreenBackground screen={screen} /> : null}</>
-  );
+  const HOME = ['(tabs)', '(home)', 'index'];
+  const SEARCH = ['(tabs)', '(search)', 'index'];
+  const ALBUM = ['(tabs)', '(home,search,library)', 'albumView'];
+
+  const Probe = () => <ScreenBackgroundProvider>{null}</ScreenBackgroundProvider>;
 
   it('draws nothing for a plain background', async () => {
     const { view } = setup(<Probe />);
@@ -106,12 +112,31 @@ describe('ScreenBackground', () => {
 
   it('stays on Home unless it is set to go behind every tab', async () => {
     mockSong = { cover: { kind: 'url', url: 'https://covers.test/1.jpg' } };
-    const { store, view } = setup(<Probe screen="search" />);
+    mockSegments = SEARCH;
+    const { store, view } = setup(<Probe />);
     store.dispatch(editTheme({ surface: { background: { kind: 'cover' } } }));
     const screen = await view;
     expect(screen.queryByTestId('screen-background')).toBeNull();
 
     await act(async () => { store.dispatch(editTheme({ surface: { backgroundScope: 'tabs' } })); });
     expect(screen.getByTestId('screen-background')).toBeTruthy();
+  });
+
+  it('reaches a pushed screen only at the widest scope', async () => {
+    // The gap this closes: "behind every tab" stopped at the three tab roots,
+    // so an album, a playlist or settings never showed it.
+    mockSong = { cover: { kind: 'url', url: 'https://covers.test/1.jpg' } };
+    mockSegments = ALBUM;
+    const { store, view } = setup(<Probe />);
+    await act(async () => {
+      store.dispatch(editTheme({ surface: { background: { kind: 'cover' }, backgroundScope: 'tabs' } }));
+    });
+    const screen = await view;
+    expect(screen.queryByTestId('screen-background')).toBeNull();
+
+    await act(async () => { store.dispatch(editTheme({ surface: { backgroundScope: 'everywhere' } })); });
+    expect(screen.getByTestId('screen-background')).toBeTruthy();
+
+    mockSegments = HOME;
   });
 });

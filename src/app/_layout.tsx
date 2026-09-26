@@ -15,6 +15,8 @@ import 'react-native-reanimated';
 import { enableFreeze } from 'react-native-screens';
 import { PlayingProvider } from '@/features/playback/PlayingContext';
 import { TextScaleProvider } from '@/features/theme/textScale';
+import { ScreenBackgroundProvider } from '@/features/theme/ScreenBackground';
+import { useScreenBackground } from '@/features/theme/screenBackgroundContext';
 import { DlnaProvider } from '@/features/player/DlnaContext';
 import { PlaybackSinkProvider } from '@/features/player/PlaybackSinkContext';
 import { SongActionSheetProvider } from '@/features/entity-actions/SongActionSheetContext';
@@ -210,6 +212,23 @@ function useImageMemoryCleanup() {
   }, []);
 }
 
+
+/**
+ * React Navigation paints its own scene background, from its own theme. Left
+ * opaque it covers the image drawn behind the navigator, which is why this
+ * reads the background surface and hands the navigators a transparent page
+ * colour while one is showing — the same thing `useTheme` does for the screens
+ * themselves. Inside `ScreenBackgroundProvider` so it can see it.
+ */
+function NavigationTheme({ isDarkMode, children }: { isDarkMode: boolean; children: React.ReactNode }) {
+  const background = useScreenBackground();
+  const base = isDarkMode ? DarkTheme : DefaultTheme;
+  const value = background
+    ? { ...base, colors: { ...base.colors, background: 'transparent' } }
+    : base;
+  return <ThemeProvider value={value}>{children}</ThemeProvider>;
+}
+
 function AppShell() {
   const { isDarkMode } = useTheme();
   const language = useSelector(selectLanguage);
@@ -248,7 +267,7 @@ function AppShell() {
   }, []);
 
   return (
-    <ThemeProvider value={isDarkMode ? DarkTheme : DefaultTheme}>
+    <>
       {/* Above everything that draws text: it publishes the user's text size
           once so `components/Text` can apply it live, instead of the size
           being multiplied into the type roles at startup. */}
@@ -258,6 +277,12 @@ function AppShell() {
         <PlaybackSinkProvider>
         <PlayingProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
+              {/* Inside PlayingProvider, which it reads to draw the playing
+                  cover, and outside the navigator, so the image sits behind
+                  every screen. PlayerHost renders after it and keeps its own
+                  cover background. */}
+              <ScreenBackgroundProvider>
+              <NavigationTheme isDarkMode={isDarkMode}>
               <ErrorBoundary>
               <BottomSheetModalProvider>
                 <SongActionSheetProvider>
@@ -289,13 +314,15 @@ function AppShell() {
                 </SongActionSheetProvider>
               </BottomSheetModalProvider>
               </ErrorBoundary>
+              </NavigationTheme>
+              </ScreenBackgroundProvider>
             </GestureHandlerRootView>
         </PlayingProvider>
         </PlaybackSinkProvider>
         </DlnaProvider>
       </DownloadProvider>
       </TextScaleProvider>
-    </ThemeProvider>
+    </>
   );
 }
 

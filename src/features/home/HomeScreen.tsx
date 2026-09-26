@@ -7,7 +7,6 @@ import { useSelector } from 'react-redux'
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors'
 import { selectSyncOnAppStart } from '@/features/settings/sync/state';
 import { useTheme } from '@/features/theme/useTheme'
-import { ScreenBackground, useHasScreenBackground } from '@/features/theme/ScreenBackground'
 import { useSync } from '@/features/library/useSync'
 import { useIsOffline } from '@/features/connectivity/useIsOffline'
 import { useAccountSheet } from '@/features/settings/AccountSheetContext'
@@ -23,7 +22,6 @@ export default function HomeScreen() {
   const username = activeServer?.username
 
   const { colors } = useTheme()
-  const hasBackground = useHasScreenBackground('home')
   const { openAccountSheet } = useAccountSheet()
 
   const [isMounted, setIsMounted] = useState(false)
@@ -69,7 +67,6 @@ export default function HomeScreen() {
       edges={['top']}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      {hasBackground && <ScreenBackground screen="home" />}
       <TabHeader
         title="Yuzic"
         username={username}
