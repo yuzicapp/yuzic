@@ -29,6 +29,14 @@ type Props = {
   roundedCover?: boolean;
   showCover?: boolean;
   variant?: 'default' | 'compact';
+  /**
+   * Extra style on the row itself. **Lands after the density padding**, so a
+   * `paddingVertical` here replaces the user's density setting rather than
+   * adding to it. Pass vertical padding only when it comes from
+   * `useListDensity()` — as `SongRow` does with `trackRowPadding`. Quick Picks
+   * passed a static `spacing.tight` and was the one list on Home that ignored
+   * the setting while looking like it honoured it.
+   */
   rowStyle?: StyleProp<ViewStyle>;
   style?: StyleProp<ViewStyle>;
   /**

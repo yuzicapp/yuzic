@@ -15,6 +15,7 @@ import type { Song } from '@/domain/entities/Song';
 import Touchable from '@/components/Touchable';
 import { iconSize, onDark, spacing, typography, veil } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
+import { useListDensity } from '@/features/theme/useListDensity';
 
 type QueueItemProps = {
   item: Song;
@@ -37,6 +38,7 @@ function queueItemPropsAreEqual(prev: QueueItemProps, next: QueueItemProps) {
 const QueueItem = memo(
   ({ item, index, isCurrent, onPress }: QueueItemProps) => {
     const rad = useRadius();
+    const density = useListDensity();
     // The drag handle comes from the list rather than being threaded down as a
     // prop, so it stays out of the memo comparison above.
     const drag = useReorderableDrag();
@@ -46,7 +48,7 @@ const QueueItem = memo(
       onLongPress={drag}
       style={[
         styles.queueItem,
-        { borderRadius: rad.md },
+        { borderRadius: rad.md, paddingVertical: density.trackRowPadding },
         isCurrent && styles.activeQueueItem,
       ]}
     >
@@ -275,10 +277,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
 
+  // Vertical padding comes from the density setting at render, not from here:
+  // the queue is a whole record's worth of track rows and was the one primary
+  // list in the app that held still when the setting changed.
   queueItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.controlGap,
     paddingHorizontal: spacing.md,
   },
 

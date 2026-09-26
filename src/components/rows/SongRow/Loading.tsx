@@ -6,13 +6,17 @@ import {
 import { Skeleton } from 'moti/skeleton';
 import { useTheme } from '@/features/theme/useTheme';
 import { spacing } from '@/constants/design';
+import { useListDensity } from '@/features/theme/useListDensity';
 
 const LoadingSongRow: React.FC = () => {
   const { isDarkMode } = useTheme();
   const colorMode = isDarkMode ? 'dark' : 'light';
+  // The same rhythm the real row uses. A flat value here made every track list
+  // jump height the moment data arrived at any density but the default.
+  const density = useListDensity();
 
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, { paddingVertical: density.trackRowPadding }]}>
       <View style={styles.songInfo}>
         {/* Cover art */}
         <Skeleton
@@ -59,7 +63,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.controlGap,
     paddingHorizontal: spacing.lg,
   },
   songInfo: {

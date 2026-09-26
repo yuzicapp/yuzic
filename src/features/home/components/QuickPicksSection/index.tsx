@@ -174,8 +174,11 @@ const styles = StyleSheet.create({
   rowWrapper: {
     paddingHorizontal: 0,
   },
+  // Horizontal only. `rowStyle` is spread after the density padding in
+  // MediaListRow, so a `paddingVertical` here silently replaced it and Quick
+  // Picks was the one list on Home that ignored the density setting while
+  // looking like it honoured it.
   row: {
     paddingHorizontal: SECTION_H_PADDING,
-    paddingVertical: spacing.tight,
   },
 });

@@ -1,4 +1,4 @@
-import { iconSize, onDark, radius, shade, spacing, stateLayer, typography, veil } from '@/constants/design';
+import { iconSize, onDark, shade, spacing, stateLayer, typography, veil } from '@/constants/design';
 import React from 'react';
 import { useRadius } from '@/features/theme/useRadius';
 import {
@@ -22,10 +22,13 @@ type HeaderProps = {
 
 export function OptionSheetHeader({ cover, title, subtitle, titleLines = 1 }: HeaderProps) {
   const { colors } = useTheme();
+  // Row artwork, so it takes the preset like every other thumbnail. One line,
+  // but it is the header of every options sheet in the app.
+  const rad = useRadius();
 
   return (
     <View style={styles.header}>
-      <MediaImage cover={cover} size="grid" style={styles.cover} />
+      <MediaImage cover={cover} size="grid" style={[styles.cover, { borderRadius: rad.thumb }]} />
       <View style={styles.headerText}>
         <Text style={[styles.title, { color: colors.secondary }]} numberOfLines={titleLines}>
           {title}
@@ -242,7 +245,6 @@ const styles = StyleSheet.create({
   cover: {
     width: 48,
     height: 48,
-    borderRadius: radius.sm,
     marginRight: spacing.md,
   },
   headerText: { flex: 1 },
