@@ -1,10 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { buildCover } from '@/providers/registry/covers';

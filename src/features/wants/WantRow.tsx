@@ -5,8 +5,9 @@ import { Ellipsis } from 'lucide-react-native';
 
 import MediaListRow from '@/components/MediaListRow';
 import Touchable from '@/components/Touchable';
-import { hitSlopFor, iconSize, spacing } from '@/constants/design';
+import { hitSlopFor, spacing } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import type { Want } from '@/state/redux/slices/wantsSlice';
 import WantStatusBadge from './WantStatusBadge';
 import type { WantStatus } from './jobStatus';
@@ -37,6 +38,7 @@ export default function WantRow({
 }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
 
   return (
     <MediaListRow
@@ -54,12 +56,12 @@ export default function WantRow({
           testID="want-options"
           accessibilityRole="button"
           accessibilityLabel={t('a11y.rows.options', { title: want.title })}
-          hitSlop={hitSlopFor(iconSize.row)}
+          hitSlop={hitSlopFor(icons.row)}
           onPress={onOptions}
           style={styles.optionsButton}
           feedback="control"
         >
-          <Ellipsis size={iconSize.row} color={colors.subtext} />
+          <Ellipsis size={icons.row} color={colors.subtext} />
         </Touchable>
       }
     />

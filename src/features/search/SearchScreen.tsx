@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import StatusBanner from '@/components/StatusBanner';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import TabHeader from '@/components/TabHeader';
 import Touchable from '@/components/Touchable';
 import { useRadius } from '@/features/theme/useRadius';
@@ -32,6 +33,7 @@ const Search = () => {
   const { t } = useTranslation();
   const scrollClearance = useScrollClearance();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const m = useSearchScreenModel();
 
@@ -41,7 +43,7 @@ const Search = () => {
       <TabHeader title={t('search.title')} username={m.username} onAccountPress={m.openAccountSheet} />
       <View style={styles.headerRow}>
         <View style={[styles.searchContainer, { backgroundColor: colors.muted, borderRadius: rad.md }]}>
-          <SearchIcon size={iconSize.row} color={colors.placeholder} style={styles.searchIcon} />
+          <SearchIcon size={icons.row} color={colors.placeholder} style={styles.searchIcon} />
           <TextInput
             accessibilityLabel={t('a11y.searchInput')}
             testID="search-input"
@@ -88,13 +90,13 @@ const Search = () => {
           ]}
           onPress={() => filtersSheetRef.current?.present()}
         >
-          <SlidersHorizontal size={iconSize.row} color={m.isOtherScope ? colors.themeColor : colors.secondary} />
+          <SlidersHorizontal size={icons.row} color={m.isOtherScope ? colors.themeColor : colors.secondary} />
         </Touchable>
       </View>
 
       {m.hasSearched && !m.isLoading && (m.hasError || m.degraded) && (
         <StatusBanner
-          icon={<CloudOff size={iconSize.badge} color={colors.subtext} />}
+          icon={<CloudOff size={icons.badge} color={colors.subtext} />}
           text={m.hasError ? t('search.searchError') : t('search.searchLocalOnly')}
           closable
           style={styles.errorBanner}

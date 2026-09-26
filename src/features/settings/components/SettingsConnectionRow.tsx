@@ -1,12 +1,14 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { ChevronRight } from 'lucide-react-native';
 
 import Touchable from '@/components/Touchable';
 import { SETTINGS_STATUS_COLORS } from '@/features/settings/constants';
-import { iconSize, spacing, tinted, typography } from '@/constants/design';
+import { spacing, tinted, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 
 type ConnectionStatus = 'connected' | 'disconnected' | 'enabled' | 'disabled';
 
@@ -31,6 +33,7 @@ const SettingsConnectionRow: React.FC<Props> = ({
   testID,
 }) => {
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
 
   return (
@@ -51,7 +54,7 @@ const SettingsConnectionRow: React.FC<Props> = ({
           <View style={[styles.statusDot, { backgroundColor: SETTINGS_STATUS_COLORS[status], borderRadius: rad.pill }]} />
           <Text style={[styles.statusLabel, { color: colors.subtext }]}>{statusLabel}</Text>
         </View>
-        <ChevronRight size={iconSize.row} color={colors.border} />
+        <ChevronRight size={icons.row} color={colors.border} />
       </View>
     </Touchable>
   );

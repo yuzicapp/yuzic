@@ -1,6 +1,7 @@
-import { cappedTypography, fontScaleCap, hitSlopFor, iconSize, radius, spacing } from '@/constants/design';
+import { cappedTypography, fontScaleCap, hitSlopFor, iconSize, spacing } from '@/constants/design';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { InteractionManager, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { InteractionManager, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Text } from '@/components/Text';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Music, Play, Pause } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +27,7 @@ import {
 } from '@/features/player/PlayerExpansion';
 import { settleFromBar } from '@/features/player/settle';
 import { useTheme } from '@/features/theme/useTheme';
+import { useRadius } from '@/features/theme/useRadius';
 import { selectPlayingBarAction } from '@/features/settings/appearance/state';
 
 import { usePlayingBarAction } from './actions/usePlayingBarAction';
@@ -61,6 +63,7 @@ const BAR_MIN_OPACITY = 0.02;
 function PlayingBarBase() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const rad = useRadius();
   const themeColor = colors.themeColor;
   const actionMode = useSelector(selectPlayingBarAction);
   const { height } = useWindowDimensions();
@@ -201,7 +204,7 @@ function PlayingBarBase() {
                   <Animated.View
                     ref={coverRef}
                     onLayout={measureCover}
-                    style={[styles.coverArt, coverHandoffStyle]}
+                    style={[styles.coverArt, { borderRadius: rad.thumb }, coverHandoffStyle]}
                   >
                     {currentSong?.cover ? (
                       <MediaImage
@@ -221,6 +224,7 @@ function PlayingBarBase() {
                       testID="playing-bar-title"
                       numberOfLines={1}
                       maxFontSizeMultiplier={fontScaleCap.control}
+                      appScaling={false}
                       style={[styles.title, { color: colors.secondary }]}
                     >
                       {currentSong?.title || t('playing.bar.noSong')}
@@ -228,6 +232,7 @@ function PlayingBarBase() {
                     <Text
                       numberOfLines={1}
                       maxFontSizeMultiplier={fontScaleCap.control}
+                      appScaling={false}
                       style={[styles.artist, { color: colors.subtext }]}
                     >
                       {currentSong?.artist.name || t('playing.bar.selectTrack')}
@@ -324,7 +329,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     marginRight: spacing.md,
-    borderRadius: radius.sm,
     // The artwork fills this slot now rather than being it, so the slot has to
     // do the clipping — it is what the player measures and hands over.
     overflow: 'hidden',

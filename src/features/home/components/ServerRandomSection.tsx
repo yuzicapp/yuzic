@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { Text } from '@/components/Text';
 import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/features/theme/useTheme';
 import Touchable from '@/components/Touchable';

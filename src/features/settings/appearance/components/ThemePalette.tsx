@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import ColorPicker, { HueSlider, Panel1 } from 'reanimated-color-picker';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
 
-import { iconSize, radius, spacing, typography } from '@/constants/design';
+import { radius, spacing, typography } from '@/constants/design';
 import Touchable from '@/components/Touchable';
 import { editTheme, resetPalettes, selectActiveTheme } from '@/features/settings/appearance/state';
 import { DEFAULT_THEME, derivePalette, type PaletteSeed } from '@/features/theme/presets';
 import { mix } from '@/features/theme/color';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import SettingsCard from '../../components/SettingsCard';
 import SettingsCardHeader from '../../components/SettingsCardHeader';
 import SettingsDivider from '../../components/SettingsDivider';
@@ -96,6 +98,7 @@ type ColorRowProps = {
 /** One colour: its name, a swatch and the hex, opening a picker in place. */
 const ColorRow: React.FC<ColorRowProps> = ({ label, value, open, onToggle, onChange }) => {
   const { colors } = useTheme();
+  const icons = useIconSize();
   return (
     <View>
       <Touchable
@@ -112,8 +115,8 @@ const ColorRow: React.FC<ColorRowProps> = ({ label, value, open, onToggle, onCha
           {/* Always six digits: the default palette writes some colours as #fff. */}
           <Text style={[styles.hex, { color: colors.subtext }]}>{mix(value, value, 0).toUpperCase()}</Text>
           {open
-            ? <ChevronUp size={iconSize.row} color={colors.subtext} />
-            : <ChevronDown size={iconSize.row} color={colors.subtext} />}
+            ? <ChevronUp size={icons.row} color={colors.subtext} />
+            : <ChevronDown size={icons.row} color={colors.subtext} />}
         </View>
       </Touchable>
       {open && (

@@ -1,14 +1,11 @@
-import { iconSize, onDark, radius, shade, spacing, stateLayer, typography, veil } from '@/constants/design';
+import { onDark, shade, spacing, stateLayer, typography, veil } from '@/constants/design';
 import React from 'react';
 import { useRadius } from '@/features/theme/useRadius';
-import {
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { MediaImage } from '@/components/MediaImage';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import type { CoverSource } from '@/domain/entities/Cover';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import Touchable from '@/components/Touchable';
@@ -22,10 +19,13 @@ type HeaderProps = {
 
 export function OptionSheetHeader({ cover, title, subtitle, titleLines = 1 }: HeaderProps) {
   const { colors } = useTheme();
+  // Row artwork, so it takes the preset like every other thumbnail. One line,
+  // but it is the header of every options sheet in the app.
+  const rad = useRadius();
 
   return (
     <View style={styles.header}>
-      <MediaImage cover={cover} size="grid" style={styles.cover} />
+      <MediaImage cover={cover} size="grid" style={[styles.cover, { borderRadius: rad.thumb }]} />
       <View style={styles.headerText}>
         <Text style={[styles.title, { color: colors.secondary }]} numberOfLines={titleLines}>
           {title}
@@ -73,7 +73,8 @@ export function OptionSheetRow({
   testID,
 }: RowProps) {
   const { colors } = useTheme();
-  const leading = loading ? <SpinningLoaderCircle size={iconSize.row} color={colors.subtext} /> : icon;
+  const icons = useIconSize();
+  const leading = loading ? <SpinningLoaderCircle size={icons.row} color={colors.subtext} /> : icon;
 
   return (
     <Touchable
@@ -242,7 +243,6 @@ const styles = StyleSheet.create({
   cover: {
     width: 48,
     height: 48,
-    borderRadius: radius.sm,
     marginRight: spacing.md,
   },
   headerText: { flex: 1 },

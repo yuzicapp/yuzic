@@ -5,12 +5,8 @@ import React, {
   forwardRef,
   useMemo,
 } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-} from 'react-native';
+import { View, StyleSheet, TextInput } from 'react-native';
+import { Text } from '@/components/Text';
 import {
   BottomSheetModal,
   BottomSheetFlatList,
@@ -21,6 +17,7 @@ import type { Playlist } from '@/domain/entities/Playlist';
 import type { Song } from '@/domain/entities/Song';
 import { MediaImage } from './MediaImage';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePlaylists } from '@/features/playlist/usePlaylists';
 import { useCreatePlaylist } from '@/features/playlist/useCreatePlaylist';
@@ -45,6 +42,7 @@ const PlaylistList = forwardRef<BottomSheetModal, PlaylistListProps>(
   ({ selectedSong, onClose }, ref) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
+  const icons = useIconSize();
     const rad = useRadius();
     const isOffline = useIsOffline();
     const themeColor = colors.themeColor;
@@ -254,7 +252,7 @@ const PlaylistList = forwardRef<BottomSheetModal, PlaylistListProps>(
             onPress={handleDone}
           >
             {membershipLoading ? (
-              <SpinningLoaderCircle size={iconSize.row} color={onDark.text} />
+              <SpinningLoaderCircle size={icons.row} color={onDark.text} />
             ) : (
               <Text style={styles.doneButtonText}>{t('common.done')}</Text>
             )}

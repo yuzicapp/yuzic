@@ -1,12 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Text } from '@/components/Text';
 import { MediaImage } from '@/components/MediaImage';
 import { useTheme } from '@/features/theme/useTheme';
 import { controlSize, spacing, typography } from '@/constants/design';
@@ -29,6 +24,14 @@ type Props = {
   roundedCover?: boolean;
   showCover?: boolean;
   variant?: 'default' | 'compact';
+  /**
+   * Extra style on the row itself. **Lands after the density padding**, so a
+   * `paddingVertical` here replaces the user's density setting rather than
+   * adding to it. Pass vertical padding only when it comes from
+   * `useListDensity()` — as `SongRow` does with `trackRowPadding`. Quick Picks
+   * passed a static `spacing.tight` and was the one list on Home that ignored
+   * the setting while looking like it honoured it.
+   */
   rowStyle?: StyleProp<ViewStyle>;
   style?: StyleProp<ViewStyle>;
   /**

@@ -33,6 +33,7 @@ import { QueryKeys } from '@/state/query/queryKeys';
 import { useServerReachable } from '@/features/connectivity/useServerReachable';
 import { useScrollClearance } from '@/features/theme/useScrollClearance';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { usePlayingActions } from '@/features/playback/PlayingContext';
 import haptics from '@/components/haptics';
 
@@ -64,6 +65,7 @@ type StationSort = 'serverOrder' | 'title';
 export default function RadioScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const api = useApi();
   const queryClient = useQueryClient();
   const serverReachable = useServerReachable();
@@ -189,19 +191,19 @@ export default function RadioScreen() {
             <Touchable
               testID="radio-station-options"
               onPress={() => setOptionsFor(item)}
-              hitSlop={hitSlopFor(iconSize.row)}
+              hitSlop={hitSlopFor(icons.row)}
               style={styles.rowAction}
               feedback="control"
               accessibilityRole="button"
               accessibilityLabel={t('a11y.rows.options', { title: item.name })}
             >
-              <Ellipsis size={iconSize.row} color={colors.subtext} />
+              <Ellipsis size={icons.row} color={colors.subtext} />
             </Touchable>
           }
         />
       )
     ),
-    [handlePlay, colors.subtext, t, isGridView, gridWidth]
+    [handlePlay, colors.subtext, t, isGridView, gridWidth, icons]
   );
 
   const stationCount = stationsQuery.data?.length ?? 0;

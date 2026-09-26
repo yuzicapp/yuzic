@@ -1,5 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import SourceBadge from '@/components/SourceBadge';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { RefreshCw } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -7,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { notify } from '@/components/toast';
 
 import { useTheme } from '@/features/theme/useTheme';
-import { useRadius } from '@/features/theme/useRadius';
+import { useIconSize } from '@/features/theme/useIconSize';
 import IconActionButton from '@/components/IconActionButton';
 import SectionHeader from '@/components/SectionHeader';
 import SkeletonListRow from '@/components/SkeletonListRow';
@@ -26,7 +28,7 @@ import {
 } from '@/providers/registry/pageSources';
 import { ARTIST_CATALOGUE } from '@/providers/registry/artistSources';
 import { QueryKeys } from '@/state/query/queryKeys';
-import { iconSize, onDark, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
 import { playlistArtistNames as computePlaylistArtistNames } from '@/features/playlist/recommendedSongs';
 import type { Album } from '@/domain/entities/Album';
 import type { Playlist } from '@/domain/entities/Playlist';
@@ -47,7 +49,7 @@ type Props = {
 export const ExternalRecommendedSection: React.FC<Props> = ({ playlist, songs, onRefreshExternal }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const rad = useRadius();
+  const icons = useIconSize();
   const showSourceHeaders = useSelector(selectShowSourceHeaders);
   const isOffline = useIsOffline();
   const catalogueEnabled = useSelector(selectSourceUse(CATALOGUE_TRACKS_RECOMMENDATIONS_USE));
@@ -111,14 +113,12 @@ export const ExternalRecommendedSection: React.FC<Props> = ({ playlist, songs, o
         title={t('playlist.recommended.catalogueTitle')}
         badge={
           showSourceHeaders ? (
-            <View style={[styles.sourceBadge, { backgroundColor: ARTIST_CATALOGUE.badge.color, borderRadius: rad.pill }]}>
-              <Text style={styles.sourceBadgeLetter}>{ARTIST_CATALOGUE.badge.letter}</Text>
-            </View>
+            <SourceBadge letter={ARTIST_CATALOGUE.badge.letter} color={ARTIST_CATALOGUE.badge.color} />
           ) : undefined
         }
         action={
           <IconActionButton
-            icon={<RefreshCw size={iconSize.row} color={colors.subtext} />}
+            icon={<RefreshCw size={icons.row} color={colors.subtext} />}
             onPress={onRefreshExternal}
             loading={externalQuery.isFetching}
             accessibilityLabel={t('playlist.recommended.refresh')}
@@ -169,11 +169,6 @@ const styles = StyleSheet.create({
     height: 22,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  sourceBadgeLetter: {
-    ...typography.micro,
-    fontWeight: '600',
-    color: onDark.text,
   },
   loader: { marginVertical: spacing.xl },
   emptyText: {

@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { CheckCircle, X } from 'lucide-react-native';
@@ -8,7 +9,7 @@ import { notify } from '@/components/toast';
 import { MediaImage } from '@/components/MediaImage';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import Touchable from '@/components/Touchable';
-import { hitSlopFor, iconSize, spacing, statusColor, typography } from '@/constants/design';
+import { hitSlopFor, spacing, statusColor, typography } from '@/constants/design';
 import type { Album } from '@/domain/entities/Album';
 import { albumCoverSubject, missingCover, type CoverSource } from '@/domain/entities/Cover';
 import { useAlbums } from '@/features/album/useAlbums';
@@ -16,6 +17,7 @@ import { matchesAlbum, type DownloaderQueueItem } from '@/features/downloaders/q
 import { useQueueRowSubtitle } from '@/features/settings/downloaders/useQueueRowSubtitle';
 import { useRadius } from '@/features/theme/useRadius';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import type { DownloaderId } from '@/state/redux/slices/downloadersSlice';
 
 type Props = {
@@ -62,6 +64,7 @@ function coverFor(item: DownloaderQueueItem, album: Album | null): CoverSource {
 export default function DownloaderQueueSection({ id, title, items, isLoading, hasError, cancelItem }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const navigation = useNavigation<any>();
   const subtitleFor = useQueueRowSubtitle();
@@ -140,10 +143,10 @@ export default function DownloaderQueueSection({ id, title, items, isLoading, ha
             {item.active ? (
               <Text style={[styles.percent, { color: colors.subtext }]}>{percent}%</Text>
             ) : (
-              <CheckCircle size={iconSize.inline} color={statusColor.success} />
+              <CheckCircle size={icons.inline} color={statusColor.success} />
             )}
             {cancelItem && (cancellingId === item.id ? (
-              <View style={styles.cancel}><SpinningLoaderCircle size={iconSize.row} color={colors.subtext} /></View>
+              <View style={styles.cancel}><SpinningLoaderCircle size={icons.row} color={colors.subtext} /></View>
             ) : (
               <Touchable
                 feedback="control"
@@ -153,7 +156,7 @@ export default function DownloaderQueueSection({ id, title, items, isLoading, ha
                 accessibilityRole="button"
                 accessibilityLabel={t('settings.downloaders.cancelAria', { title: label })}
               >
-                <X size={iconSize.row} color={statusColor.destructive} />
+                <X size={icons.row} color={statusColor.destructive} />
               </Touchable>
             ))}
           </View>
@@ -174,7 +177,7 @@ export default function DownloaderQueueSection({ id, title, items, isLoading, ha
     <View testID={`downloader-queue-section-${id}`}>
       <Text style={[styles.sectionLabel, { color: colors.subtext }]}>{title}</Text>
       {isLoading ? (
-        <View style={styles.status}><SpinningLoaderCircle size={iconSize.row} color={colors.subtext} /></View>
+        <View style={styles.status}><SpinningLoaderCircle size={icons.row} color={colors.subtext} /></View>
       ) : hasError ? (
         <Text style={[styles.statusText, { color: colors.subtext }]}>{t(`settings.downloaders.${id}.connectionFailed`)}</Text>
       ) : items.length === 0 ? (

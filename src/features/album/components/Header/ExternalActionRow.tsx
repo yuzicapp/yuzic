@@ -16,6 +16,7 @@ import { useWantToggle } from '@/features/entity-actions/shared/wantActions';
 import { playableSongs } from '@/features/album/trackPlayability';
 import { usePlayingActions } from '@/features/playback/PlayingContext';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 
 /**
  * Get, play-a-preview and Want for an album nobody's server has.
@@ -27,6 +28,7 @@ import { useTheme } from '@/features/theme/useTheme';
 export default function ExternalActionRow({ model }: { model: AlbumScreenModel }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const canDownload = useAnyAlbumDownloaderConnected();
   const { playSongInCollection } = usePlayingActions();
   const { album, songs, playability, externalStatus: albumStatus } = model;
@@ -91,7 +93,7 @@ export default function ExternalActionRow({ model }: { model: AlbumScreenModel }
 
         {previewSongs.length > 0 && (
           <DetailCircleAction onPress={handlePlay} accessibilityLabel={t('a11y.detail.playPreview')}>
-            <Play size={iconSize.row} color={colors.secondary} fill={colors.secondary} />
+            <Play size={icons.row} color={colors.secondary} fill={colors.secondary} />
           </DetailCircleAction>
         )}
 
@@ -108,7 +110,7 @@ export default function ExternalActionRow({ model }: { model: AlbumScreenModel }
           accessibilityLabel={t(isWanted ? 'a11y.detail.wanted' : 'a11y.detail.want')}
         >
           <Heart
-            size={iconSize.row}
+            size={icons.row}
             color={isWanted ? statusColor.success : colors.secondary}
             fill={isWanted ? statusColor.success : 'none'}
           />

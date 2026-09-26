@@ -1,6 +1,7 @@
 import { iconSize, shadow, spacing, tinted, typography } from '@/constants/design';
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import Animated, {
   runOnJS,
   useAnimatedStyle,

@@ -36,7 +36,7 @@ export interface Theme {
   shape: {
     radius: RadiusPreset;
     density: ListDensity;
-    /** A multiple of the type scale; one of `TEXT_SCALES`. Applies from the next start. */
+    /** A multiple of the type scale; one of `TEXT_SCALES`. Applies immediately. */
     textScale: number;
   };
   surface: {

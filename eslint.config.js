@@ -128,6 +128,17 @@ module.exports = defineConfig([
           message:
             "Use components/Touchable instead of TouchableOpacity. It gives Android a bounded ripple and every other platform an opacity dip, from one file so the two can't drift apart per screen.",
         },
+        // The same argument for text. The user's text size is applied by
+        // `components/Text` as it draws, so a platform `Text` renders at the
+        // written size and quietly ignores the setting — invisible at the
+        // default and wrong at every other. It used to be multiplied into the
+        // type roles at startup, which is why a restart was needed.
+        {
+          selector:
+            "ImportDeclaration[source.value='react-native'] > ImportSpecifier[imported.name='Text']",
+          message:
+            "Use components/Text instead of react-native's Text. It applies the user's text size as it draws; the platform one ignores the Appearance setting.",
+        },
       ],
       // A bare glyph says nothing to a screen reader unless it is told to.
       "yuzic/touchable-needs-label": "error",

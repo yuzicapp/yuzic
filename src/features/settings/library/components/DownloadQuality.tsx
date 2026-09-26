@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDownloadQuality, setDownloadQuality, AudioQuality } from '@/features/settings/playback/state';

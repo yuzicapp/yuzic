@@ -1,6 +1,7 @@
 import { iconSize, onDark, spacing, stateLayer, typography } from '@/constants/design';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';

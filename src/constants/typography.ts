@@ -1,5 +1,4 @@
 import { PixelRatio } from 'react-native';
-import { readStartupTextScale } from './startupTextScale';
 
 /**
  * The type scale: 14 roles, each chosen by naming what the text is so the same
@@ -32,25 +31,10 @@ const BASE_SCALE = {
   micro: { fontSize: 11, lineHeight: 14 },
 } as const;
 
-/**
- * The scale at the user's chosen text size (Appearance, on the theme).
- * Size and leading grow together, so every role keeps the ratio it was drawn
- * with; the system text size then applies on top, as it always has.
- */
-function sizedBy<T extends Record<string, { fontSize: number; lineHeight: number }>>(scale: T, factor: number): T {
-  if (factor === 1) return scale;
-  return Object.fromEntries(
-    Object.entries(scale).map(([role, style]) => [
-      role,
-      { ...style, fontSize: Math.round(style.fontSize * factor), lineHeight: Math.round(style.lineHeight * factor) },
-    ])
-  ) as T;
-}
-
-/** The text size this run of the app was drawn at, which a new choice waits on. */
-export const startupTextScale = readStartupTextScale();
-
-const TYPE_SCALE = sizedBy(BASE_SCALE, startupTextScale);
+// The roles at their written sizes. The user's size is applied per-`Text`; the
+// system's is still applied here, because React Native multiplies `fontSize`
+// by it and leaves `lineHeight` alone.
+const TYPE_SCALE = BASE_SCALE;
 
 /**
  * The same scale with its leading grown to match the user's text size.

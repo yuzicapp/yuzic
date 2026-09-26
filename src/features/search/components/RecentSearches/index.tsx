@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { Search as SearchIcon, X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
 import MediaListRow from '@/components/MediaListRow';
 import IconActionButton from '@/components/IconActionButton';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { usePrefetchCovers } from '@/features/library/usePrefetchCovers';
 import { controlSize, hitSlopFor, iconSize, spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
@@ -35,6 +37,7 @@ export default function RecentSearches({
 }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
 
   const coversToPrefetch = useMemo(() => entities.map(e => e.cover), [entities]);
@@ -67,7 +70,7 @@ export default function RecentSearches({
                 accessibilityLabel={entry.text}
                 onPress={() => onQueryPress(entry.text)}
               >
-                <SearchIcon size={iconSize.badge} color={colors.subtext} />
+                <SearchIcon size={icons.badge} color={colors.subtext} />
                 <Text style={[styles.chipText, { color: colors.secondary }]} numberOfLines={1}>
                   {entry.text}
                 </Text>
@@ -78,7 +81,7 @@ export default function RecentSearches({
                 accessibilityRole="button"
                 accessibilityLabel={t('search.removeRecentSearch', { query: entry.text })}
               >
-                <X size={iconSize.badge} color={colors.subtext} />
+                <X size={icons.badge} color={colors.subtext} />
               </Touchable>
             </View>
           ))}
@@ -105,7 +108,7 @@ export default function RecentSearches({
                 onPress={() => onEntityPress(entity)}
                 trailing={
                   <IconActionButton
-                    icon={<X size={iconSize.row} color={colors.subtext} />}
+                    icon={<X size={icons.row} color={colors.subtext} />}
                     onPress={() => onRemove(searchHistoryEntryKey(entity))}
                     accessibilityLabel={t('search.removeRecentSearch', { query: entity.title })}
                     size="compact"

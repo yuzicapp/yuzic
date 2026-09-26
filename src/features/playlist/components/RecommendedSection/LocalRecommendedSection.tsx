@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import IconActionButton from '@/components/IconActionButton';
 import SectionHeader from '@/components/SectionHeader';
 import { createSimilarityServiceQueueFillProvider } from '@/features/playback/queueProviders';
@@ -13,7 +14,7 @@ import { useSimilarityService } from '@/providers/registry/similarityService';
 import { useTracks } from '@/features/song/useTracks';
 import { useIsOffline } from '@/features/connectivity/useIsOffline';
 import { QueryKeys } from '@/state/query/queryKeys';
-import { iconSize, spacing } from '@/constants/design';
+import { spacing } from '@/constants/design';
 import seededShuffle from '@/features/playlist/seededShuffle';
 import {
   LOCAL_RECOMMENDED_COUNT,
@@ -39,6 +40,7 @@ type Props = {
 export const LocalRecommendedSection: React.FC<Props> = ({ playlist, songs, localSeed, onRefresh }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const { tracks } = useTracks();
   const api = useApi();
   const isOffline = useIsOffline();
@@ -88,7 +90,7 @@ export const LocalRecommendedSection: React.FC<Props> = ({ playlist, songs, loca
         title={t('playlist.recommended.local')}
         action={
           <IconActionButton
-            icon={<RefreshCw size={iconSize.row} color={colors.subtext} />}
+            icon={<RefreshCw size={icons.row} color={colors.subtext} />}
             onPress={onRefresh}
             accessibilityLabel={t('playlist.recommended.refresh')}
             size="compact"

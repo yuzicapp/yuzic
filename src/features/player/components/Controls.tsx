@@ -1,11 +1,7 @@
 import { cappedTypography, controlSize, fontScaleCap, hitSlopFor, iconSize, motion, onDark, spacing } from '@/constants/design';
 import React, { useCallback } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { Shuffle, Sparkle, SkipBack, SkipForward, Repeat, Repeat1, Play, Pause, RotateCcw, RotateCw } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
@@ -147,7 +143,7 @@ function JumpButton({ direction, onPress }: { direction: 'back' | 'forward'; onP
     >
       <View style={styles.jumpWrapper}>
         <Icon size={iconSize.large} color={onDark.text} />
-        <Text style={styles.jumpLabel} maxFontSizeMultiplier={fontScaleCap.glyph}>{label}</Text>
+        <Text style={styles.jumpLabel} maxFontSizeMultiplier={fontScaleCap.glyph} appScaling={false}>{label}</Text>
       </View>
     </Touchable>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTheme } from '@/features/theme/useTheme';
 import { spacing, typography, radius } from '@/constants/design';
 import { useBottomOverlayHeight } from '@/features/theme/useScrollClearance';

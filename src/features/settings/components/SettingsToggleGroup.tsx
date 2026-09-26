@@ -1,6 +1,7 @@
 import { onDark, spacing, typography } from '@/constants/design';
 import React, { memo } from 'react';
-import { View, Text, Switch, StyleSheet } from 'react-native';
+import { View, Switch, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTheme } from '@/features/theme/useTheme';
 type ToggleItem = {
   label: string;

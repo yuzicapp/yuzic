@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { notify } from '@/components/toast';
 import { FilePlus2, ChevronRight } from 'lucide-react-native';
 import { useSelector } from 'react-redux';
@@ -8,8 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { pickAndImportLocalFiles } from '@/providers/server/local/pickAndImport';
 import Touchable from '@/components/Touchable';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
-import { iconSize, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useSync } from '@/features/library/useSync';
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 import SettingsCard from '../../components/SettingsCard';
@@ -22,6 +24,7 @@ import SettingsCard from '../../components/SettingsCard';
 export default function LocalFileImport() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const activeServer = useSelector(selectActiveServer);
   const { sync } = useSync();
   const [importing, setImporting] = useState(false);
@@ -59,7 +62,7 @@ export default function LocalFileImport() {
         >
           <View style={styles.left}>
             <View style={styles.icon}>
-              <FilePlus2 size={iconSize.row} color={colors.themeColor} />
+              <FilePlus2 size={icons.row} color={colors.themeColor} />
             </View>
             <View style={styles.copy}>
               <Text style={[styles.label, { color: colors.secondary }]}>{t('settings.library.localFiles.import')}</Text>
@@ -67,8 +70,8 @@ export default function LocalFileImport() {
             </View>
           </View>
           {importing
-            ? <SpinningLoaderCircle size={iconSize.row} color={colors.themeColor} />
-            : <ChevronRight size={iconSize.row} color={colors.border} />}
+            ? <SpinningLoaderCircle size={icons.row} color={colors.themeColor} />
+            : <ChevronRight size={icons.row} color={colors.border} />}
         </Touchable>
       </SettingsCard>
     </>

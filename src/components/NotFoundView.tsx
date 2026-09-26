@@ -1,5 +1,6 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, StyleSheet } from 'react-native'
+import { Text } from '@/components/Text'
 import { ChevronLeft } from 'lucide-react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'

@@ -1,5 +1,6 @@
 import React, { forwardRef, useImperativeHandle } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Check } from 'lucide-react-native';
 
@@ -11,8 +12,9 @@ import {
   useOptionSheetBackground,
   useOptionSheetContentStyle,
 } from '@/components/options/OptionSheetPrimitives';
-import { iconSize, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 
 export type WantsPickOption = {
   value: string;
@@ -61,6 +63,7 @@ const WantsPickSheet = forwardRef<WantsPickHandle, Props>(function WantsPickShee
   ref
 ) {
   const { colors } = useTheme();
+  const icons = useIconSize();
   const sheetRef = useSheetRef();
   const sheetBg = useOptionSheetBackground();
   const sheetContent = useOptionSheetContentStyle();
@@ -88,7 +91,7 @@ const WantsPickSheet = forwardRef<WantsPickHandle, Props>(function WantsPickShee
             label={option.label}
             icon={
               option.Icon
-                ? <option.Icon size={iconSize.row} color={colors.subtext} />
+                ? <option.Icon size={icons.row} color={colors.subtext} />
                 : undefined
             }
             // Dismiss first, then answer: the list being reordered or filtered
@@ -100,7 +103,7 @@ const WantsPickSheet = forwardRef<WantsPickHandle, Props>(function WantsPickShee
             }}
             trailing={
               option.value === selected
-                ? <Check size={iconSize.secondary} color={colors.themeColor} />
+                ? <Check size={icons.secondary} color={colors.themeColor} />
                 : undefined
             }
           />
