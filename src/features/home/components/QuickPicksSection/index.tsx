@@ -1,17 +1,13 @@
 import React, { useMemo, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
+import { View, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { Text } from '@/components/Text';
 import { Ellipsis } from 'lucide-react-native';
 import { notify } from '@/components/toast';
 import { useSelector } from 'react-redux';
 import { selectHomeShelfItemCount } from '@/features/settings/home/state';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { usePlayingActions } from '@/features/playback/PlayingContext';
 import { usePlayableSongResolver } from '@/features/song/usePlayableSongResolver';
 import { useSongActionSheets } from '@/features/entity-actions/SongActionSheetContext';
@@ -32,7 +28,7 @@ import {
   QUICK_PICKS_PEEK,
   SECTION_H_PADDING,
 } from '@/features/home/constants';
-import { contentWidth, iconSize, spacing, typography } from '@/constants/design';
+import { contentWidth, spacing, typography } from '@/constants/design';
 
 function useQuickPicks(refreshKey: number, itemCount: number): Song[] {
   const songsById = useSongsById();
@@ -69,6 +65,7 @@ type Props = { refreshKey?: number };
 export default function QuickPicksSection({ refreshKey = 0 }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const { playSong } = usePlayingActions();
   const { resolvePlayableSong } = usePlayableSongResolver();
   const itemCount = useSelector(selectHomeShelfItemCount);
@@ -143,7 +140,7 @@ export default function QuickPicksSection({ refreshKey = 0 }: Props) {
                 rowStyle={styles.row}
                 trailing={
                   <IconActionButton
-                    icon={<Ellipsis size={iconSize.row} color={colors.secondary} />}
+                    icon={<Ellipsis size={icons.row} color={colors.secondary} />}
                     onPress={() => { void handleOptions(song); }}
                     accessibilityLabel={t('a11y.rows.options', { title: song.title })}
                     size="compact"
@@ -174,8 +171,11 @@ const styles = StyleSheet.create({
   rowWrapper: {
     paddingHorizontal: 0,
   },
+  // Horizontal only. `rowStyle` is spread after the density padding in
+  // MediaListRow, so a `paddingVertical` here silently replaced it and Quick
+  // Picks was the one list on Home that ignored the density setting while
+  // looking like it honoured it.
   row: {
     paddingHorizontal: SECTION_H_PADDING,
-    paddingVertical: spacing.tight,
   },
 });

@@ -1,11 +1,8 @@
-import { fontScaleCap, hitSlopFor, iconSize, motion, spacing, stateLayer, statusColor, typography } from '@/constants/design';
+import { fontScaleCap, hitSlopFor, motion, spacing, stateLayer, statusColor, typography } from '@/constants/design';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useListDensity } from '@/features/theme/useListDensity';
-import {
-  Text,
-  View,
-  StyleSheet,
-} from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -19,6 +16,7 @@ import { usePlayingActions } from '@/features/playback/PlayingContext';
 import { useSongActionSheets } from '@/features/entity-actions/SongActionSheetContext';
 import MediaListRow from '@/components/MediaListRow';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useTranslation } from 'react-i18next';
 import { useDownloadState } from '@/features/offline/DownloadContext';
 import { formatDuration } from '@/components/formatDuration';
@@ -68,6 +66,7 @@ const ExternalSongRowView: React.FC<{
   onPress?: () => void;
 }> = ({ song, albumTitle, albumArtist, previewUrl, onPress }) => {
   const { colors } = useTheme();
+  const icons = useIconSize();
   const { t } = useTranslation();
   const samplesEnabled = useSourceUse(PREVIEWS_USE);
   const density = useListDensity();
@@ -113,7 +112,7 @@ const ExternalSongRowView: React.FC<{
         trailing={
           <View style={styles.rowRight}>
             {hasPreview && (
-              <PlayCircle size={iconSize.inline} color={colors.subtext} />
+              <PlayCircle size={icons.inline} color={colors.subtext} />
             )}
             <Touchable
               accessibilityRole="button"
@@ -121,7 +120,7 @@ const ExternalSongRowView: React.FC<{
               onPress={() => optionsSheetRef.current?.present()}
               hitSlop={hitSlopFor(18)}
             >
-              <Ellipsis size={iconSize.row} color={colors.secondary} />
+              <Ellipsis size={icons.row} color={colors.secondary} />
             </Touchable>
           </View>
         }
@@ -151,6 +150,7 @@ const SongRow: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   // Local first: a browsed track the library already holds is *this* library's
   // track from here down — the full recording rather than a thirty-second
   // sample, with the library's own row, options and favourite state. See
@@ -239,10 +239,10 @@ const SongRow: React.FC<Props> = ({
         trailing={
           <View style={styles.rowRight}>
             <Animated.View style={heartStyle}>
-              <Heart size={iconSize.inline} color={statusColor.favorite} fill={statusColor.favorite} />
+              <Heart size={icons.inline} color={statusColor.favorite} fill={statusColor.favorite} />
             </Animated.View>
             {downloaded && (isAlbumCompact || showDownloadedDot) && (
-              <ArrowDownCircle size={iconSize.inline} color={colors.subtext} />
+              <ArrowDownCircle size={icons.inline} color={colors.subtext} />
             )}
             <Touchable
               onPress={openOptions}
@@ -250,7 +250,7 @@ const SongRow: React.FC<Props> = ({
               accessibilityRole="button"
               accessibilityLabel={t('a11y.rows.options', { title: song.title })}
             >
-              <Ellipsis size={iconSize.row} color={colors.secondary} />
+              <Ellipsis size={icons.row} color={colors.secondary} />
             </Touchable>
           </View>
         }

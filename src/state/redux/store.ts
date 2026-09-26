@@ -221,4 +221,13 @@ const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 
+// Development only, and stripped from release builds by the `__DEV__` guard.
+// Lets a debugger attached to Metro read state and dispatch — which is how
+// settings that only show up on screen (a text size, a density) get checked
+// without tapping through the simulator, where a long press or a drag cannot
+// be driven reliably.
+if (__DEV__) {
+    (globalThis as { __yuzicStore?: typeof store }).__yuzicStore = store;
+}
+
 export default store;

@@ -5,6 +5,7 @@ import { useTheme } from '@/features/theme/useTheme';
 import { controlSize, spacing } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 import { useListDensity } from '@/features/theme/useListDensity';
+import { useDrawnTypography } from '@/features/theme/textScale';
 
 type Props = {
   /** Art size of the rows this stands in for. Defaults to the shared media row;
@@ -17,6 +18,9 @@ const SkeletonListRow: React.FC<Props> = ({ artSize = controlSize.mediaRowArt })
   const { isDarkMode } = useTheme();
   const rad = useRadius();
   const density = useListDensity();
+  // The bars stand in for a title and a subtitle, so they are the height that
+  // text is actually drawn at — otherwise the list resizes when it arrives.
+  const type = useDrawnTypography();
   const colorMode = isDarkMode ? 'dark' : 'light';
 
   return (
@@ -30,12 +34,12 @@ const SkeletonListRow: React.FC<Props> = ({ artSize = controlSize.mediaRowArt })
         />
 
         <View style={styles.textContainer}>
-          <Skeleton width="70%" height={16} radius={6} colorMode={colorMode} />
+          <Skeleton width="70%" height={type.rowTitle.fontSize} radius={rad.thumb} colorMode={colorMode} />
           <View style={styles.lineSpacer} />
-          <Skeleton width="50%" height={14} radius={6} colorMode={colorMode} />
+          <Skeleton width="50%" height={type.rowSubtitle.fontSize} radius={rad.thumb} colorMode={colorMode} />
         </View>
 
-        <Skeleton width={20} height={20} radius={10} colorMode={colorMode} />
+        <Skeleton width={20} height={20} radius={rad.pill} colorMode={colorMode} />
       </View>
     </View>
   );

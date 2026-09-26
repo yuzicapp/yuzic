@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { notify } from '@/components/toast';
 
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import MediaListRow from '@/components/MediaListRow';
 import { usePlayingActions } from '@/features/playback/PlayingContext';
 import { usePreviewPlayer } from '@/features/playback/usePreviewPlayer';
@@ -13,7 +14,7 @@ import { usePlayableSongResolver } from '@/features/song/usePlayableSongResolver
 import { useLocalFirst } from '@/features/library/useLocalFirst';
 import Touchable from '@/components/Touchable';
 import { formatDuration } from '@/components/formatDuration';
-import { hitSlopFor, iconSize, spacing } from '@/constants/design';
+import { hitSlopFor, spacing } from '@/constants/design';
 import type { Song } from '@/domain/entities/Song';
 
 // ── Local song row ─────────────────────────────────────────────────────────────
@@ -26,6 +27,7 @@ type LocalRowProps = {
 export const LocalRow: React.FC<LocalRowProps> = ({ song, playlistId }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const { playSimilar } = usePlayingActions();
   const { resolvePlayableSong } = usePlayableSongResolver();
   const addToPlaylist = useAddSongToPlaylist();
@@ -69,13 +71,13 @@ export const LocalRow: React.FC<LocalRowProps> = ({ song, playlistId }) => {
           accessibilityLabel={t(added ? 'a11y.playlist.songAdded' : 'a11y.playlist.addSong', { title: song.title })}
           accessibilityState={{ disabled: adding || added }}
           onPress={() => void handleAdd()}
-          hitSlop={hitSlopFor(iconSize.row)}
+          hitSlop={hitSlopFor(icons.row)}
           style={styles.actionBtn}
           disabled={adding || added}
         >
           {added
-            ? <CheckCircle size={iconSize.secondary} color={colors.placeholder} />
-            : <CirclePlus size={iconSize.secondary} color={(adding || added) ? colors.placeholder : colors.subtext} />
+            ? <CheckCircle size={icons.secondary} color={colors.placeholder} />
+            : <CirclePlus size={icons.secondary} color={(adding || added) ? colors.placeholder : colors.subtext} />
           }
         </Touchable>
       }
@@ -94,6 +96,7 @@ type ExternalRowProps = {
 export const ExternalRow: React.FC<ExternalRowProps> = ({ song: browsedSong, hasDownloader, onDownload }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const { toggle } = usePreviewPlayer();
   const { localSong } = useLocalFirst();
   // Local first: a recommendation the library already holds is played in full
@@ -119,11 +122,11 @@ export const ExternalRow: React.FC<ExternalRowProps> = ({ song: browsedSong, has
           accessibilityState={{ disabled: !hasDownloader }}
           onPress={() => hasDownloader && onDownload(song)}
           disabled={!hasDownloader}
-          hitSlop={hitSlopFor(iconSize.row)}
+          hitSlop={hitSlopFor(icons.row)}
           style={styles.actionBtn}
         >
           <CloudDownload
-            size={iconSize.secondary}
+            size={icons.secondary}
             color={hasDownloader ? colors.subtext : colors.muted}
           />
         </Touchable>

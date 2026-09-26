@@ -9,6 +9,7 @@ import { resolvePlaylistOrigin } from '@/features/playlist/playlistOrigin';
 import { usePlayingActions } from '@/features/playback/PlayingContext';
 import { useDownload } from '@/features/offline/DownloadContext';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useTranslation } from 'react-i18next';
 import { useSheetRef } from '@/components/useSheetRef';
 import { formatDuration } from '@/components/formatDuration';
@@ -37,6 +38,7 @@ type Props = {
 const PlaylistHeader: React.FC<Props> = ({ playlist, songs = [], showNavigation = true, onOptions }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const optionsSheetRef = useSheetRef();
 
   const { playSongInCollection } = usePlayingActions();
@@ -124,7 +126,7 @@ const PlaylistHeader: React.FC<Props> = ({ playlist, songs = [], showNavigation 
         actions={
           <DetailActionRow style={{ marginBottom: spacing.lg }}>
             <DetailCircleAction onPress={handleShuffle} accessibilityLabel={t('a11y.detail.shuffle')}>
-              <Shuffle size={iconSize.row} color={colors.secondary} />
+              <Shuffle size={icons.row} color={colors.secondary} />
             </DetailCircleAction>
 
             <DetailPlayAction onPress={handlePlay} accessibilityLabel={t('a11y.detail.play')}>

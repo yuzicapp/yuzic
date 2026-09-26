@@ -1,11 +1,7 @@
 import { hitSlopFor, iconSize, motion, onDark, spacing, typography } from '@/constants/design';
 import React, { useCallback, useMemo, useRef, type ReactNode } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { Text } from '@/components/Text';
 import { useAnimatedReaction, runOnJS, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';

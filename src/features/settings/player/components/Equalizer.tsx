@@ -1,6 +1,7 @@
 import { onDark, spacing, stateLayer, typography } from '@/constants/design';
 import React, { useCallback, useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import Slider from '@react-native-community/slider';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';

@@ -1,7 +1,8 @@
 import { iconSize, onDark, onDarkAlpha, spacing, stateLayer, typography, veil } from '@/constants/design';
 import { useTheme } from '@/features/theme/useTheme';
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { Gauge } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { usePlayingActions, usePlayingState } from '@/features/playback/PlayingContext';
@@ -158,7 +159,8 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     flex: 1,
-    height: 44,
+    // A minimum, not a height: the label inside grows with the text size.
+    minHeight: 44,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -170,7 +172,7 @@ const styles = StyleSheet.create({
   },
   stepButton: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     backgroundColor: veil.cardInner,
     alignItems: 'center',
     justifyContent: 'center',

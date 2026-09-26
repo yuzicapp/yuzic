@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -19,7 +20,7 @@ import {
 } from '@/components/options/OptionSheetPrimitives';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import Touchable from '@/components/Touchable';
-import { iconSize, spacing, stateLayer, typography } from '@/constants/design';
+import { spacing, stateLayer, typography } from '@/constants/design';
 import type { CoverSource } from '@/domain/entities/Cover';
 import type { LocalId } from '@/domain/identity/LocalId';
 import {
@@ -29,6 +30,7 @@ import {
 } from '@/features/downloaders/registry';
 import { useRadius } from '@/features/theme/useRadius';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useWantGet } from '@/features/wants/useWantGet';
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 
@@ -65,6 +67,7 @@ type Props = {
 export default function ArtistGetSheet({ artist, sheetRef, onConfirm, onDismiss }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const activeServer = useSelector(selectActiveServer);
   const { getArtist } = useWantGet();
@@ -162,7 +165,7 @@ export default function ArtistGetSheet({ artist, sheetRef, onConfirm, onDismiss 
             <OptionSheetSectionLabel spaced label={t('externalAlbum.review.qualityProfile')} />
             {profilesLoading ? (
               <View style={styles.loading}>
-                <SpinningLoaderCircle size={iconSize.row} color={colors.themeColor} />
+                <SpinningLoaderCircle size={icons.row} color={colors.themeColor} />
               </View>
             ) : (
               profiles.map(profile => (

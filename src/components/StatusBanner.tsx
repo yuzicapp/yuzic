@@ -1,10 +1,12 @@
 import React, { ReactNode, useState } from 'react';
-import { StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
+import { Text } from '@/components/Text';
 import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import Touchable from '@/components/Touchable';
-import { hitSlopFor, iconSize, spacing, typography } from '@/constants/design';
+import { hitSlopFor, spacing, typography } from '@/constants/design';
 import { useRadius } from '@/features/theme/useRadius';
 
 type Props = {
@@ -26,6 +28,7 @@ type Props = {
 export default function StatusBanner({ icon, text, color, closable, style, testID }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const [dismissed, setDismissed] = useState(false);
 
@@ -45,10 +48,10 @@ export default function StatusBanner({ icon, text, color, closable, style, testI
           accessibilityRole="button"
           accessibilityLabel={t('a11y.dismissNotification')}
           onPress={() => setDismissed(true)}
-          hitSlop={hitSlopFor(iconSize.badge)}
+          hitSlop={hitSlopFor(icons.badge)}
           testID={testID ? `${testID}-close` : undefined}
         >
-          <X size={iconSize.badge} color={textColor} />
+          <X size={icons.badge} color={textColor} />
         </Touchable>
       )}
     </View>

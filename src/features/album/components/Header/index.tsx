@@ -19,6 +19,7 @@ import { useCollectionDownloadProgress } from '@/features/downloads/useCollectio
 import { usePlayingActions } from '@/features/playback/PlayingContext';
 import { useDownload } from '@/features/offline/DownloadContext';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useSheetRef } from '@/components/useSheetRef';
 import ExternalActionRow from './ExternalActionRow';
 import { formatDuration } from '@/components/formatDuration';
@@ -214,6 +215,7 @@ function ExternalMetaRow({ album, songs }: { album: Album | null; songs: Song[] 
 
 function ExternalServerStatusRow({ model }: { model: AlbumScreenModel }) {
   const { t } = useTranslation();
+  const icons = useIconSize();
   const albumStatus = model.externalStatus;
 
   if (albumStatus.kind === 'none') return null;
@@ -221,7 +223,7 @@ function ExternalServerStatusRow({ model }: { model: AlbumScreenModel }) {
   if (albumStatus.kind === 'in_library') {
     return (
       <StatusBanner
-        icon={<Link size={iconSize.badge} color={statusColor.success} />}
+        icon={<Link size={icons.badge} color={statusColor.success} />}
         text={t('externalAlbum.serverStatus.onServer')}
         color={statusColor.success}
         style={styles.serverStatusRow}
@@ -230,7 +232,7 @@ function ExternalServerStatusRow({ model }: { model: AlbumScreenModel }) {
   }
   return (
     <StatusBanner
-      icon={<SpinningLoaderCircle size={iconSize.badge} color={statusColor.downloading} />}
+      icon={<SpinningLoaderCircle size={icons.badge} color={statusColor.downloading} />}
       text={t('externalAlbum.serverStatus.downloadingToServer', { progress: albumStatus.progress })}
       color={statusColor.downloading}
       style={styles.serverStatusRow}
@@ -241,6 +243,7 @@ function ExternalServerStatusRow({ model }: { model: AlbumScreenModel }) {
 function LocalActionRow({ model }: { model: AlbumScreenModel }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const { playSongInCollection } = usePlayingActions();
   const { downloadAlbumById, cancelCollectionDownloads, getCollectionDownloadState } = useDownload();
   const { album, songs } = model;
@@ -271,7 +274,7 @@ function LocalActionRow({ model }: { model: AlbumScreenModel }) {
   return (
     <DetailActionRow>
       <DetailCircleAction onPress={handleShuffle} accessibilityLabel={t('a11y.detail.shuffle')}>
-        <Shuffle size={iconSize.row} color={colors.secondary} />
+        <Shuffle size={icons.row} color={colors.secondary} />
       </DetailCircleAction>
 
       <DetailPlayAction onPress={handlePlay} accessibilityLabel={t('a11y.detail.play')}>

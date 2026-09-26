@@ -1,6 +1,7 @@
 import { useTheme } from '@/features/theme/useTheme';
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import Slider from '@react-native-community/slider';
 import { Volume2, VolumeX, Volume1 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import ReorderableList, {
   type ReorderableListReorderEvent,
   useIsActive,
@@ -21,11 +22,12 @@ import SectionEmptyState from '@/features/home/components/SectionEmptyState';
 import { DetailHeaderBar } from '@/components/DetailHeader';
 import { notify } from '@/components/toast';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useScrollClearance } from '@/features/theme/useScrollClearance';
 import { useIsOffline } from '@/features/connectivity/useIsOffline';
 import { QueryKeys } from '@/state/query/queryKeys';
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
-import { hitSlopFor, iconSize, spacing, statusColor, typography } from '@/constants/design';
+import { hitSlopFor, spacing, statusColor, typography } from '@/constants/design';
 import { useRemoveSongFromPlaylist } from '../../useRemoveSongFromPlaylist';
 import { useMoveSongInPlaylist } from '../../useMoveSongInPlaylist';
 
@@ -61,6 +63,7 @@ type RowProps = {
 function EditRow({ item, index, isOffline, onRemove }: RowProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const drag = useReorderableDrag();
   const isActive = useIsActive();
 
@@ -73,11 +76,11 @@ function EditRow({ item, index, isOffline, onRemove }: RowProps) {
         testID="playlist-edit-remove"
         accessibilityRole="button"
         accessibilityLabel={t('a11y.playlist.removeSong', { title: item.song.title })}
-        hitSlop={hitSlopFor(iconSize.row)}
+        hitSlop={hitSlopFor(icons.row)}
         onPress={() => onRemove(item, index)}
         style={styles.remove}
       >
-        <MinusCircle size={iconSize.row} color={statusColor.destructive} />
+        <MinusCircle size={icons.row} color={statusColor.destructive} />
       </Touchable>
       <MediaListRow
         title={item.song.title}
@@ -89,12 +92,12 @@ function EditRow({ item, index, isOffline, onRemove }: RowProps) {
         <Touchable
           accessibilityRole="button"
           accessibilityLabel={t('a11y.playlist.reorderSong', { title: item.song.title })}
-          hitSlop={hitSlopFor(iconSize.row)}
+          hitSlop={hitSlopFor(icons.row)}
           onPressIn={drag}
           disabled={isActive}
           style={styles.grip}
         >
-          <GripVertical size={iconSize.row} color={colors.subtext} />
+          <GripVertical size={icons.row} color={colors.subtext} />
         </Touchable>
       )}
     </View>

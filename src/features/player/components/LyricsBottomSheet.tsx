@@ -1,12 +1,8 @@
 import { hitSlopFor, iconSize, motion, spacing, typography } from '@/constants/design';
 import React, { forwardRef, useRef, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  View,
-  StyleSheet,
-  Text,
-  LayoutChangeEvent,
-} from 'react-native';
+import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
+import { Text } from '@/components/Text';
 import {
   BottomSheetModal,
   BottomSheetScrollView,

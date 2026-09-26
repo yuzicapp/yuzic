@@ -91,6 +91,7 @@ Connect *accepted*, leaving testers on the older-numbered build.
 **What the stores held at the last release**, as a sanity check rather than a
 source of truth — the next run should come out one above these:
 
+- 2.12.0 (2026-09-25): TestFlight build **133**, Play version code **154**.
 - 2.11.0 (2026-09-25): TestFlight build **132**, Play version code **153**.
 - 2.10.0 (2026-09-24): TestFlight build **131**, Play version code **152**.
 - When the mechanism changed (2026-09-07): Play production **1.3.7 / 109**,
@@ -107,6 +108,23 @@ job — so this is a cross-check rather than the only record.
 — so notes live in `default.txt`, which supply falls back to, and
 `skip_upload_changelogs: false` is set explicitly to keep it that way. Update
 `default.txt` as part of a release; it is capped at **500 characters** by Play.
+
+## Release tags are `X.Y.Z`
+
+Bare semver, no `v`, in both repos — decided 2026-09-26, because the two had
+drifted apart: this repo had 44 bare tags and the engine 21 `v`-prefixed ones.
+
+Bare won on cost rather than taste. It is the same string as `package.json`'s
+`version`, so nothing has to add or strip a prefix to get from one to the
+other; `release-on-version-bump.yml` tags with `$VERSION` verbatim. It is what
+the release notes, the site's changelog headings and the store version strings
+already say, and `changelog-current.yml` in `yuzic-web` matches tags with
+`^[0-9]+\.[0-9]+\.[0-9]+$` to tell whether the site has fallen behind.
+
+History is not rewritten. The engine's tags up to `v1.2.1` keep their prefix
+and its workflow still triggers on `v*` as well as `[0-9]*`, with the version
+check relaxed to `^v?[0-9]+\.[0-9]+\.[0-9]+$` so an old tag can still be
+re-run. New tags in either repo are bare.
 
 ## Releasing — check both halves
 
@@ -143,6 +161,26 @@ So after any release:
    site is the only release note a user who is not on GitHub will ever read,
    so a release that is not on it did not, as far as they can tell, happen.
    `changelog-current.yml` in `yuzic-web` fails daily while the site is behind.
+
+   **Push it when the release PR merges — do not wait for the builds.** Decided
+   2026-09-25. Waiting sounds safer and is not: a release only reaches
+   TestFlight and Play's *alpha* track, and promoting either to the public is a
+   separate manual act that can be days later, so there is no moment when the
+   page and general availability line up. Waiting only adds a step that can be
+   forgotten, which is the failure this checklist exists for. The version is
+   fixed the moment the PR merges, and a half-failed release is fixed forward
+   and re-promoted under the same number, so the entry stays true either way.
+   The site being briefly ahead is the cheap direction to be wrong in, and
+   `changelog-current.yml` treats it that way: behind fails, ahead only warns.
+   Note a *draft* GitHub release creates no tag, so that warning persists until
+   step 3 is done.
+
+   `yuzic-web` is worked on **directly on `master`** — no branches, no PRs;
+   pushing `master` is what publishes. Fetch first: this file is edited from
+   more than one place, and on 2026-09-25 `master` moved fifteen commits under
+   a branch that had been cut from it. Match the entries already there: no
+   summary line under the heading, `####` sections, bullets that say what the
+   old behaviour was.
 5. If one platform failed, say so explicitly rather than re-running blind. The
    fix usually belongs on `dev` and has to be promoted before a re-run can
    possibly succeed — which is exactly what did not happen after 1.4.0.
@@ -268,7 +306,7 @@ every file it will now send — not only the ones being added.
 - Adding a player call means adding it to `PlayerBackend` **and to both platforms of the engine**. A method implemented on iOS and not on Android is the failure this seam exists to surface — it has already happened. Ask `Tools/parity.py` in the engine repo how many are outstanding rather than reading a count here: this file has carried a stale one twice, and the tool compares signatures as well as names. They reject by name (`setSpeed() is not implemented on android`) rather than throwing `is not a function`, so the gap is legible from a log; that is not the same as being fixed.
 - `@rntp/player` used to be the player and has been removed entirely. Do not reintroduce it, and do not read its source: it is the npm-scoped continuation of `react-native-track-player` and went to a commercial, non-compete licence at v5, which is a probable GPL-3 conflict for yuzic and a definite F-Droid blocker — and which is part of why the engine exists. react-native-track-player **v4** is Apache-2.0 and may be referenced with attribution.
 - `src/features/playback/PlayingContext.tsx` is the central playback state/controls context — most player-related work touches this file.
-- The engine lives in its own repo (github.com/yuzicapp/yuzic-engine) and is consumed from npm at an exact version (`yuzic-engine` in `package.json`). **The pin drifts.** Bumping it once and then making further engine commits leaves the app building an engine older than the one you are reading, and it has caused two wrong conclusions already. Check `package.json` against the engine's HEAD before trusting that a fix is in the build. An engine release is `npm publish` from a machine logged in to npm, *then* pushing the `vX.Y.Z` tag: the tag's workflow only confirms npm serves that version and creates the GitHub release, it does not publish.
+- The engine lives in its own repo (github.com/yuzicapp/yuzic-engine) and is consumed from npm at an exact version (`yuzic-engine` in `package.json`). **The pin drifts.** Bumping it once and then making further engine commits leaves the app building an engine older than the one you are reading, and it has caused two wrong conclusions already. Check `package.json` against the engine's HEAD before trusting that a fix is in the build. An engine release is `npm publish` from a machine logged in to npm, *then* pushing the `X.Y.Z` tag: the tag's workflow only confirms npm serves that version and creates the GitHub release, it does not publish.
 
 ## Native config that `app.json` cannot express
 

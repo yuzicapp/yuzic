@@ -1,6 +1,7 @@
 import { iconSize, onDark, spacing, typography } from '@/constants/design';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { CloudDownload } from 'lucide-react-native';
@@ -8,6 +9,7 @@ import { CloudDownload } from 'lucide-react-native';
 import Touchable from '@/components/Touchable';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useRadius } from '@/features/theme/useRadius';
 import { useDownloadersQueue } from '@/features/downloaders/DownloadersQueueContext';
 /**
@@ -21,6 +23,7 @@ import { useDownloadersQueue } from '@/features/downloaders/DownloadersQueueCont
 export function DownloadsInProgressBanner() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const router = useRouter();
   const { queues, totalInFlight } = useDownloadersQueue();
@@ -50,7 +53,7 @@ export function DownloadsInProgressBanner() {
     <View style={[styles.container, { backgroundColor: colors.muted, borderRadius: rad.card }]}>
       <Touchable style={styles.body} onPress={handleOpen} accessibilityRole="button" accessibilityLabel={t('home.downloadsBanner.open')}>
         <View style={[styles.iconWrap, { backgroundColor: colors.themeColor, borderRadius: rad.pill }]}>
-          <SpinningLoaderCircle size={iconSize.badge} color={onDark.background} />
+          <SpinningLoaderCircle size={icons.badge} color={onDark.background} />
         </View>
         <View style={styles.text}>
           <Text style={[styles.title, { color: colors.secondary }]} numberOfLines={1}>

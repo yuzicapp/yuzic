@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { View, TextInput, ScrollView, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { notify } from '@/components/toast';
@@ -225,7 +220,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: onDark.mutedText,
         paddingHorizontal: spacing.md,
-        height: 50,
+        // A minimum: the field's text grows with the text size.
+        minHeight: 50,
         marginBottom: spacing.controlGap,
     },
     schemeButton: {

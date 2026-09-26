@@ -1,4 +1,4 @@
-import { onDark, radius, shade, spacing } from '@/constants/design';
+import { onDark, shade, spacing } from '@/constants/design';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -197,9 +197,9 @@ export default function PlayerHost() {
     opacity: interpolate(expansion.value, [0.15, 0.7], [0, 1], Extrapolation.CLAMP),
   }));
 
-  // Resolved on the JS side and captured by the worklets below: the corner the
-  // bar draws its thumbnail with, and the one the player draws its cover with.
-  const barRadius = radius.sm;
+  // Captured by the worklets below: the bar's thumbnail corner and the
+  // player's cover corner. Both from the preset — `barRadius` was not.
+  const barRadius = rad.thumb;
   const cardRadius = rad.card;
 
   const coverStyle = useAnimatedStyle(() => {

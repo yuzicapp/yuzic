@@ -3,9 +3,10 @@ import { StyleSheet, View } from 'react-native';
 import { Star } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
-import { iconSize, spacing } from '@/constants/design';
+import { spacing } from '@/constants/design';
 import { RATING_MAX } from '@/domain/entities/Rating';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 
 const STARS = Array.from({ length: RATING_MAX }, (_, index) => index + 1);
 
@@ -28,6 +29,7 @@ const STARS = Array.from({ length: RATING_MAX }, (_, index) => index + 1);
 const RatingValue: React.FC<{ value: number | undefined }> = ({ value }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rating = value ?? 0;
 
   return (
@@ -40,7 +42,7 @@ const RatingValue: React.FC<{ value: number | undefined }> = ({ value }) => {
       {STARS.map(star => (
         <Star
           key={star}
-          size={iconSize.badge}
+          size={icons.badge}
           color={star <= rating ? colors.themeColor : colors.border}
           fill={star <= rating ? colors.themeColor : 'none'}
         />

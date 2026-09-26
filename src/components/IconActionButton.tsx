@@ -1,4 +1,4 @@
-import { controlSize, hitSlopFor, iconSize, stateLayer } from '@/constants/design';
+import { controlSize, hitSlopFor, stateLayer } from '@/constants/design';
 import React from 'react';
 import {
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useRadius } from '@/features/theme/useRadius';
 import SpinningLoaderCircle from '@/components/SpinningLoaderCircle';
 import Touchable from '@/components/Touchable';
@@ -31,6 +32,7 @@ export default function IconActionButton({
   style,
 }: Props) {
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const isDisabled = disabled || loading;
   // Only the Android ripple is bounded by this — the button has no background
@@ -54,7 +56,7 @@ export default function IconActionButton({
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
     >
-      {loading ? <SpinningLoaderCircle size={iconSize.row} color={colors.subtext} /> : icon}
+      {loading ? <SpinningLoaderCircle size={icons.row} color={colors.subtext} /> : icon}
     </Touchable>
   );
 }

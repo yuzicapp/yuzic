@@ -1,4 +1,4 @@
-import { iconSize, motion } from '@/constants/design';
+import { motion } from '@/constants/design';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -7,6 +7,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Eas
 import { useDispatch, useSelector } from 'react-redux';
 import { selectSyncOnAppStart, setSyncOnAppStart } from '@/features/settings/sync/state';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useSync } from '@/features/library/useSync';
 import IconActionButton from '@/components/IconActionButton';
 import SettingsCard from '../../components/SettingsCard';
@@ -26,6 +27,7 @@ const Stats: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const syncOnAppStart = useSelector(selectSyncOnAppStart);
   const { sync, isSyncing, lastSyncedAt } = useSync();
   const [now, setNow] = useState(() => Date.now());
@@ -66,7 +68,7 @@ const Stats: React.FC = () => {
               icon={
                 <Animated.View style={spinStyle}>
                   <RefreshCw
-                    size={iconSize.row}
+                    size={icons.row}
                     color={isSyncing ? colors.themeColor : colors.secondary}
                   />
                 </Animated.View>

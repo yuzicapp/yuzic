@@ -1,11 +1,13 @@
 import { iconSize, onDark, spacing, typography } from '@/constants/design';
 import React from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { CloudUpload, RotateCcw, Trash2 } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { selectOfflineMutationQueue } from '@/state/redux/selectors/offlineMutationsSelectors';
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
 import {
@@ -20,6 +22,7 @@ export default function PendingOfflineChanges() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const rad = useRadius();
   const activeServer = useSelector(selectActiveServer);
   const activeServerId = activeServer?.id;
@@ -83,7 +86,7 @@ export default function PendingOfflineChanges() {
                 { backgroundColor: `${colors.themeColor}18`, borderColor: `${colors.themeColor}44`, borderRadius: rad.md },
               ]}
             >
-              <RotateCcw size={iconSize.badge} color={colors.themeColor} />
+              <RotateCcw size={icons.badge} color={colors.themeColor} />
               <Text style={[styles.actionText, { color: colors.themeColor }]}>
                 {t('settings.library.offlineChanges.retry')}
               </Text>
@@ -93,7 +96,7 @@ export default function PendingOfflineChanges() {
             onPress={discardPending}
             style={[styles.actionButton, discardBtnStyle, { borderRadius: rad.md }]}
           >
-            <Trash2 size={iconSize.badge} color={discardIconColor} />
+            <Trash2 size={icons.badge} color={discardIconColor} />
             <Text style={[styles.actionText, { color: discardTextColor }]}>
               {t('settings.library.offlineChanges.discard')}
             </Text>
@@ -149,7 +152,9 @@ const styles = StyleSheet.create({
   },
   badge: {
     minWidth: 28,
-    height: 28,
+    // Was a fixed 28 with a count inside, which clipped once the text size
+    // could change without a relaunch.
+    minHeight: 28,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.sm,

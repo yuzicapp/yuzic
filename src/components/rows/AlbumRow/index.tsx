@@ -1,9 +1,6 @@
 import React, { memo, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/components/Text';
 import { Ellipsis, Link, ArrowDownCircle } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +9,7 @@ import AlbumOptions from '@/components/options/AlbumOptions';
 import IconActionButton from '@/components/IconActionButton';
 import MediaListRow from '@/components/MediaListRow';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useSheetRef } from '@/components/useSheetRef';
 import { useExternalAlbumStatus } from '@/features/downloaders/useExternalAlbumStatus';
 import { iconSize, spacing, statusColor, typography } from '@/constants/design';
@@ -42,6 +40,7 @@ const AlbumRow: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const optionsSheetRef = useSheetRef();
 
   // Disabled (no-op) for library albums — useExternalAlbumStatus already
@@ -59,10 +58,10 @@ const AlbumRow: React.FC<Props> = ({
   if (isExternalAlbum(album)) {
     const statusBadge =
       status.kind === 'in_library' ? (
-        <Link size={iconSize.badge} color={statusColor.success} />
+        <Link size={icons.badge} color={statusColor.success} />
       ) : status.kind === 'downloading' ? (
         <View style={styles.badge}>
-          <ArrowDownCircle size={iconSize.badge} color={statusColor.downloading} />
+          <ArrowDownCircle size={icons.badge} color={statusColor.downloading} />
           <Text style={[styles.badgeText, styles.badgeTextBlue]}>{status.progress}%</Text>
         </View>
       ) : null;

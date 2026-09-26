@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ import { FormSheet, FormSheetField } from '@/components/FormSheet';
 import RadioMark from '@/components/options/RadioMark';
 import { ShareLinkOptions } from '@/components/options/ShareLinkOptions';
 import { useTheme } from '@/features/theme/useTheme';
+import { useIconSize } from '@/features/theme/useIconSize';
 import { useScrollClearance } from '@/features/theme/useScrollClearance';
 import { useListDensity } from '@/features/theme/useListDensity';
 import { contentWidth, hitSlopFor, iconSize, spacing, typography } from '@/constants/design';
@@ -60,6 +62,7 @@ function formatExpiry(t: (k: string, opts?: any) => string, value: string | unde
 export default function SharesScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const icons = useIconSize();
   const scrollClearance = useScrollClearance();
   const density = useListDensity();
   const api = useApi();
@@ -140,17 +143,17 @@ export default function SharesScreen() {
         <Touchable
           testID="share-options"
           onPress={() => setOptionsFor(item)}
-          hitSlop={hitSlopFor(iconSize.row)}
+          hitSlop={hitSlopFor(icons.row)}
           style={styles.actionBtn}
           feedback="control"
           accessibilityRole="button"
           accessibilityLabel={t('a11y.rows.options', { title: item.description || item.url })}
         >
-          <Ellipsis size={iconSize.row} color={colors.subtext} />
+          <Ellipsis size={icons.row} color={colors.subtext} />
         </Touchable>
       </View>
     ),
-    [colors.secondary, colors.subtext, t, density.rowPadding]
+    [colors.secondary, colors.subtext, t, density.rowPadding, icons]
   );
 
   return (

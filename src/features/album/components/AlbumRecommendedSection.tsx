@@ -1,6 +1,8 @@
-import { onDark, spacing, typography } from '@/constants/design';
+import { spacing, typography } from '@/constants/design';
+import SourceBadge from '@/components/SourceBadge';
 import React, { useMemo } from 'react'
-import { View, Text, StyleSheet, ScrollView, useWindowDimensions } from 'react-native'
+import { View, StyleSheet, ScrollView, useWindowDimensions } from 'react-native'
+import { Text } from '@/components/Text'
 import { useSelector } from 'react-redux'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -67,9 +69,7 @@ export default function AlbumRecommendedSection({ artistName, excludeAlbumId }: 
     <View style={styles.container}>
       <View style={styles.titleRow}>
         {showSourceHeaders && (
-          <View style={[styles.badge, { backgroundColor: ARTIST_CATALOGUE.badge.color, borderRadius: rad.pill }]}>
-            <Text style={styles.badgeLetter}>{ARTIST_CATALOGUE.badge.letter}</Text>
-          </View>
+          <SourceBadge letter={ARTIST_CATALOGUE.badge.letter} color={ARTIST_CATALOGUE.badge.color} />
         )}
         <Text style={[styles.title, { color: colors.secondary }]}>{t('album.mightAlsoLike')}</Text>
       </View>
@@ -108,17 +108,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: SHELF_INSET,
     marginBottom: spacing.md,
-  },
-  badge: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeLetter: {
-    ...typography.micro,
-    fontWeight: '600',
-    color: onDark.text,
   },
   title: {
     ...typography.sectionTitle,

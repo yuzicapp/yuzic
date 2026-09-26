@@ -1,5 +1,6 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+import { Text } from '@/components/Text'
 import { useNavigation } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -21,6 +22,7 @@ import {
 import { useApi } from '@/providers/registry/useApi'
 import { useServerSurface } from './useServerSurface'
 import { useTheme } from '@/features/theme/useTheme'
+import { useListDensity } from '@/features/theme/useListDensity'
 import { iconSize, spacing, typography } from '@/constants/design'
 import CoverMosaic from './CoverMosaic'
 import { useLibrarySummary, type LibraryEntryKey } from './useLibrarySummary'
@@ -67,6 +69,9 @@ const LibraryEntryRows: React.FC = () => {
   const router = useRouter()
   const { t } = useTranslation()
   const { colors } = useTheme()
+  // The library's own density step, the same one LibraryItem uses. Without it
+  // half the rows on this screen moved with the setting and half held still.
+  const density = useListDensity()
   const summary = useLibrarySummary()
   const api = useApi()
   const podcastsOffered = useServerSurface('podcasts')
@@ -200,6 +205,12 @@ const LibraryEntryRows: React.FC = () => {
                 <View
                   style={[
                     styles.body,
+                    {
+                      paddingVertical: density.libraryRowPadding,
+                      // Keep the documented floor relative to the padding, or
+                      // a one-line row and a two-line row stop matching again.
+                      minHeight: MOSAIC_SIZE + density.libraryRowPadding * 2,
+                    },
                     index < section.entries.length - 1 && {
                       borderBottomWidth: StyleSheet.hairlineWidth,
                       borderBottomColor: colors.border,
@@ -275,8 +286,6 @@ const styles = StyleSheet.create({
     // difference between neighbours and left the dividers unevenly spaced.
     // The floor clears the art with room to breathe, so every row matches
     // whether or not it has a subtitle.
-    minHeight: MOSAIC_SIZE + spacing.sm * 2,
-    paddingVertical: spacing.sm,
   },
   labels: { flexShrink: 1, minWidth: 0, gap: spacing.xxs },
   count: { ...typography.caption },

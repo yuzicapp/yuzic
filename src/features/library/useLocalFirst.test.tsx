@@ -11,7 +11,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { Text } from '@/components/Text';
 
 let mockSongs: unknown[] = Array.from({ length: 2000 }, (_, i) => ({
   localId: `s${i}`, nativeId: `${i}`, externalIds: {}, title: `T${i}`,
