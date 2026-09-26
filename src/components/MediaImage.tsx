@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '@/components/Text';
+import { fontScaleCap } from '@/constants/design';
 import TurboImage from 'react-native-turbo-image';
 import { useSelector } from 'react-redux';
 import { buildCover, buildCoverCacheKey, coverIdentity, DRAWN_COVER } from '@/providers/registry/covers';
@@ -125,7 +127,12 @@ export function MediaImage({
             // so a screen reader reading the initials back would just repeat it.
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
-            allowFontScaling={false}
+            // Drawn artwork in a box the parent sizes, not a line of text: it
+            // holds still for the in-app size and is bounded against the
+            // system one, rather than opting out of both with
+            // `allowFontScaling={false}`.
+            appScaling={false}
+            maxFontSizeMultiplier={fontScaleCap.glyph}
             numberOfLines={1}
             style={{ color: drawn.foreground, fontSize: INITIALS_SIZE[size], fontWeight: '600' }}
           >
