@@ -1,5 +1,6 @@
-The car opens Yuzic properly, and reordering works again.
+Text size, spacing and corners now change the app as you pick them.
 
-- Starting Yuzic from the car works with your phone app closed. This was fixed last release but was missing from the build itself
-- Dragging Home shelves into the order you want, in Settings, works again
-- Drag-to-reorder is smoother in playlists, the queue and settings
+- Text size applies straight away instead of waiting for a restart, and icons grow with it
+- Spacing reaches the lists that ignored it: the play queue, Quick picks, your Library rows, and the placeholders shown while a list loads
+- The playing bar's artwork follows your corner style
+- Albums with no artwork each get their own colour and initials, instead of one grey icon for all of them
