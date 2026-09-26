@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 
 jest.mock('@/features/library/useLocalFirst', () => ({
   useLocalFirst: () => ({
@@ -151,6 +151,24 @@ describe('useEntityActions', () => {
     const { result } = await renderHook(() => useSongLibraryActions(song, { onAddToPlaylist: jest.fn(), onRating: jest.fn(), close }));
     expect(result.current.actions.map(a => a.id)).toContain('favorite');
     expect(result.current.actions.map(a => a.id)).toContain('instantMix');
+  });
+
+  /**
+   * Download was the one row in all four sheets that never dismissed. Every
+   * other action closes, a download runs for minutes, and the sheet sat over
+   * the screen the whole time hiding the thing being downloaded.
+   */
+  it.each([
+    ['song', () => useSongLibraryActions(song, { onAddToPlaylist: jest.fn(), onRating: jest.fn(), close })],
+    ['album', () => useAlbumLibraryActions(album, { hideGoToAlbum: false, isSheetOpen: false, onRating: jest.fn(), close })],
+    ['playlist', () => usePlaylistOptionsActions(playlist, { hideGoToPlaylist: false, isSheetOpen: false, close })],
+  ])('closes the %s sheet when a download starts', async (_kind, useActions) => {
+    close.mockClear();
+    const { result } = await renderHook(useActions as () => { actions: { id: string; onPress: () => void }[] });
+    const download = result.current.actions.find(a => a.id === 'download');
+    expect(download).toBeDefined();
+    await act(async () => { download!.onPress(); });
+    expect(close).toHaveBeenCalled();
   });
 
   it('useSongExternalActions resolves the external song action set', async () => {

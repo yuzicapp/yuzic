@@ -74,6 +74,7 @@ export function useArtistOptionsActions(
   const inFlightDownloadRef = useRef(false);
   const downloadAll = async () => {
     if (isDownloaded || isDownloading || !artistAlbums.length || inFlightDownloadRef.current) return;
+    opts.close();
     inFlightDownloadRef.current = true;
     setIsDownloadingAll(true);
     try {

@@ -102,6 +102,7 @@ export function useSongLibraryActions(
       sleepTimer: () => { opts.close(); if (opts.onSleepTimer) requestAnimationFrame(opts.onSleepTimer); },
       download: async () => {
         if (isDownloading) return;
+        opts.close();
         if (isDownloaded) {
           confirmDestructive({
             title: t('settings.library.downloads.removeTitle'),

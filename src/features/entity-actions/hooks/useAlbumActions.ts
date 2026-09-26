@@ -110,6 +110,11 @@ export function useAlbumLibraryActions(
       share: () => void share(),
       download: async () => {
         if (isDownloading) return;
+        // Close first, like every other row here. A download runs for minutes
+        // and reports itself in Downloads and on the row it came from, so
+        // leaving the sheet sitting over the screen buys nothing and hides
+        // the thing being downloaded.
+        opts.close();
         if (isDownloaded) {
           confirmDestructive({
             title: t('settings.library.downloads.removeTitle'),

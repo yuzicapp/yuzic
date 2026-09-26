@@ -78,6 +78,7 @@ export function usePlaylistOptionsActions(
       },
       download: async () => {
         if (isDownloading) return;
+        opts.close();
         if (isDownloaded) {
           confirmDestructive({
             title: t('settings.library.downloads.removeTitle'),
