@@ -4,6 +4,14 @@ import { render } from '@testing-library/react-native';
 import SongOptions from './SongOptions';
 import type { Song } from '@/domain/entities/Song';
 
+jest.mock('@/features/sources/externalResolutionContext', () => ({
+  // A boundary here: these tests are about which actions resolve, not about
+  // where an external record turns out to live.
+  useExternalResolution: () => ({
+    resolveAndNavigateToAlbum: jest.fn(),
+    resolveAndNavigateToArtist: jest.fn(),
+  }),
+}));
 jest.mock('@/features/library/useLocalFirst', () => ({
   useLocalFirst: () => ({
     index: {

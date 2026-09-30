@@ -1,5 +1,13 @@
 import { act, renderHook } from '@testing-library/react-native';
 
+jest.mock('@/features/sources/externalResolutionContext', () => ({
+  // A boundary here: these tests are about which actions resolve, not about
+  // where an external record turns out to live.
+  useExternalResolution: () => ({
+    resolveAndNavigateToAlbum: jest.fn(),
+    resolveAndNavigateToArtist: jest.fn(),
+  }),
+}));
 jest.mock('@/features/library/useLocalFirst', () => ({
   useLocalFirst: () => ({
     index: {
@@ -175,7 +183,7 @@ describe('useEntityActions', () => {
     const { result } = await renderHook(() => useSongExternalActions(externalSong, {
       albumTitle: 'Album', albumArtist: 'Artist', close, openAlbumGet: jest.fn(), openTrackGet: jest.fn(),
     }));
-    expect(result.current.actions.map(a => a.id)).toEqual(['want']);
+    expect(result.current.actions.map(a => a.id)).toEqual(['want', 'goToAlbum', 'goToArtist']);
   });
 
   it('useAlbumLibraryActions resolves the library album action set', async () => {

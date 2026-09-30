@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Play, Download, CloudDownload, ChevronRight, Link } from 'lucide-react-native';
+import { Heart, Play, Download, CloudDownload, ChevronRight, Link, Disc, Mic2 } from 'lucide-react-native';
 import type { Song } from '@/domain/entities/Song';
 import { iconSize, spacing, statusColor } from '@/constants/design';
 import type { ActionDef, BaseActionContext } from '../types';
@@ -21,6 +21,8 @@ export interface SongExternalActionContext extends BaseActionContext {
     toggleWant: () => void;
     openAlbumGet: () => void;
     openTrackGet: () => void;
+    goToAlbum: () => void;
+    goToArtist: () => void;
   };
 }
 
@@ -74,5 +76,24 @@ export const songExternalActions: ActionDef<Ctx>[] = [
     trailing: ctx => chevron(ctx.colors.placeholder),
     visible: ctx => !ctx.isInLibrary && ctx.canDownload,
     invoke: ctx => ctx.handlers.openAlbumGet(),
+  },
+  // The same two rows the library sheet offers, and they mean the same thing
+  // here — with one difference the listener never sees: an external record
+  // carries its source's ids, so these resolve through the source rather than
+  // asking the server, which has never heard of it. The player's artist tap
+  // already does this; a sheet that could not was the odd one out.
+  {
+    id: 'goToAlbum',
+    label: ctx => ctx.t('songOptions.actions.goToAlbum'),
+    icon: ctx => React.createElement(Disc, { size: iconSize.loader, color: ctx.colors.secondary }),
+    visible: ctx => !!ctx.song.album.title,
+    invoke: ctx => ctx.handlers.goToAlbum(),
+  },
+  {
+    id: 'goToArtist',
+    label: ctx => ctx.t('songOptions.actions.goToArtist'),
+    icon: ctx => React.createElement(Mic2, { size: iconSize.loader, color: ctx.colors.secondary }),
+    visible: ctx => !!ctx.song.artist.name,
+    invoke: ctx => ctx.handlers.goToArtist(),
   },
 ];

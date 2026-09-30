@@ -28,7 +28,7 @@ describe('_actionRegistrySummary', () => {
       'favorite', 'rating', 'addToQueue', 'addToEnd', 'addToPlaylist', 'sleepTimer', 'download',
       'goToAlbum', 'goToArtist', 'instantMix', 'generatePlaylist',
     ]);
-    expect(_actionRegistrySummary['song.external']).toEqual(['play', 'inLibrary', 'want', 'getSong', 'get']);
+    expect(_actionRegistrySummary['song.external']).toEqual(['play', 'inLibrary', 'want', 'getSong', 'get', 'goToAlbum', 'goToArtist']);
     expect(_actionRegistrySummary['album.library']).toEqual([
       'favorite', 'rating', 'play', 'shuffle', 'addToNext', 'addToEnd', 'shuffleToQueue',
       'generatePlaylist', 'goToAlbum', 'viewExternal', 'share', 'download',
@@ -108,28 +108,35 @@ describe('songLibraryActions', () => {
 function songExternalCtx(overrides: Partial<SongExternalActionContext> = {}): SongExternalActionContext {
   return {
     kind: 'song', origin: 'external',
-    song: { localId: 'local:song:ext:deezer:1' } as SongExternalActionContext['song'],
+    song: {
+      localId: 'local:song:ext:deezer:1',
+      album: { title: 'An Album' },
+      artist: { name: 'An Artist' },
+    } as SongExternalActionContext['song'],
     t, colors: { secondary: '#000', placeholder: '#999' }, close: noop, onPlay: undefined,
     isWanted: false, isInLibrary: false, canDownload: false, canDownloadTrack: false,
-    handlers: { play: noop, toggleWant: noop, openAlbumGet: noop, openTrackGet: noop },
+    handlers: { play: noop, toggleWant: noop, openAlbumGet: noop, openTrackGet: noop, goToAlbum: noop, goToArtist: noop },
     ...overrides,
   };
 }
 
 describe('songExternalActions', () => {
-  it('shows only Want with no downloader connected and no onPlay', () => {
-    expect(resolveActions(songExternalActions, songExternalCtx()).map(a => a.id)).toEqual(['want']);
+  // Go to album/artist are always offered: they need no downloader and no
+  // ownership, only a title and a credit to resolve against.
+  it('shows Want and the two navigation rows with no downloader and no onPlay', () => {
+    expect(resolveActions(songExternalActions, songExternalCtx()).map(a => a.id))
+      .toEqual(['want', 'goToAlbum', 'goToArtist']);
   });
 
   it('adds Play, GetSong and Get once wired up', () => {
     const ids = resolveActions(songExternalActions, songExternalCtx({
       onPlay: noop, canDownload: true, canDownloadTrack: true,
     })).map(a => a.id);
-    expect(ids).toEqual(['play', 'want', 'getSong', 'get']);
+    expect(ids).toEqual(['play', 'want', 'getSong', 'get', 'goToAlbum', 'goToArtist']);
   });
 
   it('hides Want entirely when the song has no localId', () => {
-    const ctx = songExternalCtx({ song: { localId: '' } as SongExternalActionContext['song'] });
+    const ctx = songExternalCtx({ song: { localId: '', album: { title: 'An Album' }, artist: { name: 'An Artist' } } as SongExternalActionContext['song'] });
     expect(resolveActions(songExternalActions, ctx).map(a => a.id)).not.toContain('want');
   });
 
@@ -144,13 +151,15 @@ describe('songExternalActions', () => {
       isInLibrary: true, onPlay: noop, canDownload: true, canDownloadTrack: true,
     })).map(a => a.id);
 
-    expect(ids).toEqual(['play', 'inLibrary']);
+    // Owning it settles Want and Get; where the album and artist live is a
+    // separate question that ownership does not answer.
+    expect(ids).toEqual(['play', 'inLibrary', 'goToAlbum', 'goToArtist']);
   });
 
   it('leaves the inLibrary row out — and Want in — for a track nobody owns', () => {
     const ids = resolveActions(songExternalActions, songExternalCtx()).map(a => a.id);
 
-    expect(ids).toEqual(['want']);
+    expect(ids).toEqual(['want', 'goToAlbum', 'goToArtist']);
   });
 });
 
