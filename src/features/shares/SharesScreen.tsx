@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { notify } from '@/components/toast';
 import { CloudOff, Ellipsis, Link2 } from 'lucide-react-native';
 import { confirmDestructive } from '@/components/confirmDestructive';
+import { formatDate } from '@/components/formatDate';
 
 import { useApi } from '@/providers/registry/useApi';
 import type { Share } from '@/providers/contracts/ServerAdapter';
@@ -39,10 +40,6 @@ const EXPIRY_CHOICES = [
 
 type ExpiryChoice = (typeof EXPIRY_CHOICES)[number]['id'];
 
-function formatDate(value: string | undefined): string {
-  if (!value) return '';
-  try { return new Date(value).toLocaleDateString(); } catch { return value; }
-}
 
 function formatExpiry(t: (k: string, opts?: any) => string, value: string | undefined): string {
   if (!value) return t('shares.neverExpires');
@@ -50,7 +47,7 @@ function formatExpiry(t: (k: string, opts?: any) => string, value: string | unde
   if (Number.isNaN(ms)) return value;
   const now = Date.now();
   if (ms <= now) return t('shares.expired');
-  return t('shares.expiresOn', { date: formatDate(value) });
+  return t('shares.expiresOn', { date: formatDate(value, { fallback: value }) });
 }
 
 /**

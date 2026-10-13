@@ -8,10 +8,20 @@ export function formatDuration(seconds: number): string {
   return `${minutes}:${secs.toString().padStart(2, '0')}`
 }
 
+/**
+ * Compact form for podcast episodes: "1h 5m" / "45m".
+ * Rounds to the nearest minute; sub-minute durations read "0m".
+ */
+export function formatCompactDuration(seconds?: number): string {
+  if (!seconds || seconds <= 0) return ''
+  const h = Math.floor(seconds / 3600)
+  const m = Math.round((seconds % 3600) / 60)
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
+}
+
 export function formatSongDuration(duration?: string | number): string {
   const n = Number(duration)
   if (!n) return ''
-  const m = Math.floor(n / 60)
-  const s = Math.floor(n % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
+  return formatDuration(n)
 }

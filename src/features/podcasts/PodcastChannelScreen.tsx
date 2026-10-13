@@ -27,26 +27,10 @@ import { useListDensity } from '@/features/theme/useListDensity';
 import { hitSlopFor, iconSize, spacing, typography } from '@/constants/design';
 import { QueryKeys } from '@/state/query/queryKeys';
 import { usePlayingActions } from '@/features/playback/PlayingContext';
+import { formatCompactDuration } from '@/components/formatDuration';
+import { formatDate } from '@/components/formatDate';
 
 const DOWNLOAD_POLL_MS = 5_000;
-
-function formatDate(publishDate: string | undefined): string {
-  if (!publishDate) return '';
-  try {
-    return new Date(publishDate).toLocaleDateString();
-  } catch {
-    return publishDate;
-  }
-}
-
-function formatDuration(seconds: number | undefined): string {
-  if (!seconds || seconds <= 0) return '';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
-
 export default function PodcastChannelScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -159,7 +143,7 @@ export default function PodcastChannelScreen() {
               {item.title}
             </Text>
             <Text style={[styles.meta, { color: colors.subtext }]} numberOfLines={1}>
-              {[formatDate(item.publishDate), formatDuration(item.durationSeconds)]
+              {[formatDate(item.publishDate), formatCompactDuration(item.durationSeconds)]
                 .filter(Boolean)
                 .join(' · ')}
             </Text>

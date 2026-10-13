@@ -4,6 +4,7 @@ import type { Song } from '@/domain/entities/Song';
 import type { Album } from '@/domain/entities/Album';
 import { useTranslation } from 'react-i18next';
 import { formatDuration } from '@/components/formatDuration';
+import { formatDate } from '@/components/formatDate';
 import { useSheetRef } from '@/components/useSheetRef';
 import GetReviewSheet from '@/components/options/GetReviewSheet';
 import {
@@ -37,16 +38,6 @@ type SongOptionsProps = {
   onPlay?: () => void;
 };
 
-function formatDate(value: string | number | undefined): string {
-  if (!value) return '';
-  if (typeof value === 'string' && /^\d{4}$/.test(value.trim())) return value;
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return String(value);
-  const year = d.getFullYear();
-  const month = d.toLocaleString('default', { month: 'short' });
-  const day = d.getDate();
-  return `${month} ${day}, ${year}`;
-}
 
 /**
  * True when `song` came from an external catalog (Deezer/etc) rather than
@@ -158,10 +149,10 @@ const LibrarySongOptionsSheet = forwardRef<BottomSheetModal, LibrarySongOptionsP
               <>
                 <OptionSheetSectionLabel label={t('songOptions.sections.dates')} spaced />
                 {selectedSong.year != null && (
-                  <OptionSheetInfoRow label={t('songOptions.dates.released')} value={formatDate(String(selectedSong.year))} />
+                  <OptionSheetInfoRow label={t('songOptions.dates.released')} value={formatDate(String(selectedSong.year), { short: true })} />
                 )}
                 {selectedSong.addedAt != null && (
-                  <OptionSheetInfoRow label={t('songOptions.dates.added')} value={formatDate(selectedSong.addedAt)} valueLines={1} />
+                  <OptionSheetInfoRow label={t('songOptions.dates.added')} value={formatDate(selectedSong.addedAt, { short: true })} valueLines={1} />
                 )}
               </>
             )}

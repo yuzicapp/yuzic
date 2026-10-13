@@ -1,6 +1,7 @@
 import React, { forwardRef, useMemo, useState } from 'react';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '@/components/formatDate';
 import type { Playlist } from '@/domain/entities/Playlist';
 import { OptionSheetInfoRow, OptionSheetSectionLabel, OptionSheetDivider } from './OptionSheetPrimitives';
 import { EntityOptionsSheet } from '@/features/entity-actions/EntityOptionsSheet';
@@ -15,16 +16,6 @@ type PlaylistOptionsProps = {
   /** Offers "Edit songs", which calls this — given by the playlist screen, the one place to edit on. */
   onEditSongs?: () => void;
 };
-
-function formatDate(value: string | number | Date | undefined): string {
-  if (!value) return '—';
-  const d = value instanceof Date ? value : new Date(value);
-  if (isNaN(d.getTime())) return '—';
-  const year = d.getFullYear();
-  const month = d.toLocaleString('default', { month: 'short' });
-  const day = d.getDate();
-  return `${month} ${day}, ${year}`;
-}
 
 /**
  * `playlist` may be null while the caller resolves it — one component
@@ -55,8 +46,8 @@ const PlaylistOptions = forwardRef<BottomSheetModal, PlaylistOptionsProps>(
             <>
               <OptionSheetDivider />
               <OptionSheetSectionLabel label={t('playlistOptions.sections.info')} />
-              <OptionSheetInfoRow label={t('playlistOptions.info.lastChanged')} value={formatDate(playlist.updatedAt)} />
-              <OptionSheetInfoRow label={t('playlistOptions.info.created')} value={formatDate(playlist.createdAt)} />
+              <OptionSheetInfoRow label={t('playlistOptions.info.lastChanged')} value={formatDate(playlist.updatedAt, { short: true, fallback: '—' })} />
+              <OptionSheetInfoRow label={t('playlistOptions.info.created')} value={formatDate(playlist.createdAt, { short: true, fallback: '—' })} />
               <OptionSheetInfoRow label={t('playlistOptions.info.songs')} value={songs.length} />
             </>
           )}

@@ -3,15 +3,9 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Text';
 
 import { onDark, spacing, typography } from '@/constants/design';
+import { formatDuration } from '@/components/formatDuration';
 import { usePlayingActions, usePlayingProgress } from '@/features/playback/PlayingContext';
 import { SeekableProgressBar } from './SeekableProgressBar';
-
-const formatTime = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-};
-
 /**
  * The seek bar and the two timestamps under the player's title.
  *
@@ -39,10 +33,10 @@ const PlayingProgressSection: React.FC<{ songDuration: number }> = memo(({ songD
 
       <View style={styles.timestamps}>
         <Text style={styles.timestamp}>
-          {formatTime(position)}
+          {formatDuration(position)}
         </Text>
         <Text style={styles.timestamp}>
-          -{formatTime(duration - position)}
+          -{formatDuration(duration - position)}
         </Text>
       </View>
     </>
