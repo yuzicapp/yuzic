@@ -377,7 +377,10 @@
         "presetBass": "Bass boost",
         "presetTreble": "Treble boost",
         "presetVocal": "Vocal",
-        "presetLoudness": "Loudness"
+        "presetLoudness": "Loudness",
+        "presetCustom": "Custom",
+        "enabled": "Use equalizer",
+        "enabledSubtext": "Off sets the sound flat without losing your curve."
       },
       "streamingQuality": {
         "wifi": "WiFi Quality",

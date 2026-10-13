@@ -1,5 +1,5 @@
-import type { Album } from '@/domain/entities/Album';
-import type { Artist } from '@/domain/entities/Artist';
+import type { Provenance } from '@/domain/identity/Provenance';
+import type { ExternalIds } from '@/domain/identity/ExternalIds';
 import { ALL_SOURCES } from './registry';
 
 /*
@@ -13,8 +13,47 @@ type SourceDefinition = (typeof ALL_SOURCES)[number];
 /** How many matches each source offers the picker, the first shown up front. */
 export const CANDIDATES_PER_SOURCE = 5;
 
+/**
+ * Everything routing an artist actually reads about one.
+ *
+ * Narrower than `Artist` on purpose. The full entity carries a biography,
+ * tags and loaded album ids that none of this looks at, and demanding it shut
+ * out the callers that matter most: a song holds an `ArtistRef`, which is
+ * these four fields and nothing else, so the player and the song sheet could
+ * not ask where an artist lived and pushed the server's own id instead. On a
+ * track from Deezer that is an id the server has never heard of, and the
+ * artist screen answered "Couldn't load artist. Check your connection."
+ *
+ * A ref carries no provenance because it is scoped to the record that holds
+ * it — so a caller passes the parent's, which is the origin the artist came
+ * from by construction.
+ */
+export type RoutableArtist = {
+  provenance: Provenance;
+  externalIds: ExternalIds;
+  nativeId: string;
+  name: string;
+};
+
+/**
+ * Everything routing an album actually reads about one.
+ *
+ * Narrower than `Album` for the same reason as `RoutableArtist`: the entity
+ * carries songIds, genres and a release type that routing never looks at, and
+ * a song holds an `AlbumRef` plus its own artist — which is exactly these
+ * fields. Demanding the entity meant the only way to route a playing track's
+ * album was to fabricate one.
+ */
+export type RoutableAlbum = {
+  provenance: Provenance;
+  externalIds: ExternalIds;
+  nativeId: string;
+  title: string;
+  artist: { name: string };
+};
+
 /** The provider id an already-external record was browsed through, if it says. */
-export function providerIdOf(item: Album | Artist): string | undefined {
+export function providerIdOf(item: { provenance: Provenance }): string | undefined {
   return item.provenance.origin === 'integration' ? item.provenance.providerId : undefined;
 }
 
@@ -28,7 +67,7 @@ type Sources = readonly SourceDefinition[];
  * source answered with its own best guess and the picker asked the listener
  * to choose between them, for an artist the app had just been showing.
  */
-export function knownArtistRoute(item: Artist, enabledSources: Sources) {
+export function knownArtistRoute(item: RoutableArtist, enabledSources: Sources) {
   // Only among the sources the listener has switched on. Resolving `own` out
   // of ALL_SOURCES sent a Deezer-born artist to Deezer with Deezer turned
   // off — and because this runs before the "no sources enabled" check, that
@@ -44,7 +83,7 @@ export function knownArtistRoute(item: Artist, enabledSources: Sources) {
 }
 
 /** As `knownArtistRoute`, for an album browsed through a source. */
-export function knownAlbumRoute(item: Album, enabledSources: Sources) {
+export function knownAlbumRoute(item: RoutableAlbum, enabledSources: Sources) {
   const own = enabledSources.find(s => s.id === providerIdOf(item));
   if (!own || !item.nativeId) return null;
   return { source: own.id, albumId: item.nativeId, artist: item.artist.name, title: item.title };

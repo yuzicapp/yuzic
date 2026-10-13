@@ -113,3 +113,28 @@ describe('DownloadersQueueProvider ordering', () => {
     expect(first).toEqual(['lidarr', 'slskd']);
   });
 });
+
+/**
+ * What the Home banner counts is what is still moving. Downtify keeps a
+ * finished job in its list until its history is cleared, and counting rows
+ * left the banner spinning over downloads that had ended long ago (#304).
+ */
+describe('DownloadersQueueProvider in-flight count', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('counts only active rows, while still listing the finished ones', async () => {
+    mockStates = [
+      state('lidarr', 'Lidarr', async () => [item('a'), { ...item('b'), active: false }]),
+      state('slskd', 'slskd', async () => [{ ...item('c'), active: false }]),
+    ];
+
+    const { result } = await renderHook(() => useDownloadersQueue(), { wrapper });
+    await waitFor(() => expect(result.current.queues).toHaveLength(2));
+
+    expect(result.current.queues.map((q) => q.count)).toEqual([1, 0]);
+    expect(result.current.queues.map((q) => q.items.length)).toEqual([2, 1]);
+    expect(result.current.totalInFlight).toBe(1);
+  });
+});

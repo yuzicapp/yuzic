@@ -376,7 +376,10 @@
         "presetBass": "低音增强",
         "presetTreble": "高音增强",
         "presetVocal": "人声",
-        "presetLoudness": "响度"
+        "presetLoudness": "响度",
+        "presetCustom": "自定义",
+        "enabled": "启用均衡器",
+        "enabledSubtext": "关闭后声音保持平直，但会保留你的曲线。"
       },
       "streamingQuality": {
         "wifi": "WiFi音质",

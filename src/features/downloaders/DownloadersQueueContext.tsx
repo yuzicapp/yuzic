@@ -32,9 +32,9 @@ const SYNC_DELAYS_MS = [15_000, 60_000];
 type DownloaderQueueSnapshot = {
   id: DownloaderId;
   label: string;
-  /** Everything currently queued. Empty is a real answer, not "unread". */
+  /** Everything listed, finished rows too. Empty is a real answer, not "unread". */
   items: DownloaderQueueItem[];
-  count: number;
+  count: number; // Active rows only — Downtify lists `done` jobs until cleared (#304).
   /** True only until the first read lands, so a list does not flash a spinner. */
   isLoading: boolean;
   /** The last read failed. The items above are then the previous good read. */
@@ -149,7 +149,7 @@ export function DownloadersQueueProvider({ children }: { children: ReactNode }) 
       previousQueuesRef.current.set(state.def.id, items);
       updateQueue(state, {
         items,
-        count: items.length,
+        count: items.filter((item) => item.active).length,
         isLoading: false,
         hasError: false,
       });

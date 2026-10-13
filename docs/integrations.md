@@ -20,7 +20,7 @@ presence-gating rule — see [architecture.md](architecture.md).
 
 | Server | Type id | Auth | Public demo |
 | --- | --- | --- | --- |
-| Navidrome (any Subsonic-compatible server) | `navidrome` | username + password (Subsonic token auth) | Yes — `demo.navidrome.org` |
+| Navidrome (any Subsonic-compatible server) | `navidrome` | username + password (Subsonic token auth; the password itself, `p=enc:`, where a server refuses tokens) | Yes — `demo.navidrome.org` |
 | Jellyfin | `jellyfin` | username + password → access token | No |
 | Emby | `emby` | username + password → access token | No |
 | Plex | `plex` | Plex PIN code sign-in → account token | No |
@@ -30,6 +30,13 @@ Configured during onboarding, and afterwards in **Settings → Server**. Each
 server also carries optional **fallback URLs** (tried in order when the primary
 is unreachable — e.g. a Tailscale address away from home) and optional HTTP
 basic auth in front of the server.
+
+A Subsonic server is asked with a salted token (`t`/`s`) first. One that
+answers error 41 (token auth not supported) or OpenSubsonic's 42 (mechanism not
+supported) is asked again with the password in Subsonic's `enc:` hex form, and
+that client keeps using it. Nextcloud Music is the case this exists for: it
+stores only a hash of the app password, so it has nothing to check a token
+against (#271).
 
 ### How Jellyfin and Emby are authenticated
 

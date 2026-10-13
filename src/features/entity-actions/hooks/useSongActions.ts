@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { useExternalResolution } from '@/features/sources/externalResolutionContext';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useTheme } from '@/features/theme/useTheme';
@@ -139,6 +140,7 @@ export function useSongExternalActions(
 ) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const { resolveAndNavigateToAlbum, resolveAndNavigateToArtist } = useExternalResolution();
   const canDownload = useAnyDownloaderConnected();
   const canDownloadTrack = useAnyTrackDownloaderConnected();
   const { isWanted, toggle } = useWantToggle(song.localId, 'track', 'search');
@@ -163,6 +165,31 @@ export function useSongExternalActions(
       }),
       openAlbumGet: opts.openAlbumGet,
       openTrackGet: opts.openTrackGet,
+      // Resolved rather than pushed. This record carries its source's ids, so
+      // /albumView and /artistView cannot be handed one as if the server knew
+      // it — that is what made the player's artist tap report a connection
+      // problem. An `AlbumRef` has no artist of its own, so the song's is the
+      // credit to resolve against, and the ref carries no provenance because
+      // it is scoped to the song holding it.
+      goToAlbum: () => {
+        opts.close();
+        resolveAndNavigateToAlbum({
+          provenance: song.provenance,
+          externalIds: song.album.externalIds,
+          nativeId: song.album.nativeId,
+          title: song.album.title || opts.albumTitle,
+          artist: { name: song.artist.name || opts.albumArtist },
+        });
+      },
+      goToArtist: () => {
+        opts.close();
+        resolveAndNavigateToArtist({
+          provenance: song.provenance,
+          externalIds: song.artist.externalIds,
+          nativeId: song.artist.nativeId,
+          name: song.artist.name || opts.albumArtist,
+        });
+      },
     },
   };
 

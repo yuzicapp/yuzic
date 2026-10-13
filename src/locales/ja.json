@@ -376,7 +376,10 @@
         "presetBass": "低音強調",
         "presetTreble": "高音強調",
         "presetVocal": "ボーカル",
-        "presetLoudness": "ラウドネス"
+        "presetLoudness": "ラウドネス",
+        "presetCustom": "カスタム",
+        "enabled": "イコライザーを使用",
+        "enabledSubtext": "オフにすると、カーブを保持したままフラットな音になります。"
       },
       "streamingQuality": {
         "wifi": "WiFi音質",

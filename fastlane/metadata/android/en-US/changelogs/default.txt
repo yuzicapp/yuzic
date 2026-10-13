@@ -1,8 +1,5 @@
-Buttons that work both ways, and settings that only offer what your server can do.
+Fixes for tapping an artist you are listening to, and for headphone buttons.
 
-- A headphone or car button unpauses again, instead of only pausing
-- With crossfade on, album segues stay hard-cut rather than fading through themselves
-- Crossfaded tracks are scrobbled on what you heard, so they stop falling short
-- Loudness and streaming quality appear only where your server supports them
-- Jellyfin and Emby: an artist's top songs
-- Playlists are found when search asks your server
+- Tapping the artist on the player, for a track playing from an external source, opened a page that could not load. It now finds the artist where it actually lives
+- The sheet for an external track gains Go to album and Go to artist, which only library tracks had
+- A route change no longer pauses when one pair of headphones hands over to another — only when the sound would otherwise come out loud

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { getBackend } from '@/features/player/activeBackend';
 import { presetToBands } from '@/features/player/audioSettings';
-import { selectCrossfadeAlways, selectCrossfadeSeconds, selectEqualizerGains, selectLoudnessNormalization, selectLoudnessPreampDb } from '@/features/settings/playback/state';
+import { selectCrossfadeAlways, selectCrossfadeSeconds, selectEqualizerEnabled, selectEqualizerGains, selectLoudnessNormalization, selectLoudnessPreampDb } from '@/features/settings/playback/state';
 
 /**
  * Whether the player has been set up this launch.
@@ -41,6 +41,7 @@ export function usePlayerSetup(): void {
   const crossfadeSeconds = useSelector(selectCrossfadeSeconds);
   const crossfadeAlways = useSelector(selectCrossfadeAlways);
   const equalizerGains = useSelector(selectEqualizerGains);
+  const equalizerEnabled = useSelector(selectEqualizerEnabled);
   const loudnessNormalization = useSelector(selectLoudnessNormalization);
   const loudnessPreampDb = useSelector(selectLoudnessPreampDb);
   const crossfade = useMemo(
@@ -54,7 +55,12 @@ export function usePlayerSetup(): void {
         : null,
     [crossfadeSeconds, crossfadeAlways],
   );
-  const equalizerBands = useMemo(() => presetToBands(equalizerGains), [equalizerGains]);
+  // Off is a flat curve, which the engine bypasses outright; the stored gains
+  // are kept for when it comes back on.
+  const equalizerBands = useMemo(
+    () => presetToBands(equalizerEnabled ? equalizerGains : []),
+    [equalizerEnabled, equalizerGains],
+  );
   const loudness = useMemo(
     () => ({ enabled: loudnessNormalization, preampDb: loudnessPreampDb }),
     [loudnessNormalization, loudnessPreampDb],

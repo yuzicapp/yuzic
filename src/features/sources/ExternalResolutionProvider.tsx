@@ -1,30 +1,16 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { ExternalResolutionContext } from './externalResolutionContext';
 import { useRouter } from 'expo-router';
 import { notify } from '@/components/toast';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import ExternalSourcePickerSheet, { type PickerItem } from '@/components/ExternalSourcePickerSheet';
 import { useEnabledExternalSources, type SourceResolvedAlbum, type SourceResolvedArtist } from './registry';
-import { CANDIDATES_PER_SOURCE, knownAlbumRoute, knownArtistRoute, pickFrom, providerIdOf } from './resolutionRoutes';
+import { CANDIDATES_PER_SOURCE, knownAlbumRoute, knownArtistRoute, pickFrom, providerIdOf, type RoutableAlbum, type RoutableArtist } from './resolutionRoutes';
 import { useAlbums } from '@/features/album/useAlbums';
 import { useArtists } from '@/features/artist/useArtists';
 import { matchAlbumToLibrary, matchArtistToLibrary } from '@/features/library/matchToLibrary';
-import type { Album } from '@/domain/entities/Album';
-import type { Artist } from '@/domain/entities/Artist';
 
 const NO_SOURCE_TOAST = 'Enable an external source in Settings to browse this content.';
-
-type ResolutionContextType = {
-  resolveAndNavigateToAlbum: (item: Album) => void;
-  resolveAndNavigateToArtist: (item: Artist) => void;
-};
-
-const ExternalResolutionContext = createContext<ResolutionContextType | null>(null);
-
-export function useExternalResolution(): ResolutionContextType {
-  const ctx = useContext(ExternalResolutionContext);
-  if (!ctx) throw new Error('useExternalResolution must be used within ExternalResolutionProvider');
-  return ctx;
-}
 
 export function ExternalResolutionProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -40,7 +26,7 @@ export function ExternalResolutionProvider({ children }: { children: React.React
   // Callers that want to bypass the library match (fuzzy false positives)
   // don't come through here — they push albumView/artistView directly with
   // forceExternal, which the unified screens honor.
-  const resolveAndNavigateToAlbum = useCallback(async (item: Album) => {
+  const resolveAndNavigateToAlbum = useCallback(async (item: RoutableAlbum) => {
     const localMatch = matchAlbumToLibrary(
       { externalIds: item.externalIds, title: item.title, artistName: item.artist.name },
       albums
@@ -90,7 +76,7 @@ export function ExternalResolutionProvider({ children }: { children: React.React
     albumPickerRef.current?.present();
   }, [albums, enabledSources, router]);
 
-  const resolveAndNavigateToArtist = useCallback(async (item: Artist) => {
+  const resolveAndNavigateToArtist = useCallback(async (item: RoutableArtist) => {
     const localMatch = matchArtistToLibrary({ externalIds: item.externalIds, name: item.name }, artists);
     if (localMatch) {
       // Server adapter identity, same reasoning as the album branch above.

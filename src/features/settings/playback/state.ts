@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { clampSpeed, type SpeedProfile } from '@/features/playback/speedProfile';
 
 import type { AudioQuality, PreferredCodec } from '@/domain/playback/AudioFormat';
+import { matchPreset, presetToBands } from '@/features/player/audioSettings';
 
 export type { AudioQuality };
 
@@ -50,6 +51,18 @@ interface PlaybackSettingsState {
   /** Per-band gains in dB, in `EQ_FREQUENCIES` order. All zero is flat. */
   equalizerGains: number[];
   /**
+   * Whether the curve above is applied. Off sends the engine a flat curve and
+   * leaves `equalizerGains` alone, so a curve tuned for headphones survives
+   * an evening on a speaker (#307). Flat was the only "off" before, and
+   * choosing it threw the curve away.
+   */
+  equalizerEnabled: boolean;
+  /**
+   * The last curve that was no preset, so picking one and coming back does
+   * not lose it. `null` until there has been one.
+   */
+  equalizerCustomGains: number[] | null;
+  /**
    * Level every track to the same loudness, using the server's own measurement.
    *
    * Off by default, because it is only ever as good as the tags: on a library
@@ -88,9 +101,13 @@ const initialState: PlaybackSettingsState = {
   crossfadeSeconds: 0,
   crossfadeAlways: false,
   equalizerGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  equalizerEnabled: true,
+  equalizerCustomGains: null,
   loudnessNormalization: false,
   loudnessPreampDb: 0,
 };
+
+const isPresetCurve = (gains: number[]): boolean => matchPreset(presetToBands(gains)) !== null;
 
 const playbackSlice = createSlice({
   name: 'settingsPlayback',
@@ -145,7 +162,18 @@ const playbackSlice = createSlice({
       state.crossfadeAlways = action.payload;
     },
     setEqualizerGains(state, action: PayloadAction<number[]>) {
+      // A curve tuned before Custom was remembered is only in the gains, and
+      // is about to be overwritten — keep it before it goes.
+      if (!state.equalizerCustomGains && !isPresetCurve(state.equalizerGains)) {
+        state.equalizerCustomGains = state.equalizerGains;
+      }
       state.equalizerGains = action.payload;
+      // Remembered here rather than by the screen, so every way a curve can
+      // change keeps the custom one — a band drag and a restore alike.
+      if (!isPresetCurve(action.payload)) state.equalizerCustomGains = action.payload;
+    },
+    setEqualizerEnabled(state, action: PayloadAction<boolean>) {
+      state.equalizerEnabled = action.payload;
     },
     setLoudnessNormalization(state, action: PayloadAction<boolean>) {
       state.loudnessNormalization = action.payload;
@@ -174,6 +202,7 @@ export const {
   setCrossfadeSeconds,
   setCrossfadeAlways,
   setEqualizerGains,
+  setEqualizerEnabled,
   setLoudnessNormalization,
   setLoudnessPreampDb,
 } = playbackSlice.actions;
@@ -236,6 +265,19 @@ export const selectCrossfadeAlways = (state: PlaybackRootState): boolean =>
 
 export const selectEqualizerGains = (state: PlaybackRootState): number[] =>
   state.settingsPlayback.equalizerGains;
+
+// Defaulted for installs that predate the keys — see `selectShowRating`. An
+// equalizer someone already tuned stays on.
+export const selectEqualizerEnabled = (state: PlaybackRootState): boolean =>
+  state.settingsPlayback.equalizerEnabled ?? true;
+
+// An install that tuned a curve before this was remembered still has it in
+// `equalizerGains`, and should find it under Custom rather than nowhere.
+export const selectEqualizerCustomGains = (state: PlaybackRootState): number[] | null => {
+  const { equalizerCustomGains, equalizerGains } = state.settingsPlayback;
+  if (equalizerCustomGains) return equalizerCustomGains;
+  return isPresetCurve(equalizerGains) ? null : equalizerGains;
+};
 
 export const selectLoudnessNormalization = (state: PlaybackRootState): boolean =>
   state.settingsPlayback.loudnessNormalization;

@@ -377,7 +377,10 @@
         "presetBass": "Graves",
         "presetTreble": "Aigus",
         "presetVocal": "Voix",
-        "presetLoudness": "Loudness"
+        "presetLoudness": "Loudness",
+        "presetCustom": "Personnalisé",
+        "enabled": "Utiliser l'égaliseur",
+        "enabledSubtext": "Désactivé, le son est neutre sans perdre votre courbe."
       },
       "streamingQuality": {
         "wifi": "Qualité WiFi",

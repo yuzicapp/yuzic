@@ -1,4 +1,4 @@
-import { useExternalResolution } from './ExternalResolutionProvider';
+import { useExternalResolution } from './externalResolutionContext';
 import type { Album } from '@/domain/entities/Album';
 import type { Artist } from '@/domain/entities/Artist';
 

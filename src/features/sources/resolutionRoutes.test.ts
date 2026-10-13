@@ -54,6 +54,43 @@ describe('knownArtistRoute', () => {
     });
   });
 
+  /**
+   * The reported bug: tapping the artist on the player, for a track playing
+   * from Deezer, landed on "Couldn't load artist. Check your connection."
+   *
+   * A song holds an `ArtistRef` — four fields, and no provenance, because a
+   * ref is scoped to the record holding it. Routing demanded a whole `Artist`,
+   * so the player could not ask this at all and pushed the server's own id
+   * instead, which on a Deezer track is an id the server has never seen.
+   * Routing reads exactly what a ref plus the song's provenance can supply.
+   */
+  it('routes what a song can actually offer: a ref and the song\'s origin', () => {
+    const songProvenance = integrationProvenance('deezer');
+    const ref = {
+      provenance: songProvenance,
+      externalIds: { deezerId: '27' },
+      nativeId: '27',
+      name: 'Artist',
+    };
+
+    expect(knownArtistRoute(ref, both)).toEqual({
+      source: 'deezer', artistId: '27', mbid: undefined, name: 'Artist',
+    });
+  });
+
+  it('sends a server-born song nowhere external, so it keeps the server route', () => {
+    // Provenance is the whole discriminator: a library track must not be
+    // resolved through Deezer just because Deezer happens to be enabled.
+    const ref = {
+      provenance: serverProvenance('srv-1'),
+      externalIds: {},
+      nativeId: 'artist-99',
+      name: 'Artist',
+    };
+
+    expect(knownArtistRoute(ref, both)).toBeNull();
+  });
+
   it('falls back to the native id when the ref carries no external ids', () => {
     const item = artist(integrationProvenance('musicbrainz'), 'mb-1');
 

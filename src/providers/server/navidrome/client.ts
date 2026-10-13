@@ -51,11 +51,31 @@ export function buildTokenParams(username: string, password: string): {
   return { u: username, t: token, s: salt };
 }
 
+/**
+ * The password as Subsonic's `enc:` form — its UTF-8 bytes in hex. Not
+ * secrecy (hex is not encryption), only what the spec defines for `p`, and it
+ * keeps a password with `&` or `%` in it from reading as more parameters.
+ */
+function encodedPassword(password: string): string {
+  const hex = encodeURIComponent(password).replace(/%([0-9A-F]{2})|([^%])/g, (_match, byte, char) =>
+    byte ? byte.toLowerCase() : char.charCodeAt(0).toString(16).padStart(2, '0')
+  );
+  return `enc:${hex}`;
+}
+
+/**
+ * Subsonic's "token authentication not supported" (41) and OpenSubsonic's
+ * "authentication mechanism not supported" (42). Nextcloud Music answers 41:
+ * it keeps only a hash of the app password, so it has nothing to check a
+ * salted token against, and takes the password itself instead (#271).
+ */
+const TOKEN_AUTH_REFUSED = new Set([41, 42]);
+
 /** A query value; an array repeats the key, which is how Subsonic takes a list. */
 type ParamValue = string | number | readonly (string | number)[];
 
 function buildParams(
-  auth: { u: string; t: string; s: string },
+  auth: Record<string, string>,
   extra: Record<string, ParamValue> = {},
   opts?: { format?: "json" | null }
 ): string {
@@ -83,6 +103,11 @@ export function createNavidromeClient(config: NavidromeClientConfig) {
     : {};
 
   let extensions: Promise<Set<string>> | null = null;
+  // Token auth until the server says it cannot take it, then the password for
+  // the rest of this client's life — one refused request, not one per request.
+  let passwordAuth = false;
+  const authParams = (): Record<string, string> =>
+    passwordAuth ? { u: username, p: encodedPassword(password) } : buildTokenParams(username, password);
 
   /**
    * The OpenSubsonic extensions the server declares, asked once per client.
@@ -103,7 +128,23 @@ export function createNavidromeClient(config: NavidromeClientConfig) {
     extraParams: Record<string, ParamValue> = {},
     options: { method?: "GET" | "POST" } = {}
   ): Promise<T> {
-    const auth = buildTokenParams(username, password);
+    try {
+      return await send<T>(endpoint, extraParams, options);
+    } catch (error) {
+      if (passwordAuth || !(error instanceof SubsonicRequestError) || !TOKEN_AUTH_REFUSED.has(error.code ?? -1)) {
+        throw error;
+      }
+      passwordAuth = true;
+      return send<T>(endpoint, extraParams, options);
+    }
+  }
+
+  async function send<T>(
+    endpoint: string,
+    extraParams: Record<string, ParamValue>,
+    options: { method?: "GET" | "POST" }
+  ): Promise<T> {
+    const auth = authParams();
     const params = buildParams(auth, { ...(defaultParams ?? {}), ...extraParams });
     // A POST carries its parameters in the body where the server says it can
     // take them there. In the URL, a playlist rewrite repeats a song id per
@@ -170,7 +211,7 @@ export function createNavidromeClient(config: NavidromeClientConfig) {
     // is built against that same address.
     const streamBaseUrl = failoverHint ? orderedUrls(failoverHint)[0] ?? baseUrl : baseUrl;
     const { format, maxBitRate } = qualityToStreamParams(quality, codec);
-    const auth = buildTokenParams(username, password);
+    const auth = authParams();
     const extra: Record<string, string | number> = { id: songId, format };
     if (maxBitRate) extra.maxBitRate = maxBitRate;
     const params = buildParams(auth, extra, { format: null });
@@ -181,7 +222,7 @@ export function createNavidromeClient(config: NavidromeClientConfig) {
     // Same failover treatment as a stream: the avatar is fetched by the image
     // loader against whichever URL was last confirmed alive.
     const base = failoverHint ? orderedUrls(failoverHint)[0] ?? baseUrl : baseUrl;
-    const auth = buildTokenParams(username, password);
+    const auth = authParams();
     // `f=json` is deliberately omitted — the response is a PNG, and asking for
     // JSON makes Navidrome answer with an error document instead of an image.
     const params = buildParams(auth, { username }, { format: null });

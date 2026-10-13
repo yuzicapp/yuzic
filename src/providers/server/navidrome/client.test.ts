@@ -113,3 +113,58 @@ describe('request', () => {
     await expect(client().request('ping.view')).rejects.toThrow('Navidrome API error (502)');
   });
 });
+
+/**
+ * Nextcloud Music cannot take a salted token (#271): it stores only a hash of
+ * the app password, so it answers every token request with error 41 and
+ * expects the password itself. Signing in failed outright.
+ */
+describe('password auth fallback', () => {
+  beforeEach(() => mockServerFetch.mockReset());
+
+  const ok = { 'subsonic-response': { status: 'ok' } };
+  const refused = (code: number) => ({
+    'subsonic-response': { status: 'failed', error: { code, message: 'Token-based authentication not supported' } },
+  });
+  const paramsOf = (call: unknown[]) => new URL(String(call[0])).searchParams;
+
+  it.each([41, 42])('retries with the password when the server refuses a token (%i), and keeps using it', async code => {
+    mockServerFetch.mockReturnValueOnce(respond(refused(code))).mockReturnValue(respond(ok));
+    const nd = client();
+
+    await expect(nd.request('ping.view')).resolves.toEqual(ok);
+    await nd.request('getAlbumList2.view');
+
+    const [first, retry, next] = mockServerFetch.mock.calls.map(paramsOf);
+    expect(first.has('t')).toBe(true);
+    // 'hunter2' as UTF-8 hex — Subsonic's `enc:` form of `p`.
+    expect(retry.get('p')).toBe('enc:68756e74657232');
+    expect(retry.has('t')).toBe(false);
+    expect(next.get('p')).toBe('enc:68756e74657232');
+    expect(paramsOf([nd.buildStreamUrl('s1')]).get('p')).toBe('enc:68756e74657232');
+  });
+
+  it('keeps token auth, and the refusal, for any other error', async () => {
+    mockServerFetch.mockReturnValue(respond(refused(40)));
+    const nd = client();
+
+    await expect(nd.request('ping.view')).rejects.toMatchObject({ code: 40 });
+    expect(mockServerFetch).toHaveBeenCalledTimes(1);
+    expect(paramsOf([nd.buildStreamUrl('s1')]).has('t')).toBe(true);
+  });
+
+  it('gives up after one password retry rather than looping', async () => {
+    mockServerFetch.mockReturnValue(respond(refused(41)));
+
+    await expect(client().request('ping.view')).rejects.toBeInstanceOf(SubsonicRequestError);
+    expect(mockServerFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('hex-encodes a password as UTF-8 bytes', async () => {
+    mockServerFetch.mockReturnValueOnce(respond(refused(41))).mockReturnValue(respond(ok));
+    const nd = createNavidromeClient({ serverUrl: 'https://music.example.com', username: 'zack', password: 'pä&ss' });
+
+    await nd.request('ping.view');
+    expect(paramsOf(mockServerFetch.mock.calls[1]).get('p')).toBe('enc:70c3a4267373');
+  });
+});

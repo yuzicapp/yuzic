@@ -7,9 +7,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/features/theme/useTheme';
-import { selectEqualizerGains, setEqualizerGains } from '@/features/settings/playback/state';
+import {
+  selectEqualizerCustomGains,
+  selectEqualizerEnabled,
+  selectEqualizerGains,
+  setEqualizerEnabled,
+  setEqualizerGains,
+} from '@/features/settings/playback/state';
 import { useRadius } from '@/features/theme/useRadius';
 import SettingsCard from '../../components/SettingsCard';
+import SettingsToggleRow from '../../components/SettingsToggleRow';
 import { withAlpha } from '@/features/theme/color';
 import {
   EQ_FREQUENCIES,
@@ -30,9 +37,20 @@ const Equalizer: React.FC = () => {
   const { colors } = useTheme();
   const rad = useRadius();
   const gains = useSelector(selectEqualizerGains);
+  const enabled = useSelector(selectEqualizerEnabled);
+  const customGains = useSelector(selectEqualizerCustomGains);
   const themeColor = colors.themeColor;
 
   const activePreset = useMemo(() => matchPreset(presetToBands(gains)), [gains]);
+  // The remembered curve gets a chip of its own beside the presets, so trying
+  // one is not a one-way trip (#307). Selected whenever the curve is no preset:
+  // a band drag is the custom curve being edited.
+  const chips = useMemo(
+    () => customGains
+      ? [...EQ_PRESETS, { id: CUSTOM_ID, labelKey: 'settings.player.equalizer.presetCustom', gains: customGains }]
+      : EQ_PRESETS,
+    [customGains],
+  );
   const isFlat = useMemo(() => gains.every(gain => gain === 0), [gains]);
 
   const setBand = useCallback(
@@ -45,149 +63,167 @@ const Equalizer: React.FC = () => {
   );
 
   return (
-    <SettingsCard>
-      <View style={styles.header}>
-        <Text style={[styles.label, { color: colors.secondary }]}>
-          {t('settings.player.equalizer.title')}
-        </Text>
-        {!isFlat && (
-          <Pressable
-            onPress={() => dispatch(setEqualizerGains(EQ_PRESETS[0].gains))}
-            accessibilityRole="button"
-            accessibilityLabel={t('a11y.equalizer.reset')}
-            hitSlop={spacing.sm}
-          >
-            <Text style={[styles.reset, { color: themeColor }]}>
-              {t('settings.player.equalizer.reset')}
-            </Text>
-          </Pressable>
-        )}
-      </View>
+    <>
+      <SettingsCard>
+        <SettingsToggleRow
+          label={t('settings.player.equalizer.enabled')}
+          subtext={t('settings.player.equalizer.enabledSubtext')}
+          value={enabled}
+          onValueChange={value => dispatch(setEqualizerEnabled(value))}
+        />
+      </SettingsCard>
 
       {/*
-        Horizontally scrollable rather than squeezed to fit. Ten bands across a
-        phone leaves each slider too narrow to grab, and a control you cannot
-        reliably hit is worse than one you have to scroll to.
+        Hidden while off, as the loudness preamp is: these shape a curve that is
+        not being applied. The curve itself is kept.
       */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.presets}
-      >
-        {EQ_PRESETS.map(preset => {
-          const selected = activePreset === preset.id;
-          return (
-            <Pressable
-              key={preset.id}
-              onPress={() => dispatch(setEqualizerGains(preset.gains))}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              accessibilityLabel={t('a11y.equalizer.preset', { name: t(preset.labelKey) })}
-              style={[
-                styles.preset,
-                {
-                  borderRadius: rad.card,
-                  backgroundColor: selected ? themeColor : withAlpha(colors.border, 0.33),
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.presetText,
-                  { color: selected ? onDark.text : colors.secondary },
-                ]}
+      {enabled && (
+        <SettingsCard>
+          <View style={styles.header}>
+            <Text style={[styles.label, { color: colors.secondary }]}>
+              {t('settings.player.equalizer.title')}
+            </Text>
+            {!isFlat && (
+              <Pressable
+                onPress={() => dispatch(setEqualizerGains(EQ_PRESETS[0].gains))}
+                accessibilityRole="button"
+                accessibilityLabel={t('a11y.equalizer.reset')}
+                hitSlop={spacing.sm}
               >
-                {t(preset.labelKey)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+                <Text style={[styles.reset, { color: themeColor }]}>
+                  {t('settings.player.equalizer.reset')}
+                </Text>
+              </Pressable>
+            )}
+          </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.bands}
-      >
-        {EQ_FREQUENCIES.map((frequencyHz, index) => {
-          const gain = gains[index] ?? 0;
-          return (
-            <View key={frequencyHz} style={styles.band}>
-              <Text style={[styles.gain, { color: gain === 0 ? colors.subtext : themeColor }]}>
-                {gain > 0 ? `+${gain}` : gain}
-              </Text>
-              {/*
-                A vertical slider is what an equalizer looks like everywhere
-                else, and `@react-native-community/slider` has no vertical
-                mode — so it is rotated. `height` and `width` are swapped in
-                the style because the rotation happens after layout.
-              */}
-              <View style={styles.sliderWell}>
-                {/*
-                  The track is drawn here rather than by the Slider, because
-                  this control is bipolar and the Slider only fills from one
-                  end. Filling from minimum would leave every band half-filled
-                  at 0 dB — the state a user sees most — which reads as "half
-                  on" rather than "neutral". Filling from the centre detent
-                  outward makes flat read as empty, and makes a boost and a cut
-                  distinguishable by direction rather than by length.
-
-                  The crossfade slider above still fills from its low end, and
-                  that is not an inconsistency: it runs 0..12 with no
-                  meaningful centre.
-                */}
-                <View style={[styles.trackBase, { backgroundColor: colors.border }]} />
-                <View style={[styles.detent, { backgroundColor: colors.subtext }]} />
-                {gain !== 0 && (
-                  <View
+          {/*
+            Horizontally scrollable rather than squeezed to fit. Ten bands across a
+            phone leaves each slider too narrow to grab, and a control you cannot
+            reliably hit is worse than one you have to scroll to.
+          */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.presets}
+          >
+            {chips.map(preset => {
+              const selected = preset.id === CUSTOM_ID ? activePreset === null : activePreset === preset.id;
+              return (
+                <Pressable
+                  key={preset.id}
+                  onPress={() => dispatch(setEqualizerGains(preset.gains))}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={t('a11y.equalizer.preset', { name: t(preset.labelKey) })}
+                  style={[
+                    styles.preset,
+                    {
+                      borderRadius: rad.card,
+                      backgroundColor: selected ? themeColor : withAlpha(colors.border, 0.33),
+                    },
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.trackFill,
-                      {
-                        backgroundColor: themeColor,
-                        height: (Math.abs(gain) / EQ_GAIN_LIMIT_DB) * (SLIDER_LENGTH / 2),
-                        bottom:
-                          gain > 0
-                            ? SLIDER_LENGTH / 2
-                            : SLIDER_LENGTH / 2 -
-                              (Math.abs(gain) / EQ_GAIN_LIMIT_DB) * (SLIDER_LENGTH / 2),
-                      },
+                      styles.presetText,
+                      { color: selected ? onDark.text : colors.secondary },
                     ]}
-                  />
-                )}
-                <Slider
-                  style={styles.slider}
-                  minimumValue={-EQ_GAIN_LIMIT_DB}
-                  maximumValue={EQ_GAIN_LIMIT_DB}
-                  step={1}
-                  value={gain}
-                  onValueChange={value => setBand(index, value)}
-                  // Both transparent: the fill above is the visible track.
-                  minimumTrackTintColor="transparent"
-                  maximumTrackTintColor="transparent"
-                  thumbTintColor={themeColor}
-                  accessibilityLabel={t('a11y.equalizer.band', {
-                    frequency: labelFor(frequencyHz),
-                  })}
-                  accessibilityValue={{ text: t('a11y.equalizer.decibels', { gain }) }}
-                />
-              </View>
-              <Text style={[styles.frequency, { color: colors.subtext }]}>
-                {labelFor(frequencyHz)}
-              </Text>
-            </View>
-          );
-        })}
-      </ScrollView>
+                  >
+                    {t(preset.labelKey)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
 
-      <Text style={[styles.subtext, { color: colors.subtext }]}>
-        {isFlat
-          ? t('settings.player.equalizer.flatSubtext')
-          : t('settings.player.equalizer.gainSubtext', { limit: EQ_GAIN_LIMIT_DB })}
-      </Text>
-    </SettingsCard>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.bands}
+          >
+            {EQ_FREQUENCIES.map((frequencyHz, index) => {
+              const gain = gains[index] ?? 0;
+              return (
+                <View key={frequencyHz} style={styles.band}>
+                  <Text style={[styles.gain, { color: gain === 0 ? colors.subtext : themeColor }]}>
+                    {gain > 0 ? `+${gain}` : gain}
+                  </Text>
+                  {/*
+                    A vertical slider is what an equalizer looks like everywhere
+                    else, and `@react-native-community/slider` has no vertical
+                    mode — so it is rotated. `height` and `width` are swapped in
+                    the style because the rotation happens after layout.
+                  */}
+                  <View style={styles.sliderWell}>
+                    {/*
+                      The track is drawn here rather than by the Slider, because
+                      this control is bipolar and the Slider only fills from one
+                      end. Filling from minimum would leave every band half-filled
+                      at 0 dB — the state a user sees most — which reads as "half
+                      on" rather than "neutral". Filling from the centre detent
+                      outward makes flat read as empty, and makes a boost and a cut
+                      distinguishable by direction rather than by length.
+
+                      The crossfade slider above still fills from its low end, and
+                      that is not an inconsistency: it runs 0..12 with no
+                      meaningful centre.
+                    */}
+                    <View style={[styles.trackBase, { backgroundColor: colors.border }]} />
+                    <View style={[styles.detent, { backgroundColor: colors.subtext }]} />
+                    {gain !== 0 && (
+                      <View
+                        style={[
+                          styles.trackFill,
+                          {
+                            backgroundColor: themeColor,
+                            height: (Math.abs(gain) / EQ_GAIN_LIMIT_DB) * (SLIDER_LENGTH / 2),
+                            bottom:
+                              gain > 0
+                                ? SLIDER_LENGTH / 2
+                                : SLIDER_LENGTH / 2 -
+                                  (Math.abs(gain) / EQ_GAIN_LIMIT_DB) * (SLIDER_LENGTH / 2),
+                          },
+                        ]}
+                      />
+                    )}
+                    <Slider
+                      style={styles.slider}
+                      minimumValue={-EQ_GAIN_LIMIT_DB}
+                      maximumValue={EQ_GAIN_LIMIT_DB}
+                      step={1}
+                      value={gain}
+                      onValueChange={value => setBand(index, value)}
+                      // Both transparent: the fill above is the visible track.
+                      minimumTrackTintColor="transparent"
+                      maximumTrackTintColor="transparent"
+                      thumbTintColor={themeColor}
+                      accessibilityLabel={t('a11y.equalizer.band', {
+                        frequency: labelFor(frequencyHz),
+                      })}
+                      accessibilityValue={{ text: t('a11y.equalizer.decibels', { gain }) }}
+                    />
+                  </View>
+                  <Text style={[styles.frequency, { color: colors.subtext }]}>
+                    {labelFor(frequencyHz)}
+                  </Text>
+                </View>
+              );
+            })}
+          </ScrollView>
+
+          <Text style={[styles.subtext, { color: colors.subtext }]}>
+            {isFlat
+              ? t('settings.player.equalizer.flatSubtext')
+              : t('settings.player.equalizer.gainSubtext', { limit: EQ_GAIN_LIMIT_DB })}
+          </Text>
+        </SettingsCard>
+      )}
+    </>
   );
 };
 
+const CUSTOM_ID = 'custom';
 const SLIDER_LENGTH = 120;
 const TRACK_WIDTH = 4;
 

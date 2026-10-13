@@ -17,6 +17,7 @@ import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { usePlayerExpansion } from '@/features/player/PlayerExpansion';
 import PlaylistList from '@/components/PlaylistList';
+import { useExternalResolution } from '@/features/sources/externalResolutionContext';
 import PlayingMain from './components/PlayingMain';
 import Controls from './components/Controls';
 import BottomControls from './components/BottomControls';
@@ -68,6 +69,7 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
 }) => {
     const router = useRouter();
     const { currentSong, playbackSpeed } = usePlayingState();
+    const { resolveAndNavigateToArtist } = useExternalResolution();
     const insets = useSafeAreaInsets();
     const songModel: SongScreenModel = useSongScreenModel(currentSong);
     const { artistId, lyrics, lyricsAvailable } = songModel;
@@ -135,6 +137,24 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
     const showVolumeSlider = useSelector(selectShowVolumeSlider);
 
     const navigateToArtist = useCallback(() => {
+        if (!currentSong) return;
+        // A track from an integration carries that integration's ids, so the
+        // server cannot answer for its artist — pushing `id` straight at
+        // /artistView asked Navidrome about a Deezer artist and the screen
+        // said "Couldn't load artist. Check your connection." The resolution
+        // provider is what knows where an external record lives; the artist
+        // reference carries no provenance of its own because it is scoped to
+        // the song holding it, so the song's is the one to send.
+        if (currentSong.provenance.origin === 'integration') {
+            onClose();
+            resolveAndNavigateToArtist({
+                provenance: currentSong.provenance,
+                externalIds: currentSong.artist.externalIds,
+                nativeId: currentSong.artist.nativeId,
+                name: currentSong.artist.name,
+            });
+            return;
+        }
         if (artistId) {
             onClose();
             router.push({
@@ -142,7 +162,7 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
                 params: { id: artistId },
             });
         }
-    }, [artistId, onClose, router]);
+    }, [artistId, currentSong, onClose, resolveAndNavigateToArtist, router]);
 
     const openLyricsSheet = useCallback(() => {
         if (lyricsAvailable && lyrics) {

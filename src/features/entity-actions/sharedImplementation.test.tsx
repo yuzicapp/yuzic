@@ -1,6 +1,14 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
+jest.mock('@/features/sources/externalResolutionContext', () => ({
+  // A boundary here: these tests are about which actions resolve, not about
+  // where an external record turns out to live.
+  useExternalResolution: () => ({
+    resolveAndNavigateToAlbum: jest.fn(),
+    resolveAndNavigateToArtist: jest.fn(),
+  }),
+}));
 jest.mock('@/features/sources/useMatchedNavigation', () => ({
   useMatchedNavigation: () => ({ navigateToAlbum: jest.fn(), navigateToArtist: jest.fn() }),
 }));
