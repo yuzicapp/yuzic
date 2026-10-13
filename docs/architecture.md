@@ -491,7 +491,13 @@ Two adjacent things that look like refreshes and are not:
 A playlist's own screen is the one detail screen that refetches on focus
 (`usePlaylistScreenModel`), because its tracks are not in the catalog's playlist
 record: without it, a song added from another client stayed invisible until the
-next sync.
+next sync. The same gap is the offline story: with the server unreachable the
+screen rebuilds the songs locally, from the playlist's own `songIds` where a
+playlist carries them (generated/favorites) and otherwise from the downloaded
+collection's `trackIds` resolved against the catalog — so a fully downloaded
+playlist lists its songs offline instead of opening empty. That is the same
+fallback `useAlbum` has for albums, except the album's tracks come out of the
+catalog by album id, which a listing's playlist record never holds.
 
 `sync(force?: boolean)` throttles at 30 minutes by default; `force=true`
 bypasses that throttle, and bypasses nothing else — every run that gets past it

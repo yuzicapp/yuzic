@@ -5,6 +5,7 @@ import {
   buildCatalogStore,
   songsByAlbum,
   songsByAlbumNativeId,
+  songsByTrackIds,
   type Catalog,
 } from './catalogStore';
 import type { Album } from '@/domain/entities/Album';
@@ -17,6 +18,7 @@ import { serverProvenance } from '@/domain/identity/Provenance';
 const provenance = serverProvenance('srv-1');
 const artistId = (n: string) => makeLocalId('artist', provenance, n);
 const albumId = (n: string) => makeLocalId('album', provenance, n);
+const songId = (n: string) => makeLocalId('song', provenance, n);
 
 const artist = (nativeId: string, name = `Artist ${nativeId}`): Artist => ({
   localId: artistId(nativeId), nativeId, provenance, externalIds: {},
@@ -93,6 +95,17 @@ describe('relationships', () => {
 
   it('answers songs by album', () => {
     expect(songsByAlbum(store, albumId('al1')).map(s => s.nativeId)).toEqual(['s1', 's2']);
+  });
+
+  it('answers song ids in the order given, skipping ids the catalog lacks', () => {
+    // The download store records a playlist's tracks as `localId`s; resolving
+    // them in that order is how an offline playlist screen recovers its songs.
+    const ids = [songId('s2'), songId('s1'), songId('gone'), songId('s3')];
+    const resolved = songsByTrackIds(store, ids);
+
+    expect(resolved.map(s => s.nativeId)).toEqual(['s2', 's1', 's3']);
+    // A missing id is skipped, not turned into a hole in the list.
+    expect(resolved).toHaveLength(3);
   });
 
   it('answers albums by genre, counting an album under each of its genres', () => {

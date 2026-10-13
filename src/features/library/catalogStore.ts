@@ -283,6 +283,20 @@ export const albumsByArtist = (store: CatalogStore, artistId: LocalId): Album[] 
 export const songsByAlbum = (store: CatalogStore, albumId: LocalId): Song[] =>
   resolve(store.songIdsByAlbum.get(albumId) ?? EMPTY, store.songs);
 
+/**
+ * Resolves a list of track ids, in the order given.
+ *
+ * Track ids are `localId`s — that is what the download store records — and a
+ * server playlist's membership is not part of the catalog's playlist record
+ * (a listing maps no tracks), so with the server unreachable this is how a
+ * downloaded playlist's songs are recovered: the download's `trackIds` in
+ * playlist order, each resolved against the catalog, which holds every track.
+ * Ids the catalog no longer holds are skipped, same as every other
+ * relationship here.
+ */
+export const songsByTrackIds = (store: CatalogStore, trackIds: readonly string[]): Song[] =>
+  resolve(trackIds as readonly LocalId[], store.songs);
+
 export const albumsByGenre = (store: CatalogStore, genre: string): Album[] =>
   resolve(store.albumIdsByGenre.get(genre) ?? EMPTY, store.albums);
 
