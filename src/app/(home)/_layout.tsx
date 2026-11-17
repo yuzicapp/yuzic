@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux';
 import { useSync } from '@/features/library/useSync';
 import { useIsOffline } from '@/features/connectivity/useIsOffline';
 import { selectActiveServerId } from '@/state/redux/selectors/serversSelectors';
-import { ExternalResolutionProvider } from '@/features/sources/ExternalResolutionProvider';
 import { ServerReachabilityWatcher } from '@/features/connectivity/ServerReachabilityWatcher';
 import { AutoDownloadWatcher } from '@/features/downloads/AutoDownloadWatcher';
 import { DownloadersQueueProvider } from '@/features/downloaders/DownloadersQueueContext';
@@ -87,17 +86,15 @@ export default function HomeLayout() {
   }, [activeServerId, sync]);
 
   return (
-    <ExternalResolutionProvider>
-      <AccountSheetProvider>
-        <DownloadersQueueProvider>
-          <ServerReachabilityWatcher />
-          <AutoDownloadWatcher />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
-            <Stack.Screen name="settings" />
-          </Stack>
-        </DownloadersQueueProvider>
-      </AccountSheetProvider>
-    </ExternalResolutionProvider>
+    <AccountSheetProvider>
+      <DownloadersQueueProvider>
+        <ServerReachabilityWatcher />
+        <AutoDownloadWatcher />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
+          <Stack.Screen name="settings" />
+        </Stack>
+      </DownloadersQueueProvider>
+    </AccountSheetProvider>
   );
 }
