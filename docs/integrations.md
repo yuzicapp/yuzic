@@ -159,6 +159,14 @@ mapper reports a real gap rather than a URL that 404s — Navidrome 0.64+ omits
 `coverArt`, Jellyfin/Emby report no `ImageTags.Primary` — and names the item,
 so cover resolution can try the library's copy and then the Artwork backups.
 
+**Subsonic lyrics come from two endpoints.** OpenSubsonic's
+`getLyricsBySongId.view` first: it can return several lists (synced beside
+plain, or one per language), and the app takes a synced one with lines, else
+the first plain one with lines — reading only the first list hid lyrics another
+list had (#316). A server that refuses that endpoint gets plain Subsonic's
+`getLyrics.view`, asked by the artist and title `getSong.view` reports; its one
+string is split into plain lines, or parsed as LRC when it carries timings.
+
 ### Client certificates (mTLS)
 
 For a server behind a reverse proxy that asks the *client* to prove who it is.
