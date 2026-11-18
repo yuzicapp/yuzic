@@ -49,6 +49,7 @@ import { clearImageMemoryCache, runImageCacheMigration } from '@/features/artwor
 import { useClientCertificate } from '@/features/mtls/useClientCertificate';
 import { CredentialsGate } from '@/features/servers/CredentialsGate';
 import { isCatalogQuery } from '@/features/library/catalogPersistence';
+import { holdsStreamCredentials } from '@/features/song/playableResourcePersistence';
 import { useCatalogHydration } from '@/features/library/useCatalogHydration';
 
 
@@ -190,10 +191,16 @@ const queryPersister = createAsyncStoragePersister({
  * `useCatalogHydration` for the read side. `defaultShouldDehydrateQuery` is
  * kept as the first test rather than replaced, so a query that TanStack would
  * not have persisted anyway (a failed one, chiefly) still isn't.
+ *
+ * Resolved stream URLs are excluded for an unrelated and harder reason: they
+ * are credentials, and this blob is not encrypted. See
+ * `features/song/playableResourcePersistence`.
  */
 const dehydrateOptions = {
   shouldDehydrateQuery: (query: Parameters<typeof defaultShouldDehydrateQuery>[0]) =>
-    defaultShouldDehydrateQuery(query) && !isCatalogQuery(query.queryKey),
+    defaultShouldDehydrateQuery(query)
+    && !isCatalogQuery(query.queryKey)
+    && !holdsStreamCredentials(query.queryKey),
 };
 
 const OFFLINE_TOAST_ID = 'offline-banner';
@@ -370,6 +377,9 @@ export default function RootLayout() {
         maxAge: QUERY_CACHE_MAX_AGE,
         dehydrateOptions,
       }}
+      // Drops stream URLs that a pre-exclusion blob restored, and does
+      // nothing once none are persisted — see `playableResourcePersistence`.
+      onSuccess={() => queryClient.removeQueries({ predicate: q => holdsStreamCredentials(q.queryKey) })}
     >
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>

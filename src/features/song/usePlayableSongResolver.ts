@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import { useApi } from '@/providers/registry/useApi';
-import { QueryKeys } from '@/state/query/queryKeys';
+import { playableResourceKey } from '@/features/song/playableResourcePersistence';
 import { useDownloadActions } from '@/features/offline/DownloadContext';
 import { useSongsById } from '@/features/song/useSongsById';
 import { selectActiveServer } from '@/state/redux/selectors/serversSelectors';
@@ -71,12 +71,12 @@ export function usePlayableSongResolver() {
     const localPath = librarySong ? getLocalPath(librarySong.localId) : null;
     if (librarySong && localPath) {
       const resource: PlayableResource = { song: librarySong, streamUrl: localPath, filePath: localPath };
-      queryClient.setQueryData([QueryKeys.Song, activeServer?.id, songId], resource);
+      queryClient.setQueryData(playableResourceKey(activeServer?.id, songId), resource);
       return resource;
     }
 
     const cachedResource = queryClient.getQueryData<PlayableResource | null>(
-      [QueryKeys.Song, activeServer?.id, songId]
+      playableResourceKey(activeServer?.id, songId)
     );
     if (cachedResource && isPlayable(cachedResource)) return cachedResource;
 
@@ -99,7 +99,7 @@ export function usePlayableSongResolver() {
     if (!streamUrl) return null;
 
     const resource: PlayableResource = { song: domainSong, streamUrl };
-    queryClient.setQueryData([QueryKeys.Song, activeServer?.id, songId], resource);
+    queryClient.setQueryData(playableResourceKey(activeServer?.id, songId), resource);
     return resource;
   }, [activeServer?.id, api.songs, api.tracks, getLocalPath, preferredCodec, queryClient, songsById, streamQuality]);
 
