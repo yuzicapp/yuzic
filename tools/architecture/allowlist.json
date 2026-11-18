@@ -1,17 +1,4 @@
 {
-  "console": [
-    "console.warn src/features/library/catalogPersistence.ts",
-    "console.warn src/features/library/components/Items/TrackItem.tsx",
-    "console.warn src/features/offline/offlineDownloader.ts",
-    "console.warn src/features/offline/useOfflineCommands.ts",
-    "console.warn src/features/playback/usePlaybackEngine.ts",
-    "console.warn src/features/playback/usePlayerSetup.ts",
-    "console.warn src/features/playback/useRestorePersistedQueue.ts",
-    "console.warn src/features/player/DlnaContext.tsx",
-    "console.warn src/features/player/createEngineBackend.ts",
-    "console.warn src/features/player/useDlnaDiscovery.ts",
-    "console.warn src/features/servers/CredentialsGate.tsx"
-  ],
   "file-shape": [
     "src/features/playback/autoplayCoordinator.ts",
     "src/features/sources/registry.ts"

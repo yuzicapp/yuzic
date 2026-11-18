@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import UdpSockets from "react-native-udp";
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 export interface DiscoveredDevice {
   name: string;
@@ -104,7 +106,7 @@ export function useDlnaDiscovery() {
     const socket = UdpSockets.createSocket({ type: 'udp4', reusePort: true });
 
     socket.on('error', (err: Error) => {
-      console.warn('[DLNA] Socket error', err?.message ?? err);
+      log.player.warn('dlna socket error', { detail: detailOf(err) });
     });
 
     // Track IPs that have responded — probe them for renderer ports after SSDP
@@ -152,7 +154,7 @@ export function useDlnaDiscovery() {
         // joined; SSDP unicast responses still arrive without it.
       }
       socket.send(M_SEARCH, 0, M_SEARCH.length, SSDP_PORT, SSDP_MULTICAST, (err?: Error) => {
-        if (err) console.warn('[DLNA] M-SEARCH send failed', err?.message ?? err);
+        if (err) log.player.warn('dlna m-search send failed', { detail: detailOf(err) });
       });
     });
 

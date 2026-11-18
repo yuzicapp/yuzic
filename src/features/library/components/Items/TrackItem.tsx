@@ -9,6 +9,8 @@ import { usePlayableSongResolver } from '@/features/song/usePlayableSongResolver
 import { formatDuration } from '@/components/formatDuration';
 import { heavy as heavyHaptic } from '@/components/haptics';
 import LibraryItem from './LibraryItem';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /** A second tap inside this window is the same tap. */
 const TRACK_PRESS_COOLDOWN_MS = 700;
@@ -55,7 +57,7 @@ const TrackItem: React.FC<Props> = ({ song, isGridView, gridWidth, gridSpacing }
       );
       await playSimilar(resolved.song);
     } catch (error) {
-      console.warn("Failed to play home track", error);
+      log.playback.warn('could not play track', { songId: song.nativeId, detail: detailOf(error) });
       notify.error(t("common.playbackError"));
     } finally {
       pressInFlightRef.current = false;
@@ -76,7 +78,7 @@ const TrackItem: React.FC<Props> = ({ song, isGridView, gridWidth, gridSpacing }
         notify.error(t("common.songDetailsError"));
       }
     } catch (error) {
-      console.warn("Failed to fetch full track data", error);
+      log.library.warn('could not fetch full track', { songId: song.nativeId, detail: detailOf(error) });
       notify.error(t("common.songDetailsError"));
     } finally {
       longPressInFlightRef.current = false;

@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 import { getBackend } from '@/features/player/activeBackend';
 import { presetToBands } from '@/features/player/audioSettings';
 import { selectCrossfadeAlways, selectCrossfadeSeconds, selectEqualizerEnabled, selectEqualizerGains, selectLoudnessNormalization, selectLoudnessPreampDb } from '@/features/settings/playback/state';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * Whether the player has been set up this launch.
@@ -29,7 +31,7 @@ export function usePlayerSetup(): void {
         getBackend().setup();
         playerSetUp.current = true;
       } catch (err) {
-        console.warn('player setup failed', err);
+        log.player.error('player setup failed', { detail: detailOf(err) });
       }
     }
     getBackend().setCommands();

@@ -9,6 +9,8 @@ import { playableOnly } from '@/features/playback/playableResource';
 import { buildFillRequest } from './autoplayFill';
 import { tagSegment, type QueueSegment } from './playingQueue';
 import { resolveQueueFillProvider, type QueueFillProvider } from './queueProviders';
+import { detailOf } from '@/features/diagnostics/errorDetail';
+import type { Fields } from '@/features/diagnostics/record';
 
 /**
  * Extending a queue with tracks nobody chose.
@@ -69,7 +71,7 @@ export interface AutoplayDeps {
     play: boolean,
     seekToPosition?: number
   ) => Promise<void>;
-  logWarning: (message: string, error: unknown) => void;
+  logWarning: (message: string, fields?: Fields) => void;
 }
 
 interface AutoplayCoordinator {
@@ -177,7 +179,7 @@ const keyOfResource = (resource: PlayableResource): string => entityKey(resource
         answered = true;
       } catch (error) {
         lastError = error;
-        deps.logWarning(`Queue fill from ${provider.id} failed`, error);
+        deps.logWarning('queue fill failed', { provider: provider.id, detail: detailOf(error) });
         continue;
       }
       if (fetched.length) break;
@@ -216,7 +218,7 @@ const keyOfResource = (resource: PlayableResource): string => entityKey(resource
         if (!playable.length) return;
 
         if (anchor && !deps.queue().some(r => r.song.localId === anchor.song.localId)) {
-          deps.logWarning('Autoplay fill discarded: the queue it was filling is gone', null);
+          deps.logWarning('autoplay fill discarded', { reason: 'the queue it was filling is gone' });
           return;
         }
 
@@ -234,7 +236,7 @@ const keyOfResource = (resource: PlayableResource): string => entityKey(resource
       } catch (error) {
         // Autoplay failing is the music stopping at the end of the queue,
         // which is also what happens without the feature. Not worth a toast.
-        deps.logWarning('Autoplay fill failed', error);
+        deps.logWarning('autoplay fill failed', { detail: detailOf(error) });
       } finally {
         filling = false;
       }
@@ -280,7 +282,7 @@ const keyOfResource = (resource: PlayableResource): string => entityKey(resource
         // after the current track is entirely different now.
         await deps.loadQueue(full, deps.currentIndex(), wasPlaying, savedPosition);
       } catch (error) {
-        deps.logWarning('Smart Shuffle inject failed', error);
+        deps.logWarning('smart shuffle inject failed', { detail: detailOf(error) });
       }
     },
   };

@@ -38,6 +38,8 @@ import type { QueryKey } from '@tanstack/react-query';
 
 import { catalogStorage } from '@/state/mmkvStorage';
 import { CATALOG_RESOURCES } from './catalogQueries';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /** Not exported: it names the parameter below, and every caller reaches it
  *  through `CATALOG_RESOURCES` rather than by naming it. */
@@ -151,7 +153,7 @@ export function writeCatalogResource(
   } catch (error) {
     // A full disk or an oversized record loses this resource until the next
     // sync, which is recoverable. Failing the sync over it would not be.
-    console.warn(`[catalog] could not persist ${name}`, error);
+    log.library.warn('could not persist catalog resource', { resource: name, detail: detailOf(error) });
   }
 }
 
@@ -206,7 +208,7 @@ export function readCatalogResource<T>(
     }
     return all as T;
   } catch (error) {
-    console.warn(`[catalog] could not read ${name}`, error);
+    log.library.warn('could not read catalog resource', { resource: name, detail: detailOf(error) });
     return undefined;
   }
 }
@@ -235,7 +237,7 @@ export function compactCatalog(): void {
   } catch (error) {
     // Compaction is an optimisation. A store that would not trim is still a
     // store that reads, so this must never be what fails a sync.
-    console.warn('[catalog] could not compact', error);
+    log.library.warn('could not compact catalog', { detail: detailOf(error) });
   }
 }
 

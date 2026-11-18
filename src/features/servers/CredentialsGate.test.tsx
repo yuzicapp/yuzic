@@ -7,6 +7,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { CredentialsGate } from './CredentialsGate';
 import serversReducer, { addServer, setActiveServer } from '@/state/redux/slices/serversSlice';
 import type { Server } from '@/providers/contracts/Server';
+import { log } from '@/features/diagnostics/log';
 
 let finishHydration: (outcome: 'resolve' | 'reject') => void = () => {};
 const mockHydrateAll = jest.fn(
@@ -79,13 +80,19 @@ describe('CredentialsGate', () => {
   });
 
   it('still opens the app when the keystore cannot be read, and says why', async () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    log.clear();
     const { queryByText } = await renderGate();
 
     await act(async () => { finishHydration('reject'); });
 
     expect(queryByText('app')).not.toBeNull();
-    expect(warn).toHaveBeenCalledWith('[credentials] keystore read failed', expect.any(Error));
-    warn.mockRestore();
+    // Recorded rather than printed, so the reason leaves with the export.
+    expect(log.records()).toEqual([
+      expect.objectContaining({
+        scope: 'server',
+        message: 'keystore read failed',
+        fields: expect.objectContaining({ detail: 'keystore locked' }),
+      }),
+    ]);
   });
 });

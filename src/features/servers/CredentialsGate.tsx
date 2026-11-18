@@ -6,6 +6,8 @@ import type { RootState } from '@/state/redux/store';
 import { setCredentialsHydrated } from '@/state/redux/slices/serversSlice';
 import { selectCredentialsHydrated } from '@/state/redux/selectors/serversSelectors';
 import { serverCredentialScopes } from '@/providers/registry/serverCredentials';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * Nothing that can talk to a server renders before its secrets are loaded.
@@ -36,7 +38,7 @@ export function CredentialsGate({ children }: { children: React.ReactNode }) {
     hydrateAll(scopes)
       // A keystore that cannot be read opens the app signed out rather than not
       // at all. `finally` alone would pass the rejection on, unhandled.
-      .catch(error => console.warn('[credentials] keystore read failed', error))
+      .catch(error => log.server.error('keystore read failed', { detail: detailOf(error) }))
       .finally(() => dispatch(setCredentialsHydrated(true)));
   }, [dispatch, store]);
 

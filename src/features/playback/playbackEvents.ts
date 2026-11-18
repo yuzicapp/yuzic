@@ -3,6 +3,7 @@ import type { MediaItem } from '@/features/player/mediaItem';
 import type { PlayableResource } from '@/features/playback/playableResource';
 import type { Song } from '@/domain/entities/Song';
 import { sourceKind } from '@/features/playback/playableResource';
+import type { Fields } from '@/features/diagnostics/record';
 import { resolvePlaybackErrorAction } from './playbackErrorRecovery';
 
 /** How long a playback-error toast suppresses the next one. */
@@ -61,7 +62,8 @@ export interface PlaybackEventDeps {
   /** Tell the listener playback stopped because nothing would play. */
   notifyStopped: () => void;
   notifyError: () => void;
-  logFailure: (info: Record<string, unknown>) => void;
+  /** Structured, because this is the record #324/#320/#318 are diagnosed from. */
+  logFailure: (info: Fields) => void;
   /** Injected so the toast throttle can be tested without waiting it out. */
   now: () => number;
 }
@@ -113,11 +115,21 @@ export function createPlaybackEventHandlers(deps: PlaybackEventDeps): PlaybackEv
 
       deps.logFailure({
         code: event.code,
-        message: event.message,
+        // `detail`, not `message`: the record carries its own fixed message,
+        // and this is the player's variable text.
+        detail: event.message,
         songId: song?.nativeId,
         title: song?.title,
         source: sourceKind(resource),
-        provenance: song?.provenance,
+        // Flattened: a record holds primitives, and `Provenance` is a union of
+        // two object shapes. Both halves are worth having — a failure on an
+        // integration's record is a different problem from one on the user's
+        // own server.
+        origin: song?.provenance?.origin,
+        originId:
+          song?.provenance?.origin === 'server'
+            ? song.provenance.serverId
+            : song?.provenance?.providerId,
       });
 
       // A preview URL is issued once and cannot be rebuilt from an id, so

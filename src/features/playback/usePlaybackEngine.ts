@@ -22,6 +22,7 @@ import { speedFor } from './speedProfile';
 import { useLatestRef } from './useLatestRef';
 import type { PlaybackResources } from './usePlaybackResources';
 import type { PlaybackServices } from './usePlaybackServices';
+import { log } from '@/features/diagnostics/log';
 
 export type LoadQueue = (
   resources: PlayableResource[],
@@ -118,7 +119,7 @@ export function usePlaybackEngine(
     bumpQueue: session.bumpQueue,
     loadQueue: (queue, startIndex, play, seekToPosition) =>
       loadQueueRef.current(queue, startIndex, play, seekToPosition),
-    logWarning: (message, error) => console.warn(message, error),
+    logWarning: (message, fields) => log.playback.warn(message, fields),
   }), [loadQueueRef, listenerRef, queueFillProviders, resolve, session, toMediaItems]);
   const autoplayRef = useLatestRef(autoplay);
 
@@ -166,7 +167,7 @@ export function usePlaybackEngine(
     removeFailedCurrentTrack,
     notifyError: () => notify.error(t('common.playbackError')),
     notifyStopped: () => notify.error(t('common.playbackStopped')),
-    logFailure: info => console.warn('Playback failed', info),
+    logFailure: info => log.playback.error('playback failed', info),
     now: Date.now,
   }), [removeFailedCurrentTrack, resolve, session, t, toMediaItems]);
   const eventsRef = useLatestRef(events);

@@ -51,11 +51,12 @@ export async function getStarredItems(
     return { songs, albums };
   } catch (error) {
     // A warning, not an error: this call has already decided how to cope, and
-    // it copes by returning nothing rather than by failing. `console.error`
-    // says something went wrong that the code could not handle, and in
-    // development it puts a full-screen red box over the app — which, for a
-    // server behind a flaky tunnel answering 530 on one request in ten, means
-    // the app is unusable for a fault it is already absorbing.
+    // it copes by returning nothing rather than by failing. Error level says
+    // something went wrong that the code could not handle — and it still
+    // reaches `console.error` through the log's development sink, which puts
+    // a full-screen red box over the app. For a server behind a flaky tunnel
+    // answering 530 on one request in ten, that makes the app unusable for a
+    // fault it is already absorbing.
     log.server.warn('request failed', { provider: client.brand.label, operation: 'getStarredItems', detail: detailOf(error) });
     return { songs: [], albums: [] };
   }

@@ -1010,8 +1010,10 @@ point of this is that it changes.
 
 Every failure the app noticed used to go to `console`. Fifty-six call sites,
 all of them `warn` or `error`, every one a deliberate report of something
-going wrong, and not one reachable from a device in a listener's hands. The
-cost was not hypothetical: `ErrorBoundary` caught the crash that shipped as
+going wrong, and not one reachable from a device in a listener's hands. They
+are all gone now — `check-console.mjs` holds the count at zero, and the only
+module allowed to print is the log's own development sink. The cost of the
+old arrangement was not hypothetical: `ErrorBoundary` caught the crash that shipped as
 #325 and passed `info.componentStack` — which named the provider that was
 missing, the entire diagnosis — to `console.error`. Three people reported that
 bug with screenshots, and the answer had been on each of their phones.
@@ -1058,6 +1060,16 @@ which is a poor moment to share an instance with the user's library.
 Scopes are a closed union (`record.ts`) rather than free strings, so `log.playbck`
 does not compile and `player`/`playback`/`Player` cannot become three names for
 one area. Add to the set deliberately, naming the area rather than the file.
+
+**The migration is what the gate was for.** `check-console.mjs` was baselined
+at the 56 sites and is shrink-only, so the old habit could not grow back while
+they were moved area by area — adapters first, since that is where a failing
+stream surfaces, then playback, player, offline, library and servers. It now
+holds zero, which makes it a ban in practice while staying a ratchet in
+mechanism. Two tests had asserted `console.error` was called, which was the
+clearest evidence these were deliberate reports and not debug chatter; they
+assert on the record's provider, operation and detail now, which is more than
+a spy could tell them.
 
 ## Where things live
 
