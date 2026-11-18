@@ -720,6 +720,17 @@
       "longestGap": "Days untouched",
       "topArtists": "Your artists",
       "topTracks": "Your tracks"
+    },
+    "diagnostics": {
+      "title": "Diagnostics",
+      "explainer": "Yuzic records what goes wrong — failed tracks, crashes, downloads that did not finish. Share this with a bug report so the cause can be found. Passwords and server credentials are removed automatically; song titles and your server's address may appear.",
+      "share": "Share diagnostics",
+      "sharing": "Preparing…",
+      "clear": "Clear diagnostics",
+      "cleared": "Diagnostics cleared",
+      "empty": "Nothing recorded yet. Anything that goes wrong will show up here.",
+      "recordCount_one": "{{count}} record",
+      "recordCount_other": "{{count}} records"
     }
   },
   "common": {

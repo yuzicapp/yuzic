@@ -35,3 +35,21 @@ export function installDiagnostics(): void {
 export function flushDiagnostics(): void {
   persistence?.flushNow();
 }
+
+/**
+ * Forgets the log, in memory and on disk — the diagnostics screen's Clear.
+ *
+ * Offered because the export is the user's to send: a log holds what they
+ * listened to and which of their endpoints failed, and someone who has just
+ * shared it is entitled to take it back off the device.
+ *
+ * `log.clear()` runs unconditionally rather than through `persistence`, which
+ * is null until `installDiagnostics` has run. Delegating the whole thing left
+ * a control that reported success and deleted nothing if it was ever called
+ * before install, or after an install that threw — the worst possible failure
+ * for a button whose entire purpose is that the data is gone.
+ */
+export function clearDiagnostics(): void {
+  log.clear();
+  persistence?.clear();
+}

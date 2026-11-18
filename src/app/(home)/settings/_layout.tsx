@@ -41,6 +41,7 @@ export default function SettingsLayout() {
             <Stack.Screen name='searchView' options={{ headerShown: false }} />
             <Stack.Screen name='audiomuseView' options={{ headerShown: false }} />
             <Stack.Screen name='metadataView' options={{ headerShown: false }} />
+            <Stack.Screen name='diagnosticsView' options={{ headerShown: false }} />
         </Stack>
     );
 }
