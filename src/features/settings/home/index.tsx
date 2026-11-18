@@ -18,6 +18,7 @@ import SettingsRow from '../components/SettingsRow';
 import Touchable from '@/components/Touchable';
 import UserAvatar from '@/components/UserAvatar';
 import { controlSize, radius, spacing, typography } from '@/constants/design';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '@/constants/links';
 import { useRadius } from '@/features/theme/useRadius';
 import { useScrollClearance } from '@/features/theme/useScrollClearance';
 
@@ -248,13 +249,13 @@ export default function Settings() {
                     <SettingsRow
                         label={t('settings.rows.privacyPolicy')}
                         leftIcon={<ShieldCheck size={icons.secondary} color={colors.secondary} />}
-                        onPress={() => openLink('https://yuzicapp.github.io/yuzic-web/privacypolicy/')}
+                        onPress={() => openLink(PRIVACY_POLICY_URL)}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         label={t('settings.rows.termsOfUse')}
                         leftIcon={<ScrollText size={icons.secondary} color={colors.secondary} />}
-                        onPress={() => openLink('https://yuzicapp.github.io/yuzic-web/tos/')}
+                        onPress={() => openLink(TERMS_URL)}
                     />
                 </SettingsCard>
 

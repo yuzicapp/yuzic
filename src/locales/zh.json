@@ -785,7 +785,9 @@
     "home": {
       "subtitle": "你的个人音乐库。随时随地从自有服务器流式播放。",
       "getStarted": "开始使用",
-      "terms": "继续使用即表示你已阅读并同意我们的《使用条款》和《隐私政策》"
+      "terms": "继续即表示您已阅读并接受我们的{{terms}}和{{privacy}}",
+      "termsLink": "使用条款",
+      "privacyLink": "隐私政策"
     },
     "servers": {
       "title": "你的服务器",

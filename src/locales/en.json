@@ -787,7 +787,9 @@
     "home": {
       "subtitle": "Your personal music library. Stream from your own server anywhere.",
       "getStarted": "Get Started",
-      "terms": "By continuing you confirm that you've read and accepted our Terms and Privacy Policy"
+      "terms": "By continuing you confirm that you've read and accepted our {{terms}} and {{privacy}}",
+      "termsLink": "Terms",
+      "privacyLink": "Privacy Policy"
     },
     "servers": {
       "title": "Your Servers",
