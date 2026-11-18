@@ -1,5 +1,6 @@
-Fixes for tapping an artist you are listening to, and for headphone buttons.
+Fixes the error that could cover the screen when you tapped a song, and adds somewhere to see what went wrong.
 
-- Tapping the artist on the player, for a track playing from an external source, opened a page that could not load. It now finds the artist where it actually lives
-- The sheet for an external track gains Go to album and Go to artist, which only library tracks had
-- A route change no longer pauses when one pair of headphones hands over to another — only when the sound would otherwise come out loud
+- Playing a song could fill the screen with "Something went wrong" while the music carried on behind it. Fixed
+- Settings now has Diagnostics: what has gone wrong, ready to share with a bug report, with credentials removed first
+- Terms and Privacy Policy on the welcome screen are real links
+- Stream addresses, which carry your server login, are no longer written to the device
