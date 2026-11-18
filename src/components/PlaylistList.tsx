@@ -11,7 +11,7 @@ import {
   BottomSheetModal,
   BottomSheetFlatList,
 } from '@gorhom/bottom-sheet';
-import { X, Search, Plus, Check } from 'lucide-react-native';
+import { X, Search, Plus, Check, Heart } from 'lucide-react-native';
 import { notify } from '@/components/toast';
 import type { Playlist } from '@/domain/entities/Playlist';
 import type { Song } from '@/domain/entities/Song';
@@ -32,6 +32,7 @@ import Touchable from '@/components/Touchable';
 import { useRadius } from '@/features/theme/useRadius';
 import { FAVORITES_ID } from '@/constants/favorites';
 import { canEditPlaylist } from '@/features/entity-actions/registry/playlistActions';
+import { useFavoriteMembership } from '@/features/song/useFavoriteMembership';
 
 type PlaylistListProps = {
   selectedSong: Song | null;
@@ -75,6 +76,10 @@ const PlaylistList = forwardRef<BottomSheetModal, PlaylistListProps>(
       loading: membershipLoading,
       toggle: togglePlaylist,
     } = usePlaylistMembership(selectedSong, playlists, isSheetOpen);
+    // Favorites is starred songs, not a playlist, so it ticks and commits on
+    // its own path — see the hook. Pinned above the list rather than mixed
+    // into it: it is not a playlist you can rename, reorder or delete.
+    const favorite = useFavoriteMembership(selectedSong, isSheetOpen);
 
     const snapPoints = useMemo(() => ['85%'], []);
 
@@ -114,6 +119,39 @@ const PlaylistList = forwardRef<BottomSheetModal, PlaylistListProps>(
       );
     }, [selectedIds, membershipLoading, togglePlaylist, colors.secondary, themeColor, rad.thumb]);
 
+    /**
+     * Favorites, pinned above the playlists and shown with a heart rather
+     * than a cover: it is the starred songs, not a playlist, and nothing
+     * about it can be renamed or reordered. Hidden while a search excludes
+     * it, so the field still filters everything on screen.
+     */
+    const favoritesTitle = t('playlist.favoritesTitle');
+    const renderFavoritesRow = () => {
+      if (!favoritesTitle.toLowerCase().includes(searchQuery.toLowerCase())) return null;
+
+      return (
+        <Touchable
+          style={styles.option}
+          testID="playlist-list-favorites"
+          onPress={favorite.toggle}
+        >
+          <View style={[styles.playlistCover, styles.favoritesCover, { borderRadius: rad.thumb }]}>
+            <Heart size={iconSize.loader} color={themeColor} fill={themeColor} />
+          </View>
+
+          <Text style={[styles.optionText, { color: colors.secondary }]}>
+            {favoritesTitle}
+          </Text>
+
+          <Check
+            size={iconSize.header}
+            color={themeColor}
+            style={{ opacity: favorite.ticked ? 1 : 0 }}
+          />
+        </Touchable>
+      );
+    };
+
     const handleCreatePlaylist = async () => {
       if (!newPlaylistName.trim()) return;
       try {
@@ -149,6 +187,9 @@ const PlaylistList = forwardRef<BottomSheetModal, PlaylistListProps>(
           }));
         }
       }
+
+      const favoriteChange = favorite.pendingChange();
+      if (favoriteChange) mutations.push(favoriteChange);
 
       const results = await Promise.allSettled(mutations);
       const failed = results.filter(r => r.status === 'rejected').length;
@@ -229,6 +270,7 @@ const PlaylistList = forwardRef<BottomSheetModal, PlaylistListProps>(
 
           <BottomSheetFlatList
             data={filteredPlaylists}
+            ListHeaderComponent={renderFavoritesRow}
             keyExtractor={item => item.localId}
             contentContainerStyle={{ paddingBottom: spacing.scrollClearance }}
             extraData={selectedIds}
@@ -322,6 +364,11 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     marginRight: spacing.md,
+  },
+  // The heart sits where a cover would, so the row lines up with the rest.
+  favoritesCover: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   optionText: {
     ...typography.body,
