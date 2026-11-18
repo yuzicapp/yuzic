@@ -68,20 +68,46 @@ export function createLog(capacity?: number): Log {
    */
   let threshold: Level = __DEV__ ? 'debug' : 'info';
 
+  /**
+   * True while a record is being delivered, so a log caused *by* logging is
+   * dropped instead of recursing.
+   *
+   * Found on a device, not in a test. React Native reports `console.error`
+   * through `ExceptionsManager`, which reaches the global error handler —
+   * measured: one `console.error` fires it exactly once. The app's fatal
+   * handler logs what it is given, the development console sink prints an
+   * error-level record with `console.error`, and that is a closed loop. One
+   * non-fatal error filled all 400 slots of the ring with copies of itself,
+   * at a single millisecond, destroying the context that would have explained
+   * it — the opposite of this feature's purpose.
+   *
+   * Guarded here rather than in the sink, because the loop is not the console
+   * sink's to own: any sink that can cause a log — a store write that fails,
+   * a future reporter — closes the same circle. The first record is kept and
+   * the recursive ones are dropped, which is the right way round.
+   */
+  let emitting = false;
+
   const emit = (level: Level, scope: Scope, message: string, fields?: Fields): void => {
     if (levelRank(level) < levelRank(threshold)) return;
+    if (emitting) return;
 
-    const record = scrub({ at: Date.now(), level, scope, message, fields });
+    emitting = true;
+    try {
+      const record = scrub({ at: Date.now(), level, scope, message, fields });
 
-    ring.push(record);
-    for (const sink of sinks) {
-      try {
-        sink(record);
-      } catch {
-        // A sink that throws must not take down the thing it was logging
-        // about. Deliberately silent: reporting it through this log would be
-        // the same call again, one frame deeper.
+      ring.push(record);
+      for (const sink of sinks) {
+        try {
+          sink(record);
+        } catch {
+          // A sink that throws must not take down the thing it was logging
+          // about. Deliberately silent: reporting it through this log would be
+          // the same call again, one frame deeper.
+        }
       }
+    } finally {
+      emitting = false;
     }
   };
 

@@ -145,6 +145,47 @@ describe('log', () => {
     });
   });
 
+  describe('a sink that logs', () => {
+    /**
+     * The loop this guards against was found on a device: React Native
+     * reports `console.error` through `ExceptionsManager` to the global error
+     * handler, the app's handler logs what it receives, and the development
+     * console sink prints error records with `console.error`. One non-fatal
+     * error filled all 400 slots of the ring with copies of itself inside a
+     * single millisecond.
+     */
+    it('does not recurse, and keeps the record that started it', () => {
+      const detach = log.addSink(record => {
+        if (record.message === 'original') log.player.error('caused by the sink');
+      });
+
+      expect(() => log.crash.error('original')).not.toThrow();
+      detach();
+
+      expect(records().map((r: LogRecord) => r.message)).toEqual(['original']);
+    });
+
+    it('survives a sink that logs on every record, rather than looping forever', () => {
+      const detach = log.addSink(() => log.app.warn('echo'));
+
+      log.crash.error('first');
+      log.crash.error('second');
+      detach();
+
+      expect(records().map((r: LogRecord) => r.message)).toEqual(['first', 'second']);
+    });
+
+    it('logs normally again once delivery has finished', () => {
+      const detach = log.addSink(() => log.app.warn('echo'));
+      log.crash.error('during');
+      detach();
+
+      log.app.info('after');
+
+      expect(records().map((r: LogRecord) => r.message)).toEqual(['during', 'after']);
+    });
+  });
+
   it('clears on request, for a user who does not want to send history', () => {
     log.app.info('private');
     log.clear();
