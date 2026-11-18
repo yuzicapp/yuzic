@@ -272,7 +272,19 @@ export const createMediaBrowserAdapter = (
     buildStreamUrl: (songId, quality, codec) => client.buildStreamUrl(songId, quality, codec),
     scrobbleKind: 'markPlayed',
     transcodes: true,
-    reportsLoudness: false,
+    /**
+     * Jellyfin measures loudness itself and returns it per track as
+     * `NormalizationGain` — mapped in `mapSong`, which is what makes the
+     * Player screen's levelling switch and its preamp do anything here
+     * (#314). Emby reports no such figure, so it still declares false.
+     *
+     * Known edge: a Jellyfin older than 10.10 returns no figure, so the
+     * switch appears there with nothing to correct towards. Gating that out
+     * needs the server version, which this client does not track. Weighed
+     * against every Jellyfin user having no switch at all — the state this
+     * replaces — and 10.10 being two years old, the trade is worth it.
+     */
+    reportsLoudness: client.brand.kind === 'jellyfin',
     streamableCodecs: ['mp3', 'opus'],
     reportPlaybackProgress: async (songId, positionMs, isPaused) =>
       reportPlaybackProgress(client, songId, positionMs, isPaused),
