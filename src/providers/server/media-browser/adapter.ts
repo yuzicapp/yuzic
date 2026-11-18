@@ -44,6 +44,7 @@ import { FAVORITES_ID } from "@/constants/favorites";
 import { getLyricsBySongId } from "./lyrics/getLyricsBySongId";
 import { getSong } from "./songs/getSong";
 import { markPlayed } from "./songs/markPlayed";
+import { probeLoudness } from "./songs/probeLoudness";
 import { reportPlaybackStart, reportPlaybackProgress, reportPlaybackStop, clearPlaybackPosition } from "./playback/report";
 import { getBookmarksFromUserData } from "./bookmarks/bookmarks";
 import { getTracks } from "./tracks/getTracks";
@@ -278,13 +279,14 @@ export const createMediaBrowserAdapter = (
      * Player screen's levelling switch and its preamp do anything here
      * (#314). Emby reports no such figure, so it still declares false.
      *
-     * Known edge: a Jellyfin older than 10.10 returns no figure, so the
-     * switch appears there with nothing to correct towards. Gating that out
-     * needs the server version, which this client does not track. Weighed
-     * against every Jellyfin user having no switch at all — the state this
-     * replaces — and 10.10 being two years old, the trade is worth it.
+     * Declaring it is not promising it: a figure only exists from Jellyfin
+     * 10.10 and only for a scanned library, so `probeLoudness` below asks the
+     * server before the switch is offered.
      */
     reportsLoudness: client.brand.kind === 'jellyfin',
+    probeLoudness: client.brand.kind === 'jellyfin'
+      ? () => probeLoudness(client)
+      : undefined,
     streamableCodecs: ['mp3', 'opus'],
     reportPlaybackProgress: async (songId, positionMs, isPaused) =>
       reportPlaybackProgress(client, songId, positionMs, isPaused),

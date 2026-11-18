@@ -53,6 +53,23 @@ export interface SongsApi {
    */
   reportsLoudness: boolean;
   /**
+   * Whether this server, as configured right now, actually returns a loudness
+   * figure — asked of the server rather than inferred.
+   *
+   * `reportsLoudness` above says the protocol carries loudness and the mapper
+   * reads it. That is not the same as a figure arriving: Jellyfin only
+   * measures loudness from 10.10 onward, and only for a library it has
+   * actually scanned, so a server can satisfy everything declared above and
+   * still have nothing to level towards. A version check would answer the
+   * wrong question — it would show the switch for a 10.10 server whose
+   * library was never scanned.
+   *
+   * Absent means the declaration stands on its own, which is Navidrome's
+   * case: ReplayGain tags come from the files and the server reports whatever
+   * it was given.
+   */
+  probeLoudness?: () => Promise<boolean>;
+  /**
    * "I am playing this right now", however the provider spells it: Subsonic's
    * scrobble.view with submission=false, a session-start event on
    * Jellyfin/Emby. Every provider that can express it implements this, so the

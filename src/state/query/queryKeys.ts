@@ -35,6 +35,8 @@ export enum QueryKeys {
 	Shares = 'server-shares',
 	/** Whether the active server really offers a declared surface (podcasts, shares). */
 	ServerSurface = 'server-surface',
+	/** Whether the active server really returns a loudness figure to level towards. */
+	ServerLoudness = 'server-loudness',
 	ExploreGenreRow = 'explore-genre-row',
 	ExternalAlbumPreviews = 'external-album-previews',
 	RecommendedLocalSongs = 'recommended-local-songs',
