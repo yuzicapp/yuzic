@@ -1006,6 +1006,59 @@ Read a theme value through `useActiveTheme()`/`useTheme()`, never at module
 import time: a static read cannot change when the theme does, and the whole
 point of this is that it changes.
 
+## 13. Diagnostics — failures the user can send you
+
+Every failure the app noticed used to go to `console`. Fifty-six call sites,
+all of them `warn` or `error`, every one a deliberate report of something
+going wrong, and not one reachable from a device in a listener's hands. The
+cost was not hypothetical: `ErrorBoundary` caught the crash that shipped as
+#325 and passed `info.componentStack` — which named the provider that was
+missing, the entire diagnosis — to `console.error`. Three people reported that
+bug with screenshots, and the answer had been on each of their phones.
+
+So `features/diagnostics` is a log with levels (`debug`/`info`/`warn`/`error`),
+a closed set of scopes, a bounded buffer, and an export. Four rules hold it
+together.
+
+**A record is fields, not prose.** `log.playback.warn('stream stalled', {
+songId, position })`. The message is short and fixed; everything that varies
+goes in `fields`, whose values are primitives by type. That is what makes a
+log filterable, what bounds the size of a record so the buffer can be bounded
+by count, and what keeps a field from retaining a component tree or a whole
+queue. A message that interpolates is also unsearchable: two reports of one
+failure never share a line.
+
+**Credentials are scrubbed on the way in, never on the way out.** Every
+stream and artwork URL carries the user's credentials — Subsonic's `t` is
+md5(password + salt), Jellyfin sends `api_key` — so a URL in a log is a
+password in a log. The engine formats failures as prose, and an `NSError` from
+a failed load carries the failing URL, so URLs arrive already interpolated
+into messages. `scrub` runs in `emit`, before the buffer and before any sink:
+query strings and `user:pass@` go, host and path stay, because the endpoint is
+most of the diagnosis and the host is how a failover problem is recognised.
+Scrubbing at export instead would leave the secret in the buffer and on disk
+for the next reader to find — and the whole point is an export a user attaches
+to a public issue.
+
+**The buffer is bounded and the store is debounced.** A ring of 400 records
+overwrites oldest-first, so a week-long session costs what a minute does. It
+persists because a crash log that dies with its process cannot describe a
+crash — but written whole on a 2s debounce rather than per record, since the
+engine measured a failing stream at 121 failures a minute and each write
+serialises the buffer. `flushNow()` exists for the fatal handler, which is
+about to restart the app; MMKV is synchronous and memory-mapped, so that is
+safe to call there.
+
+**The log is its own store.** A fourth MMKV instance, beside redux, the query
+cache and the catalog. A user who has just sent a report may delete what it
+held without that touching their settings or costing a re-sync, so the log
+needs its own `clearAll` — and it is the one store written during a crash,
+which is a poor moment to share an instance with the user's library.
+
+Scopes are a closed union (`record.ts`) rather than free strings, so `log.playbck`
+does not compile and `player`/`playback`/`Player` cannot become three names for
+one area. Add to the set deliberately, naming the area rather than the file.
+
 ## Where things live
 
 ```
@@ -1038,6 +1091,9 @@ src/providers/
 
 src/features/           — one directory per feature: its screen, components,
                           hooks and logic together
+  diagnostics/          — the log: record shape and scopes, scrub (credentials
+                          out at capture), the bounded ring, the persisted
+                          store a crash survives
   playback/
     PlayingContext.tsx  — the player. Consumes the server adapter,
                           dispatches into playbackSlice, checks contentKind

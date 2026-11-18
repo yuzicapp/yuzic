@@ -21,6 +21,7 @@ import { DlnaProvider } from '@/features/player/DlnaContext';
 import { PlaybackSinkProvider } from '@/features/player/PlaybackSinkContext';
 import { SongActionSheetProvider } from '@/features/entity-actions/SongActionSheetContext';
 import { ExternalResolutionProvider } from '@/features/sources/ExternalResolutionProvider';
+import { installDiagnostics } from '@/features/diagnostics/install';
 import { DownloadProvider } from '@/features/offline/DownloadContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider, useSelector } from 'react-redux';
@@ -69,6 +70,10 @@ onlineManager.setEventListener(setOnline => {
 enableFreeze(true);
 
 SplashScreen.preventAutoHideAsync();
+
+// At module scope, not in an effect: a crash during the first render has to
+// find the log already listening. See docs/architecture.md section 13.
+installDiagnostics();
 
 const LIBRARY_ERROR_QUERY_KEYS = new Set<string>([
   QueryKeys.Album,
@@ -294,19 +299,11 @@ function AppShell() {
               <NavigationTheme isDarkMode={isDarkMode}>
               <ErrorBoundary>
               <BottomSheetModalProvider>
-                {/* Above SongActionSheetProvider and PlayerHost, both of
-                  * which render here rather than under `(home)`, and both of
-                  * which reach for this context: the song option sheet
-                  * through `useSongActions`, the player through
-                  * `PlayingScreen`. Mounted inside `(home)` instead, it
-                  * covered the browsing screens and nothing else, so tapping
-                  * a song or opening its options threw
-                  * "useExternalResolution must be used within
-                  * ExternalResolutionProvider" into the ErrorBoundary below
-                  * — audio playing on, the UI behind a full-screen error
-                  * (#325). It needs the router, the store, the query client
-                  * and the sheet portal, and all four are already in scope
-                  * at this depth. */}
+                {/* Above SongActionSheetProvider and PlayerHost: both render
+                  * here rather than under `(home)`, and both reach for this
+                  * context. Mounted lower it covered the browsing screens
+                  * only, and playing a song threw into the ErrorBoundary
+                  * below (#325) — see `externalResolutionMount.test.ts`. */}
                 <ExternalResolutionProvider>
                 <SongActionSheetProvider>
                 <PlayerExpansionProvider>
