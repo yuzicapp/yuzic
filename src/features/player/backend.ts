@@ -1,3 +1,4 @@
+import type { EngineErrorOperation } from 'yuzic-engine';
 import type { BrowseCategory } from './browse';
 import type { CrossfadeSettings, EqualizerBand, LoudnessSettings } from './audioSettings';
 import type { MediaItem } from './mediaItem';
@@ -159,7 +160,33 @@ export interface PlayerBackend {
  * whether audio is actually coming out.
  */
 export type BackendEvent =
-  | { type: 'error'; code?: string; message: string }
+  | {
+      type: 'error';
+      code?: string;
+      /**
+       * A sentence for a listener, and the only field here that can carry a
+       * credential: the engine builds it by interpolating the underlying
+       * error, and an NSError from a failed load holds the URL it failed on.
+       * Diagnose from the fields below it, which cannot.
+       */
+      message: string;
+      /**
+       * What the engine was attempting, from a closed vocabulary, so failures
+       * group instead of being matched on the text of `message`. Absent on an
+       * error raised outside playback.
+       */
+      operation?: EngineErrorOperation;
+      /**
+       * The engine's id for the track that failed. Kept separate from the
+       * app's own notion of the current track: when the two disagree, the
+       * disagreement is the bug.
+       */
+      id?: string;
+      /** The underlying error's domain — `NSURLErrorDomain`, or Media3's code name. */
+      domain?: string;
+      /** The underlying error's own code: `-1008`, or a Media3 `errorCode`. */
+      underlyingCode?: number;
+    }
   | {
       type: 'stateChange';
       buffering: boolean;

@@ -197,7 +197,8 @@ export function createEngineBackend(): PlayerBackend {
               reportTrackChange(event.index, event.id);
             }
             if (event.type === 'error') {
-              emit({ type: 'error', code: event.code, message: event.message });
+              // Whole: rebuilding it by field is what dropped 1.3.0's parts.
+              emit(event);
             }
             if (event.type === 'queueChange') {
               void reconcileWithEngine();

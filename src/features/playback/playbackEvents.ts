@@ -4,6 +4,7 @@ import type { PlayableResource } from '@/features/playback/playableResource';
 import type { Song } from '@/domain/entities/Song';
 import { sourceKind } from '@/features/playback/playableResource';
 import type { Fields } from '@/features/diagnostics/record';
+import type { BackendEvent } from '@/features/player/backend';
 import { resolvePlaybackErrorAction } from './playbackErrorRecovery';
 
 /** How long a playback-error toast suppresses the next one. */
@@ -70,7 +71,7 @@ export interface PlaybackEventDeps {
 
 interface PlaybackEventHandlers {
   /** A failure arrived from the player. */
-  onError: (event: { code?: string; message: string }) => void;
+  onError: (event: Omit<Extract<BackendEvent, { type: 'error' }>, 'type'>) => void;
   /**
    * The player is actually playing: it opened the source and has audio.
    *
@@ -118,6 +119,20 @@ export function createPlaybackEventHandlers(deps: PlaybackEventDeps): PlaybackEv
         // `detail`, not `message`: the record carries its own fixed message,
         // and this is the player's variable text.
         detail: event.message,
+        // The engine's own account of the failure, added in 1.3.0. `detail`
+        // above is a sentence built for a listener and is the only field here
+        // that can carry a credential; these cannot, and they group, so a
+        // report with twenty failures can be read by `operation` rather than
+        // by eye. Kept beside `detail` rather than replacing it, because the
+        // sentence still says which track and what the system called it.
+        operation: event.operation,
+        domain: event.domain,
+        underlyingCode: event.underlyingCode,
+        // Only when it disagrees with the track the app believes is current.
+        // Equal is the normal case and says nothing; different means the app
+        // handled a failure against the wrong track, which is the bug that
+        // would otherwise be invisible here.
+        engineId: event.id && event.id !== song?.nativeId ? event.id : undefined,
         songId: song?.nativeId,
         title: song?.title,
         source: sourceKind(resource),
