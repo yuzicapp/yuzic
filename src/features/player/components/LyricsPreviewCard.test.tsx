@@ -1,7 +1,8 @@
 import React from 'react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { ScrollView } from 'react-native';
 
 import LyricsPreviewCard from './LyricsPreviewCard';
 import type { LyricsResult } from '@/providers/contracts/ServerAdapter';
@@ -107,5 +108,58 @@ describe('the player screen does not gate the card on timings', () => {
     // here is unsynced lyrics becoming unreachable again.
     expect(playingScreen).toMatch(/\{lyricsAvailable && lyrics && \(\s*<LyricsPreviewCardResolver/);
     expect(playingScreen).not.toMatch(/lyrics\?\.synced && \(/);
+  });
+});
+
+/**
+ * The other half of the unsynced mode: no autoscroll.
+ *
+ * I wrote this off as needing the ScrollView ref and therefore untestable.
+ * `scrollTo` is on `ScrollView.prototype`, and the card's effect runs off
+ * layout events the test can fire, so it is neither.
+ *
+ * The effect needs a measured line and a content height before it will scroll
+ * at all, which is why both are fired here.
+ */
+describe('following the track by scrolling', () => {
+  let scrollTo: jest.SpyInstance;
+
+  beforeEach(() => {
+    scrollTo = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    scrollTo.mockRestore();
+  });
+
+  /** Measure the nth line and give the content a height, as layout would. */
+  const measure = (index: number) => {
+    const line = screen.getAllByText(/line$/)[index];
+    if (!line) throw new Error(`no line at ${index}`);
+    fireEvent(line, 'layout', { nativeEvent: { layout: { y: 300, height: 20 } } });
+    // Fired at the line: `fireEvent` walks up for a handler, and the only
+    // `onContentSizeChange` above it is the card's ScrollView.
+    fireEvent(line, 'contentSizeChange', 320, 600);
+  };
+
+  it('scrolls to the line that is playing', async () => {
+    await renderCard(synced, 12);
+
+    await act(async () => { measure(1); });
+
+    expect(scrollTo).toHaveBeenCalled();
+    const [{ y }] = scrollTo.mock.calls[scrollTo.mock.calls.length - 1] as [{ y: number }];
+    expect(y).toBeGreaterThan(0);
+  });
+
+  it('does not scroll at all without timings', async () => {
+    // The regression: every unsynced line carries `startMs: 0`, so a
+    // position lookup would call the last line current and the card would
+    // open scrolled to the end of the song's words.
+    await renderCard(unsynced, 90);
+
+    await act(async () => { measure(2); });
+
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 });
