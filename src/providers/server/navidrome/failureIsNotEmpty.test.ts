@@ -5,6 +5,7 @@ import { getTopSongs } from './artists/getTopSongs';
 import { getInternetRadioStations } from './radio/getInternetRadioStations';
 import { getRandomSongs } from './discovery/random';
 import type { NavidromeClient } from './client';
+import { log } from '@/features/diagnostics/log';
 
 /**
  * A request that failed is not a library that is empty.
@@ -66,7 +67,22 @@ describe('a failed request rejects rather than resolving empty', () => {
   });
 
   it('still logs the failure, so the reason survives the rethrow', async () => {
+    log.clear();
+
     await expect(getSimilarSongs(failing, provenance, 'song-1')).rejects.toThrow();
-    expect(console.error).toHaveBeenCalled();
+
+    // Recorded rather than printed: the reason has to reach the diagnostics
+    // export, not a console no user can read.
+    expect(log.records()).toEqual([
+      expect.objectContaining({
+        scope: 'server',
+        level: 'error',
+        fields: expect.objectContaining({
+          provider: 'navidrome',
+          operation: 'getSimilarSongs',
+          detail: 'Network request failed',
+        }),
+      }),
+    ]);
   });
 });

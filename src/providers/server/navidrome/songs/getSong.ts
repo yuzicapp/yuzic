@@ -3,6 +3,8 @@ import type { Provenance } from "@/domain/identity/Provenance";
 import type { NavidromeClient } from "../client";
 import { mapSong } from "../mapSong";
 import { SubsonicResponse } from "../types";
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 export async function getSong(
   client: NavidromeClient,
@@ -16,7 +18,7 @@ export async function getSong(
 
     return mapSong(s, { provenance });
   } catch (error) {
-    console.error("Failed to fetch Navidrome song:", error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getSong', detail: detailOf(error) });
     throw error;
   }
 }

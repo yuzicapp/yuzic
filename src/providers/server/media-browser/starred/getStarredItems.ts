@@ -6,6 +6,8 @@ import { mapSong } from "../mapSong";
 import { normalizeAlbum } from "../albums/getAlbums";
 import type { MediaBrowserItem } from "../types";
 import { fetchAllItems } from "../pagedItems";
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 interface GetStarredItemsResult {
   songs: Song[];
@@ -54,7 +56,7 @@ export async function getStarredItems(
     // development it puts a full-screen red box over the app — which, for a
     // server behind a flaky tunnel answering 530 on one request in ten, means
     // the app is unusable for a fault it is already absorbing.
-    console.warn(`Could not read ${client.brand.label} starred items:`, error);
+    log.server.warn('request failed', { provider: client.brand.label, operation: 'getStarredItems', detail: detailOf(error) });
     return { songs: [], albums: [] };
   }
 }

@@ -1,6 +1,8 @@
 import type { NavidromeClient } from '../client';
 import type { SubsonicResponse } from '../types';
 import type { Bookmark } from '@/providers/contracts/ServerAdapter';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * Subsonic bookmarks store a resume position (ms) per track, keyed by song
@@ -23,7 +25,7 @@ export async function getBookmarks(client: NavidromeClient): Promise<Bookmark[]>
         changed: b.changed ?? undefined,
       }));
   } catch (error) {
-    console.error('Navidrome getBookmarks failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getBookmarks', detail: detailOf(error) });
     throw error;
   }
 }

@@ -32,6 +32,7 @@ export const SCOPES = [
   'playback',
   'player',
   'server',
+  'integration',
   'library',
   'offline',
   'downloads',

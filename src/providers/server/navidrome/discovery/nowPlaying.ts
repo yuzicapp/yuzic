@@ -2,6 +2,8 @@ import type { NavidromeClient } from '../client';
 import type { SubsonicResponse } from '../types';
 import type { NowPlayingEntry } from '@/providers/contracts/ServerAdapter';
 import type { CoverSource } from '@/domain/entities/Cover';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * Users currently listening on this server. Small servers with a single user
@@ -27,7 +29,7 @@ export async function getNowPlaying(client: NavidromeClient): Promise<NowPlaying
         minutesAgo: typeof e.minutesAgo === 'number' ? e.minutesAgo : undefined,
       }));
   } catch (error) {
-    console.error('Navidrome getNowPlaying failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getNowPlaying', detail: detailOf(error) });
     throw error;
   }
 }

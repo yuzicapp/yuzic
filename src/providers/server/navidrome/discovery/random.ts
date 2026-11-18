@@ -3,6 +3,8 @@ import type { Provenance } from '@/domain/identity/Provenance';
 import type { NavidromeClient } from '../client';
 import type { SubsonicResponse } from '../types';
 import { mapSong } from '../mapSong';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /** A random slice of the user's library. Optional genre/year filters route to
  * a themed shelf (a random draw of 80s tracks, jazz picks, etc.). */
@@ -24,7 +26,7 @@ export async function getRandomSongs(
       .filter((s): s is typeof s & { id: string } => !!s?.id)
       .map((s) => mapSong(s, { provenance }));
   } catch (error) {
-    console.error('Navidrome getRandomSongs failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getRandomSongs', detail: detailOf(error) });
     throw error;
   }
 }

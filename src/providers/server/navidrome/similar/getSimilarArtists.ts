@@ -3,6 +3,8 @@ import type { Provenance } from '@/domain/identity/Provenance';
 import type { NavidromeClient } from '../client';
 import type { SubsonicResponse } from '../types';
 import { mapArtist } from '../mapArtist';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * Navidrome's Subsonic `getArtistInfo2.view` returns a Last.fm-derived
@@ -31,7 +33,7 @@ export async function getSimilarArtists(
       .filter((s): s is typeof s & { id: string; name: string } => !!s?.id && !!s?.name)
       .map((s) => mapArtist(s, provenance));
   } catch (error) {
-    console.error('Navidrome getSimilarArtists failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getSimilarArtists', detail: detailOf(error) });
     throw error;
   }
 }

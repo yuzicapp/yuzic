@@ -1,6 +1,8 @@
 import type { MediaBrowserClient } from '../client';
 import type { MediaBrowserItemsResponse } from '../types';
 import type { Bookmark } from '@/providers/contracts/ServerAdapter';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * Jellyfin/Emby don't have a dedicated bookmarks API, but they DO store a
@@ -45,7 +47,7 @@ export async function getBookmarksFromUserData(client: MediaBrowserClient): Prom
       })
       .filter((b): b is Bookmark => b !== null);
   } catch (error) {
-    console.error('mediaBrowser bookmarks read failed:', error);
+    log.server.error('request failed', { provider: 'media-browser', operation: 'readBookmarks', detail: detailOf(error) });
     throw error;
   }
 }

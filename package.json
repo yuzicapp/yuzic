@@ -17,8 +17,8 @@
     "test:e2e:ratings": "maestro test .maestro/ratings.yaml",
     "lint": "expo lint",
     "postinstall": "patch-package --error-on-fail",
-    "architecture:check": "node tools/architecture/check-cycles.mjs && node tools/architecture/check-unused.mjs && node tools/architecture/check-provider-branches.mjs && node tools/architecture/check-file-shape.mjs && node tools/architecture/check-unsafe.mjs && node tools/architecture/check-shims.mjs && node tools/architecture/check-test-only-exports.mjs",
-    "architecture:prune": "node tools/architecture/check-cycles.mjs --prune && node tools/architecture/check-unused.mjs --prune && node tools/architecture/check-provider-branches.mjs --prune && node tools/architecture/check-file-shape.mjs --prune && node tools/architecture/check-unsafe.mjs --prune && node tools/architecture/check-shims.mjs --prune",
+    "architecture:check": "node tools/architecture/check-cycles.mjs && node tools/architecture/check-unused.mjs && node tools/architecture/check-provider-branches.mjs && node tools/architecture/check-file-shape.mjs && node tools/architecture/check-unsafe.mjs && node tools/architecture/check-console.mjs && node tools/architecture/check-shims.mjs && node tools/architecture/check-test-only-exports.mjs",
+    "architecture:prune": "node tools/architecture/check-cycles.mjs --prune && node tools/architecture/check-unused.mjs --prune && node tools/architecture/check-provider-branches.mjs --prune && node tools/architecture/check-file-shape.mjs --prune && node tools/architecture/check-unsafe.mjs --prune && node tools/architecture/check-console.mjs --prune && node tools/architecture/check-shims.mjs --prune",
     "architecture:measure": "node tools/architecture/measure.mjs"
   },
   "overrides": {

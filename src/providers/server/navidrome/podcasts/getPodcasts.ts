@@ -2,6 +2,8 @@ import type { NavidromeClient } from '../client';
 import type { SubsonicResponse } from '../types';
 import type { PodcastChannel, PodcastEpisode } from '@/providers/contracts/ServerAdapter';
 import type { CoverSource } from '@/domain/entities/Cover';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * A channel or episode cover. `coverArt` is a Subsonic image id the server
@@ -95,7 +97,7 @@ export async function getPodcasts(
           .filter((e): e is PodcastEpisode => e !== null),
       }));
   } catch (error) {
-    console.error('Navidrome getPodcasts failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getPodcasts', detail: detailOf(error) });
     throw error;
   }
 }
@@ -112,7 +114,7 @@ export async function getNewestPodcasts(
       .map((e) => normalizeEpisode(e as RawEpisode, ''))
       .filter((e): e is PodcastEpisode => e !== null);
   } catch (error) {
-    console.error('Navidrome getNewestPodcasts failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getNewestPodcasts', detail: detailOf(error) });
     throw error;
   }
 }
