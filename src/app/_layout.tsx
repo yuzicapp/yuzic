@@ -22,15 +22,14 @@ import { PlaybackSinkProvider } from '@/features/player/PlaybackSinkContext';
 import { SongActionSheetProvider } from '@/features/entity-actions/SongActionSheetContext';
 import { ExternalResolutionProvider } from '@/features/sources/ExternalResolutionProvider';
 import { installDiagnostics } from '@/features/diagnostics/install';
+import { installFatalHandlers } from '@/features/diagnostics/fatalHandlers';
 import { DownloadProvider } from '@/features/offline/DownloadContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import store from '@/state/redux/store';
 import { persistor } from '@/state/redux/persistor';
-import { Alert, AppState } from 'react-native';
-import { setJSExceptionHandler, setNativeExceptionHandler } from 'react-native-exception-handler';
-import RNRestart from 'react-native-restart';
+import { AppState } from 'react-native';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PlayerExpansionProvider } from '@/features/player/PlayerExpansion';
 import PlayerHost from '@/features/player/PlayerHost';
@@ -357,18 +356,7 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    const jsErrorHandler = (error: { name: string; message: string }, isFatal: boolean) => {
-      if (isFatal) {
-        Alert.alert(
-          i18n.t('common.error.unexpected'),
-          i18n.t('common.error.details', { name: error.name, message: error.message }),
-          [{ text: i18n.t('common.error.restart'), onPress: () => RNRestart.Restart() }]
-        );
-      }
-    };
-
-    setJSExceptionHandler(jsErrorHandler, true);
-    setNativeExceptionHandler(() => { }, false, true);
+    installFatalHandlers();
   }, []);
 
   // The splash comes down in `CredentialsGate`, once the app can render.

@@ -38,6 +38,26 @@ const SENSITIVE_KEY = /^(pass|password|secret|token|auth|authorization|apikey|ap
 const REDACTED = '<redacted>';
 
 /**
+ * The most characters one field may carry.
+ *
+ * The ring is bounded by count, and that is only a bound on memory because a
+ * record is small — see `ring.ts`. Most fields are an id or a number and stay
+ * small on their own; a React component stack does not, and it is the single
+ * most useful field this log captures. So it is kept, and cut: the top frames
+ * name the component that failed, which is the part that explains a crash,
+ * and the tail is the app shell every stack ends with.
+ *
+ * Cut here rather than at each call site, so no caller has to remember, and
+ * so one place decides what "bounded" means.
+ */
+const MAX_FIELD_CHARS = 2000;
+
+function bound(value: string): string {
+  if (value.length <= MAX_FIELD_CHARS) return value;
+  return `${value.slice(0, MAX_FIELD_CHARS)}… (+${value.length - MAX_FIELD_CHARS} more)`;
+}
+
+/**
  * Matches a URL inside a larger string, because that is how they arrive:
  * interpolated into a sentence by the engine, or into a thrown `Error`.
  * Deliberately stops at whitespace, quotes and brackets — the characters that
@@ -83,7 +103,9 @@ function scrubValue(key: string, value: Fields[string]): Fields[string] {
   if (SENSITIVE_KEY.test(key) && value !== null && value !== undefined && value !== '') {
     return REDACTED;
   }
-  return typeof value === 'string' ? scrubText(value) : value;
+  // Scrubbed before it is cut, never after: cutting first could leave half a
+  // URL whose query the pattern no longer recognises, and so no longer strips.
+  return typeof value === 'string' ? bound(scrubText(value)) : value;
 }
 
 function scrubFields(fields: Fields): Fields {
@@ -101,7 +123,7 @@ function scrubFields(fields: Fields): Fields {
 export function scrub(record: LogRecord): LogRecord {
   return {
     ...record,
-    message: scrubText(record.message),
+    message: bound(scrubText(record.message)),
     ...(record.fields ? { fields: scrubFields(record.fields) } : {}),
   };
 }

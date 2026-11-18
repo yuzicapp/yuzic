@@ -1,6 +1,7 @@
 import { onDark } from '@/constants/design';
 import React, { Component, ReactNode } from 'react';
 import ScreenError from '@/components/ScreenError';
+import { log } from '@/features/diagnostics/log';
 
 interface Props {
   children: ReactNode;
@@ -22,8 +23,24 @@ export class ErrorBoundary extends Component<Props, State> {
     return { error };
   }
 
+  /**
+   * The component stack is the point.
+   *
+   * This went to `console.error` and therefore nowhere, which is how #325 —
+   * a context consumer mounted outside its provider — reached three users'
+   * phones with the name of the missing provider sitting in `componentStack`
+   * on each of them. Logged, it survives the restart that follows and leaves
+   * with the diagnostics export.
+   */
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[ErrorBoundary]', error, info.componentStack);
+    log.crash.error('uncaught render error', {
+      name: error.name,
+      // `message` rather than the Error: a record holds primitives, and the
+      // stack worth having here is the component one, not the JS one.
+      detail: error.message,
+      componentStack: info.componentStack ?? undefined,
+      boundary: 'root',
+    });
   }
 
   private retry = () => this.setState({ error: null });

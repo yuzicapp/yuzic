@@ -93,6 +93,47 @@ describe('scrubText', () => {
   });
 });
 
+describe('bounding a large field', () => {
+  it('keeps a component stack but cuts it, saying how much went', () => {
+    const stack = 'at PlayingScreen\n'.repeat(500);
+
+    const out = scrub(record({ fields: { componentStack: stack } }));
+    const kept = String(out.fields?.componentStack);
+
+    expect(kept.length).toBeLessThan(stack.length);
+    expect(kept).toContain('at PlayingScreen');
+    expect(kept).toMatch(/\(\+\d+ more\)$/);
+  });
+
+  it('keeps the top of the stack, which is the part that names the failure', () => {
+    const stack = `at TheComponentThatFailed\n${'at Filler\n'.repeat(500)}`;
+
+    expect(String(scrub(record({ fields: { componentStack: stack } })).fields?.componentStack))
+      .toContain('at TheComponentThatFailed');
+  });
+
+  it('leaves a field that is already small exactly as it was', () => {
+    const out = scrub(record({ fields: { componentStack: 'at PlayingScreen' } }));
+    expect(out.fields?.componentStack).toBe('at PlayingScreen');
+  });
+
+  it('cuts a long message too', () => {
+    const out = scrub(record({ message: 'x'.repeat(5000) }));
+    expect(out.message.length).toBeLessThan(5000);
+  });
+
+  /**
+   * Order matters: cut first and a URL can lose the `?` that makes its query
+   * recognisable, so the credential in the tail would survive the scrubbing.
+   */
+  it('scrubs before cutting, so a credential cannot survive in the tail', () => {
+    const padding = 'y'.repeat(1990);
+    const out = scrub(record({ fields: { note: `${padding} ${SUBSONIC_TOKEN}` } }));
+
+    expect(String(out.fields?.note)).not.toContain('26719a1196d2a940705a59634eb18eab');
+  });
+});
+
 describe('scrub', () => {
   it('scrubs the message', () => {
     const out = scrub(record({ message: `could not open ${SUBSONIC_TOKEN}` }));
