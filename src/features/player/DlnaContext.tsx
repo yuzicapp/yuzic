@@ -2,6 +2,8 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { getBackend } from '@/features/player/activeBackend';
 import { getMediaItemUrl } from '@/features/playback/playableMedia';
 import type { MediaItem } from '@/features/player/mediaItem';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 // ─── DLNA ────────────────────────────────────────────────────────────────────
 
@@ -110,7 +112,7 @@ export function DlnaProvider({ children }: { children: React.ReactNode }) {
           <Speed>1</Speed>
         `);
       } catch (err) {
-        console.warn('[DLNA] track update failed', err);
+        log.player.warn('dlna track update failed', { detail: detailOf(err) });
       }
     });
     return unsubscribe;
@@ -136,7 +138,7 @@ export function DlnaProvider({ children }: { children: React.ReactNode }) {
       );
       if (!uriRes.ok) {
         const body = await uriRes.text();
-        console.warn('[Cast] SetAVTransportURI failed', uriRes.status, body);
+        log.player.warn('dlna set transport uri failed', { status: uriRes.status, detail: body });
         throw new Error(`SetAVTransportURI ${uriRes.status}`);
       }
 
@@ -145,7 +147,7 @@ export function DlnaProvider({ children }: { children: React.ReactNode }) {
       );
       if (!playRes.ok) {
         const body = await playRes.text();
-        console.warn('[Cast] Play failed', playRes.status, body);
+        log.player.warn('dlna play failed', { status: playRes.status, detail: body });
         throw new Error(`Play ${playRes.status}`);
       }
 
@@ -162,7 +164,7 @@ export function DlnaProvider({ children }: { children: React.ReactNode }) {
       try {
         await soapAction(device.avTransportUrl, 'AVTransport', 'Stop', `<InstanceID>0</InstanceID>`);
       } catch (err) {
-        console.warn('[Cast] DLNA stop on disconnect failed', err);
+        log.player.warn('dlna stop on disconnect failed', { detail: detailOf(err) });
       }
     }
     getBackend().setVolume(1);
@@ -177,7 +179,7 @@ export function DlnaProvider({ children }: { children: React.ReactNode }) {
     try {
       await soapAction(device.avTransportUrl, 'AVTransport', 'Pause', `<InstanceID>0</InstanceID>`);
     } catch (err) {
-      console.warn('[Cast] DLNA pause failed', err);
+      log.player.warn('dlna pause failed', { detail: detailOf(err) });
     }
   }, []);
 
@@ -190,7 +192,7 @@ export function DlnaProvider({ children }: { children: React.ReactNode }) {
         <Speed>1</Speed>
       `);
     } catch (err) {
-      console.warn('[Cast] DLNA resume failed', err);
+      log.player.warn('dlna resume failed', { detail: detailOf(err) });
     }
   }, []);
 
@@ -208,7 +210,7 @@ export function DlnaProvider({ children }: { children: React.ReactNode }) {
         <Target>${ts}</Target>
       `);
     } catch (err) {
-      console.warn('[Cast] DLNA seek failed', err);
+      log.player.warn('dlna seek failed', { detail: detailOf(err) });
     }
   }, []);
 

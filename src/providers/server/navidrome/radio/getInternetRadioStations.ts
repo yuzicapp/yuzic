@@ -1,6 +1,8 @@
 import type { NavidromeClient } from '../client';
 import type { SubsonicResponse } from '../types';
 import type { InternetRadioStation } from '@/providers/contracts/ServerAdapter';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 
 /**
@@ -35,7 +37,7 @@ export async function getInternetRadioStations(
         homepageUrl: s.homePageUrl ?? s.homepageUrl ?? undefined,
       }));
   } catch (error) {
-    console.error('Navidrome getInternetRadioStations failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getInternetRadioStations', detail: detailOf(error) });
     throw error;
   }
 }

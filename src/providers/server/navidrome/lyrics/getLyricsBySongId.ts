@@ -1,5 +1,7 @@
 import type { NavidromeClient } from "../client";
 import { LyricsResult } from "@/providers/contracts/ServerAdapter";
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 type NavidromeLyricLine = {
   start: number; // milliseconds
@@ -53,7 +55,7 @@ export async function getLyricsBySongId(
       lines,
     };
   } catch (error) {
-    console.error('Navidrome getLyricsBySongId failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getLyricsBySongId', detail: detailOf(error) });
     throw error;
   }
 }

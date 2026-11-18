@@ -1,6 +1,8 @@
 import type { MediaBrowserClient } from "../client";
 import { LyricsResult } from "@/providers/contracts/ServerAdapter";
 import { MediaBrowserRequestError } from "../requestError";
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 type MediaBrowserLyricsResponse = {
   Lyrics?: {
@@ -67,7 +69,7 @@ export async function getLyricsBySongId(
     if (error instanceof MediaBrowserRequestError && error.status === 404) {
       return null;
     }
-    console.error('Jellyfin/Emby getLyricsBySongId failed:', error);
+    log.server.error('request failed', { provider: 'media-browser', operation: 'getLyricsBySongId', detail: detailOf(error) });
     throw error;
   }
 }

@@ -3,6 +3,8 @@ import type { Provenance } from "@/domain/identity/Provenance";
 import type { NavidromeClient } from "../client";
 import { mapSong } from "../mapSong";
 import { SubsonicResponse } from "../types";
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 export async function getSimilarSongs(
   client: NavidromeClient,
@@ -19,7 +21,7 @@ export async function getSimilarSongs(
       .filter((s): s is typeof s & { id: string } => !!s?.id)
       .map((s) => mapSong(s, { provenance }));
   } catch (error) {
-    console.error("Navidrome getSimilarSongs failed:", error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getSimilarSongs', detail: detailOf(error) });
     throw error;
   }
 }

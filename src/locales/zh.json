@@ -719,6 +719,16 @@
       "longestGap": "未播放天数",
       "topArtists": "你的艺人",
       "topTracks": "你的曲目"
+    },
+    "diagnostics": {
+      "title": "诊断信息",
+      "explainer": "Yuzic 会记录出现的问题：无法播放的曲目、崩溃、未完成的下载。请在提交错误报告时一并分享，以便查明原因。密码和服务器凭据会被自动移除；曲目名称和服务器地址可能会出现在其中。",
+      "share": "分享诊断信息",
+      "sharing": "正在准备…",
+      "clear": "清除诊断信息",
+      "cleared": "已清除诊断信息",
+      "empty": "暂无记录。出现问题时会显示在这里。",
+      "recordCount_other": "{{count}} 条记录"
     }
   },
   "common": {
@@ -775,7 +785,9 @@
     "home": {
       "subtitle": "你的个人音乐库。随时随地从自有服务器流式播放。",
       "getStarted": "开始使用",
-      "terms": "继续使用即表示你已阅读并同意我们的《使用条款》和《隐私政策》"
+      "terms": "继续即表示您已阅读并接受我们的{{terms}}和{{privacy}}",
+      "termsLink": "使用条款",
+      "privacyLink": "隐私政策"
     },
     "servers": {
       "title": "你的服务器",

@@ -2,14 +2,21 @@ import { createMMKV } from 'react-native-mmkv';
 import { Storage } from 'redux-persist';
 
 /**
- * Three stores, deliberately separate.
+ * Four stores, deliberately separate.
  *
  * Redux holds small durable client state — playback resume position, settings,
  * wants. TanStack Query holds the screens' own queries. The catalog — albums,
- * artists, tracks — holds its own, one record per resource. They have
- * different sizes, different lifetimes and different reasons to be cleared:
- * dropping a stale catalog should never risk a user's settings, and one
- * instance made that a single blast radius.
+ * artists, tracks — holds its own, one record per resource. The diagnostics
+ * log holds its own too. They have different sizes, different lifetimes and
+ * different reasons to be cleared: dropping a stale catalog should never risk
+ * a user's settings, and one instance made that a single blast radius.
+ *
+ * The log is separate for the clearing rather than the size. A user who has
+ * just sent a failure report is entitled to delete what it held without that
+ * touching their settings or costing them a re-sync, and the diagnostics
+ * screen offers exactly that — so the log needs a `clearAll` of its own. It is
+ * also the one store written during a crash, which is a poor moment to be
+ * sharing an instance with the user's library.
  *
  * The catalog is separate from the query cache for size rather than for
  * lifetime. The persister rewrites its blob whenever anything in the cache
@@ -28,6 +35,7 @@ const NAMESPACE = 'yuzic-v2';
 const reduxMmkv = createMMKV({ id: `${NAMESPACE}-redux` });
 const queryMmkv = createMMKV({ id: `${NAMESPACE}-query` });
 const catalogMmkv = createMMKV({ id: `${NAMESPACE}-catalog` });
+const logMmkv = createMMKV({ id: `${NAMESPACE}-log` });
 
 /** Kept for the few modules that store their own small values directly. */
 export const mmkv = reduxMmkv;
@@ -65,3 +73,11 @@ export const queryCacheStorage = storageFor(queryMmkv);
  * other two wear for their libraries' sake would only be something to unwrap.
  */
 export const catalogStorage = catalogMmkv;
+
+/**
+ * The diagnostics log's store, handed out raw for the same reasons as the
+ * catalog's: it addresses its own key and needs `clearAll`, so a
+ * promise-returning wrapper would only be something to unwrap. See
+ * `features/diagnostics/store` for what it holds.
+ */
+export const logStorage = logMmkv;

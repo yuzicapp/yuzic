@@ -2,6 +2,8 @@ import { Server } from '@/providers/contracts/Server';
 import { buildTokenParams } from '../client';
 import { SubsonicResponse } from '../types';
 import { serverFetch } from '@/features/mtls/serverFetch';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 const API_VERSION = '1.16.0';
 const CLIENT_NAME = 'Yuzic';
@@ -34,7 +36,7 @@ export async function getMusicFolders(server: Server): Promise<{ id: string; nam
       })
       .filter((folder): folder is { id: string; name: string } => folder !== null);
   } catch (error) {
-    console.error('Navidrome getMusicFolders failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getMusicFolders', detail: detailOf(error) });
     throw error;
   }
 }

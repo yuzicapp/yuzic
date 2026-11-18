@@ -43,14 +43,22 @@ jest.mock('@/features/player/activeBackend', () => ({
 
 // The server adapter — HTTP.
 jest.mock('@/providers/registry/useApi', () => ({
-  useApi: () => ({ songs: { streamableCodecs: mockStreamableCodecs, reportsLoudness: mockReportsLoudness, transcodes: mockTranscodes } }),
+  useApi: () => ({ songs: { streamableCodecs: mockStreamableCodecs, transcodes: mockTranscodes } }),
+}));
+
+// Whether the server really has loudness to level towards. Mocked rather than
+// exercised: the hook asks the server through react-query and has its own
+// tests — see `useServerLoudness.test`. What this screen owes is rendering the
+// switch on that answer rather than on the adapter's declaration (#314).
+jest.mock('@/features/library/useServerLoudness', () => ({
+  useServerLoudness: () => mockServerHasLoudness,
 }));
 
 /* eslint-disable no-var -- hoisted for the jest.mock factories above */
 var mockPush = jest.fn();
 var mockClearCache = jest.fn();
 var mockStreamableCodecs: string[] = ['mp3'];
-var mockReportsLoudness = true;
+var mockServerHasLoudness = true;
 var mockTranscodes = true;
 /* eslint-enable no-var */
 
@@ -93,7 +101,7 @@ function switchFor(view: View, label: 'settings.player.autoplay' | 'settings.pla
 describe('PlayerSettings', () => {
   beforeEach(() => {
     mockStreamableCodecs = ['mp3'];
-    mockReportsLoudness = true;
+    mockServerHasLoudness = true;
     mockTranscodes = true;
     mockPush.mockClear();
     mockClearCache.mockClear();
@@ -124,15 +132,17 @@ describe('PlayerSettings', () => {
 
   // It rendered for every provider while only Navidrome reported a gain, so
   // four adapters out of five offered a switch that corrected against nothing.
-  it('hides loudness normalisation when the active adapter reports no loudness', async () => {
-    mockReportsLoudness = false;
+  // Now it renders on what the server answered: a Jellyfin that declares
+  // loudness but has measured none still gets no switch.
+  it('hides loudness normalisation where the server has none to level towards', async () => {
+    mockServerHasLoudness = false;
     const view = await renderScreen(makeStore());
 
     expect(view.queryByText('settings.player.loudness.label')).toBeNull();
   });
 
-  it('offers loudness normalisation when the adapter declares it', async () => {
-    mockReportsLoudness = true;
+  it('offers loudness normalisation once the server confirms it has some', async () => {
+    mockServerHasLoudness = true;
     const view = await renderScreen(makeStore());
 
     expect(view.queryByText('settings.player.loudness.label')).not.toBeNull();

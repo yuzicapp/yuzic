@@ -3,6 +3,8 @@ import type { Provenance } from '@/domain/identity/Provenance';
 import type { NavidromeClient } from '../client';
 import type { SubsonicResponse } from '../types';
 import { mapSong } from '../mapSong';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * Server-ranked "top songs" for an artist. Subsonic's getTopSongs is backed by
@@ -29,7 +31,7 @@ export async function getTopSongs(
       .filter((s): s is typeof s & { id: string } => !!s?.id)
       .map((s) => mapSong(s, { provenance }));
   } catch (error) {
-    console.error('Navidrome getTopSongs failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getTopSongs', detail: detailOf(error) });
     throw error;
   }
 }

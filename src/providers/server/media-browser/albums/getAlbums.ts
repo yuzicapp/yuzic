@@ -3,6 +3,8 @@ import { requireProvenance, type MediaBrowserClient } from "../client";
 import { mapAlbum } from "../mapAlbum";
 import type { MediaBrowserItem } from "../types";
 import { fetchAllItems } from "../pagedItems";
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 type GetAlbumsResult = Album[];
 
@@ -16,7 +18,7 @@ export function normalizeAlbum(a: MediaBrowserItem, client: MediaBrowserClient):
   try {
     return mapAlbum(a, { provenance: requireProvenance(client), brand: client.brand });
   } catch (error) {
-    console.error(`Failed to normalize album:`, error);
+    log.server.error('request failed', { provider: 'media-browser', operation: 'normalizeAlbum', detail: detailOf(error) });
     return null;
   }
 }

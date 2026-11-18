@@ -3,6 +3,8 @@ import { MediaBrowserItemsResponse } from '../types';
 import { EMBY_BRAND, JELLYFIN_BRAND } from '../brand';
 import { mediaBrowserAuthHeaders } from '../clientHeader';
 import { serverFetch } from '@/features/mtls/serverFetch';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 export async function getMusicLibraries(server: Server): Promise<{ id: string; name: string }[]> {
   const { serverUrl, auth } = server;
@@ -34,7 +36,7 @@ export async function getMusicLibraries(server: Server): Promise<{ id: string; n
       .filter((i) => i.CollectionType === 'music')
       .map((i) => ({ id: String(i.Id), name: String(i.Name) }));
   } catch (error) {
-    console.error('Jellyfin/Emby getMusicLibraries failed:', error);
+    log.server.error('request failed', { provider: 'media-browser', operation: 'getMusicLibraries', detail: detailOf(error) });
     throw error;
   }
 }

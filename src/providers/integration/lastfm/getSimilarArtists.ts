@@ -1,4 +1,6 @@
 import { lastfmRequest } from './client';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 type LastFmSimilarArtist = {
   name: string
@@ -53,7 +55,7 @@ export async function getLastFmSimilarArtists(
       })
       .filter((a): a is LastFmSimilarArtist => a !== null);
   } catch (error) {
-    console.error('Last.fm getSimilarArtists failed:', error);
+    log.integration.error('request failed', { provider: 'lastfm', operation: 'getSimilarArtists', detail: detailOf(error) });
     throw error;
   }
 }

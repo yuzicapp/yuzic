@@ -82,9 +82,17 @@ export default function LyricsPreviewCard({
   const [contentHeight, setContentHeight] = useState(0);
   const [layoutVersion, setLayoutVersion] = useState(0);
   const lines = useMemo(() => lyrics.lines, [lyrics.lines]);
+  /**
+   * Unsynced lines all carry `startMs: 0`, so `getCurrentLineIndex` would
+   * answer with the *last* line from the first moment of the track — every
+   * line "already started" — and the card would open scrolled to the end of
+   * the song's words. There is no current line without timings, so there is
+   * no highlight and no autoscroll either: the words simply start at the top.
+   */
+  const synced = lyrics.synced;
   const currentIndex = useMemo(
-    () => getCurrentLineIndex(lines, position),
-    [lines, position]
+    () => (synced ? getCurrentLineIndex(lines, position) : -1),
+    [synced, lines, position]
   );
 
   useEffect(() => {
@@ -120,6 +128,9 @@ export default function LyricsPreviewCard({
   if (!lines.length) return null;
 
   const getVariant = (index: number): 'active' | 'adjacent' | 'inactive' => {
+    // Nothing is "now" without timings, so nothing is dimmed — the same
+    // choice `LyricsBottomSheet` makes for the same reason.
+    if (!synced) return 'active';
     if (index === currentIndex) return 'active';
     if (index === currentIndex - 1 || index === currentIndex + 1)
       return 'adjacent';

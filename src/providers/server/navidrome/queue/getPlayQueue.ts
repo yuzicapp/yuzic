@@ -1,6 +1,8 @@
 import type { NavidromeClient } from '../client';
 import type { SubsonicResponse } from '../types';
 import type { ServerPlayQueue } from '@/providers/contracts/ServerAdapter';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * The user's cross-device play queue on the server. Subsonic stores one queue
@@ -25,7 +27,7 @@ export async function getPlayQueue(client: NavidromeClient): Promise<ServerPlayQ
         .filter((id): id is string => typeof id === 'string' && id.length > 0),
     };
   } catch (error) {
-    console.error('Navidrome getPlayQueue failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getPlayQueue', detail: detailOf(error) });
     throw error;
   }
 }

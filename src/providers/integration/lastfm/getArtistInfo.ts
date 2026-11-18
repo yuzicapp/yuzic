@@ -1,4 +1,6 @@
 import { lastfmRequest } from './client';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 type LastFmArtistInfo = {
   bio: string | null;
@@ -47,7 +49,7 @@ export async function getLastFmArtistInfo(
       tags,
     };
   } catch (error) {
-    console.error('Last.fm getArtistInfo failed:', error);
+    log.integration.error('request failed', { provider: 'lastfm', operation: 'getArtistInfo', detail: detailOf(error) });
     throw error;
   }
 }

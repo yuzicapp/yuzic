@@ -2,6 +2,8 @@ import type { Song } from "@/domain/entities/Song";
 import { requireProvenance, type MediaBrowserClient } from "../client";
 import { mapSong } from "../mapSong";
 import type { MediaBrowserItemsResponse } from "../types";
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * An artist's most-played songs, as this server knows them.
@@ -49,7 +51,7 @@ export async function getTopSongs(
   } catch (error) {
     // One empty shelf, not a failed artist page: every other section on it
     // answers from a different call and none of them depend on this one.
-    console.error('MediaBrowser getTopSongs failed:', error);
+    log.server.error('request failed', { provider: 'media-browser', operation: 'getTopSongs', detail: detailOf(error) });
     return [];
   }
 }

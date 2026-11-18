@@ -1,7 +1,7 @@
 {
   "name": "yuzic",
   "main": "expo-router/entry",
-  "version": "2.17.1",
+  "version": "2.18.0",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -17,8 +17,8 @@
     "test:e2e:ratings": "maestro test .maestro/ratings.yaml",
     "lint": "expo lint",
     "postinstall": "patch-package --error-on-fail",
-    "architecture:check": "node tools/architecture/check-cycles.mjs && node tools/architecture/check-unused.mjs && node tools/architecture/check-provider-branches.mjs && node tools/architecture/check-file-shape.mjs && node tools/architecture/check-unsafe.mjs && node tools/architecture/check-shims.mjs && node tools/architecture/check-test-only-exports.mjs",
-    "architecture:prune": "node tools/architecture/check-cycles.mjs --prune && node tools/architecture/check-unused.mjs --prune && node tools/architecture/check-provider-branches.mjs --prune && node tools/architecture/check-file-shape.mjs --prune && node tools/architecture/check-unsafe.mjs --prune && node tools/architecture/check-shims.mjs --prune",
+    "architecture:check": "node tools/architecture/check-cycles.mjs && node tools/architecture/check-unused.mjs && node tools/architecture/check-provider-branches.mjs && node tools/architecture/check-file-shape.mjs && node tools/architecture/check-unsafe.mjs && node tools/architecture/check-console.mjs && node tools/architecture/check-shims.mjs && node tools/architecture/check-test-only-exports.mjs",
+    "architecture:prune": "node tools/architecture/check-cycles.mjs --prune && node tools/architecture/check-unused.mjs --prune && node tools/architecture/check-provider-branches.mjs --prune && node tools/architecture/check-file-shape.mjs --prune && node tools/architecture/check-unsafe.mjs --prune && node tools/architecture/check-console.mjs --prune && node tools/architecture/check-shims.mjs --prune",
     "architecture:measure": "node tools/architecture/measure.mjs"
   },
   "overrides": {
@@ -105,7 +105,7 @@
     "react-redux": "^9.2.0",
     "reanimated-color-picker": "^4.2.0",
     "redux-persist": "^6.0.0",
-    "yuzic-engine": "1.2.5"
+    "yuzic-engine": "1.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

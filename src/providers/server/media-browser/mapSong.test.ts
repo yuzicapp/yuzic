@@ -120,4 +120,40 @@ describe('mapSong', () => {
   it('has no streamId, because MediaBrowser streams the same id as nativeId', () => {
     expect(mapSong(fullDto, { provenance, brand: JELLYFIN_BRAND }).streamId).toBeUndefined();
   });
+  /**
+   * #314: the preamp slider did nothing on Jellyfin, because the preamp is
+   * added to a *measured* figure and nothing here ever read Jellyfin's.
+   * Figures below are real ones, from a Jellyfin 12.4 server.
+   */
+  describe("the loudness Jellyfin measured", () => {
+    it('carries the track figure as track gain, in dB', () => {
+      const song = mapSong(
+        { Id: 'tr-1', NormalizationGain: -6.6 },
+        { provenance, brand: JELLYFIN_BRAND }
+      );
+
+      expect(song.loudness).toEqual({ trackGainDb: -6.6 });
+    });
+
+    it('carries the album figure too, where the album has one', () => {
+      const song = mapSong(
+        { Id: 'tr-1', NormalizationGain: -8.7, AlbumNormalizationGain: -8.1 },
+        { provenance, brand: JELLYFIN_BRAND }
+      );
+
+      expect(song.loudness).toEqual({ trackGainDb: -8.7, albumGainDb: -8.1 });
+    });
+
+    it('leaves loudness absent when the server measured none', () => {
+      // Not `{ trackGainDb: 0 }`: unmeasured and "already at reference
+      // loudness" are different claims, and the engine treats them so.
+      expect(mapSong({ Id: 'tr-1' }, { provenance, brand: JELLYFIN_BRAND }).loudness)
+        .toBeUndefined();
+    });
+
+    it('keeps a measured zero, which is a figure and not an absence', () => {
+      expect(mapSong({ Id: 'tr-1', NormalizationGain: 0 }, { provenance, brand: JELLYFIN_BRAND }).loudness)
+        .toEqual({ trackGainDb: 0 });
+    });
+  });
 });

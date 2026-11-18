@@ -3,6 +3,8 @@ import type { Song } from '@/domain/entities/Song';
 import { albumCoverSubject, artistCoverSubject, missingCover, type CoverSource } from '@/domain/entities/Cover';
 import { makeLocalId } from '@/domain/identity/LocalId';
 import { integrationProvenance } from '@/domain/identity/Provenance';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 const BASE_URL = 'https://api.listenbrainz.org/1';
 const PROVENANCE = integrationProvenance('musicbrainz');
@@ -194,7 +196,7 @@ export async function getCreatedForPlaylists(username?: string | null): Promise<
       .map((r) => r.value)
       .filter((mix) => mix.tracks.length > 0);
   } catch (error) {
-    console.error('ListenBrainz getCreatedForPlaylists failed:', error);
+    log.integration.error('request failed', { provider: 'listenbrainz', operation: 'getCreatedForPlaylists', detail: detailOf(error) });
     return [];
   }
 }

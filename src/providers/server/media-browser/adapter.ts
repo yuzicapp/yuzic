@@ -44,6 +44,7 @@ import { FAVORITES_ID } from "@/constants/favorites";
 import { getLyricsBySongId } from "./lyrics/getLyricsBySongId";
 import { getSong } from "./songs/getSong";
 import { markPlayed } from "./songs/markPlayed";
+import { probeLoudness } from "./songs/probeLoudness";
 import { reportPlaybackStart, reportPlaybackProgress, reportPlaybackStop, clearPlaybackPosition } from "./playback/report";
 import { getBookmarksFromUserData } from "./bookmarks/bookmarks";
 import { getTracks } from "./tracks/getTracks";
@@ -272,7 +273,20 @@ export const createMediaBrowserAdapter = (
     buildStreamUrl: (songId, quality, codec) => client.buildStreamUrl(songId, quality, codec),
     scrobbleKind: 'markPlayed',
     transcodes: true,
-    reportsLoudness: false,
+    /**
+     * Jellyfin measures loudness itself and returns it per track as
+     * `NormalizationGain` — mapped in `mapSong`, which is what makes the
+     * Player screen's levelling switch and its preamp do anything here
+     * (#314). Emby reports no such figure, so it still declares false.
+     *
+     * Declaring it is not promising it: a figure only exists from Jellyfin
+     * 10.10 and only for a scanned library, so `probeLoudness` below asks the
+     * server before the switch is offered.
+     */
+    reportsLoudness: client.brand.kind === 'jellyfin',
+    probeLoudness: client.brand.kind === 'jellyfin'
+      ? () => probeLoudness(client)
+      : undefined,
     streamableCodecs: ['mp3', 'opus'],
     reportPlaybackProgress: async (songId, positionMs, isPaused) =>
       reportPlaybackProgress(client, songId, positionMs, isPaused),

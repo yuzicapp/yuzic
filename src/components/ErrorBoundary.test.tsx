@@ -3,6 +3,7 @@ import { Text } from '@/components/Text';
 import { act, fireEvent, render } from '@testing-library/react-native';
 
 import { ErrorBoundary } from './ErrorBoundary';
+import { log } from '@/features/diagnostics/log';
 
 const mockRestart = jest.fn();
 jest.mock('@/features/theme/useRadius', () => ({
@@ -46,6 +47,30 @@ describe('ErrorBoundary', () => {
 
     expect(view.getByText('recovered')).toBeTruthy();
     expect(mockRestart).not.toHaveBeenCalled();
+  });
+
+  /**
+   * #325 reached three users' phones with the name of the missing provider
+   * sitting in `componentStack` on each of them, because this went to
+   * `console.error`. The record is the fix, so the record is tested.
+   */
+  it('records the crash, with the component stack that names its cause', async () => {
+    log.clear();
+
+    await render(<ErrorBoundary><Flaky /></ErrorBoundary>);
+
+    expect(log.records()).toEqual([
+      expect.objectContaining({
+        scope: 'crash',
+        level: 'error',
+        message: 'uncaught render error',
+        fields: expect.objectContaining({
+          detail: 'bad row data',
+          boundary: 'root',
+          componentStack: expect.stringContaining('Flaky'),
+        }),
+      }),
+    ]);
   });
 
   it('still offers a restart', async () => {

@@ -24,7 +24,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, existsSy
 import { join, relative } from 'node:path';
 import { isTest, sourceFiles } from './allowlist.mjs';
 import {
-  cycles, unusedExports, providerReferences, unsafeEscapes, oversizedFiles,
+  cycles, unusedExports, providerReferences, unsafeEscapes, consoleCalls, oversizedFiles,
   GENERAL_LIMIT, ORCHESTRATION_LIMIT,
 } from './detectors.mjs';
 
@@ -173,6 +173,9 @@ const baseline = {
     })
   ),
   providerLeakage: (list => ({ count: list.length, entries: list }))(providerReferences(files)),
+  // Failure reports still going to the console rather than to the log. A
+  // to-do list that only shrinks — see check-console.mjs.
+  consoleCalls: (list => ({ count: list.length, entries: list }))(consoleCalls(files)),
   largeFiles: {
     generalLimit: GENERAL_LIMIT,
     orchestrationLimit: ORCHESTRATION_LIMIT,

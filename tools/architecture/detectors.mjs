@@ -230,6 +230,44 @@ export function unsafeEscapes(files = sourceFiles()) {
     a.file.localeCompare(b.file) || a.line - b.line || a.kind.localeCompare(b.kind));
 }
 
+// --- console calls ----------------------------------------------------------
+
+/**
+ * The one module allowed to print.
+ *
+ * `features/diagnostics/log.ts` carries the console *sink*: the place a record
+ * is deliberately printed in development. Exempted by path rather than by
+ * allowlist entry, because it is not a violation waiting to be migrated — it
+ * is the destination everything else is migrating to, and an allowlist entry
+ * would invite a prune to delete it.
+ */
+const CONSOLE_SINK = 'src/features/diagnostics/log.ts';
+
+/**
+ * `console.warn` / `.error` / `.info` / `.debug` in production code.
+ *
+ * `console.log` is deliberately not here: it is banned outright by the
+ * `unsafe` gate, which holds it at zero. These four are the opposite case —
+ * 56 of them existed when `features/diagnostics` was written, every one a
+ * deliberate failure report, every one writing where no user and no
+ * maintainer could read it. They are not banned, they are being migrated, so
+ * they get a ratchet of their own that can only shrink.
+ */
+const CONSOLE_PATTERN = /\bconsole\.(warn|error|info|debug)\s*\(/;
+
+export function consoleCalls(files = sourceFiles()) {
+  const found = [];
+  for (const file of files) {
+    if (isTest(file) || file === CONSOLE_SINK) continue;
+    stripComments(readFileSync(file, 'utf8')).split('\n').forEach((line, index) => {
+      const match = line.match(CONSOLE_PATTERN);
+      if (match) found.push({ kind: `console.${match[1]}`, file, line: index + 1 });
+    });
+  }
+  return found.sort((a, b) =>
+    a.file.localeCompare(b.file) || a.line - b.line || a.kind.localeCompare(b.kind));
+}
+
 // --- file shape -------------------------------------------------------------
 
 export const GENERAL_LIMIT = 400;

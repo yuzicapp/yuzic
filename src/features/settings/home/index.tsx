@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, View, Image, StyleSheet, Alert, Linking } from 'react-native';
 import { Text } from '@/components/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Server, Library, Volume2, Palette, Puzzle, Github, Newspaper, FileText, ShieldCheck, ScrollText, House as HomeIcon, Tags, Disc3, Search, ChartColumn } from 'lucide-react-native';
+import { Server, Library, Volume2, Palette, Puzzle, Github, Newspaper, FileText, ShieldCheck, ScrollText, House as HomeIcon, Tags, Disc3, Search, ChartColumn, Stethoscope } from 'lucide-react-native';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
@@ -18,6 +18,7 @@ import SettingsRow from '../components/SettingsRow';
 import Touchable from '@/components/Touchable';
 import UserAvatar from '@/components/UserAvatar';
 import { controlSize, radius, spacing, typography } from '@/constants/design';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '@/constants/links';
 import { useRadius } from '@/features/theme/useRadius';
 import { useScrollClearance } from '@/features/theme/useScrollClearance';
 
@@ -230,16 +231,31 @@ export default function Settings() {
                         onPress={() => openLink('https://github.com/yuzicapp/yuzic')}
                     />
                     <SettingsDivider />
+                    {/*
+                      In About, beside the changelog and the repository: a
+                      reporter looking for somewhere to send a problem looks
+                      where the version number and the GitHub link are. It is
+                      a visible row rather than a hidden gesture because the
+                      point is that you can tell someone "Settings →
+                      Diagnostics → Share" and they can just do it.
+                    */}
+                    <SettingsRow
+                        testID="settings-row-diagnostics"
+                        label={t('settings.diagnostics.title')}
+                        leftIcon={<Stethoscope size={icons.secondary} color={colors.secondary} />}
+                        onPress={() => router.push('/settings/diagnosticsView')}
+                    />
+                    <SettingsDivider />
                     <SettingsRow
                         label={t('settings.rows.privacyPolicy')}
                         leftIcon={<ShieldCheck size={icons.secondary} color={colors.secondary} />}
-                        onPress={() => openLink('https://yuzicapp.github.io/yuzic-web/privacypolicy/')}
+                        onPress={() => openLink(PRIVACY_POLICY_URL)}
                     />
                     <SettingsDivider />
                     <SettingsRow
                         label={t('settings.rows.termsOfUse')}
                         leftIcon={<ScrollText size={icons.secondary} color={colors.secondary} />}
-                        onPress={() => openLink('https://yuzicapp.github.io/yuzic-web/tos/')}
+                        onPress={() => openLink(TERMS_URL)}
                     />
                 </SettingsCard>
 

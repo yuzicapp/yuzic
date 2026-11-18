@@ -6,6 +6,7 @@ import { notify } from '@/components/toast';
 import { getBackend } from '@/features/player/activeBackend';
 import { useDispatch, useSelector } from 'react-redux';
 import { useApi } from '@/providers/registry/useApi';
+import { useServerLoudness } from '@/features/library/useServerLoudness';
 import { playableCodec } from '@/features/playback/playableFormat';
 import SettingsScreen from '../components/SettingsScreen';
 import SettingsToggleGroup from '../components/SettingsToggleGroup';
@@ -24,6 +25,8 @@ const PlayerSettings: React.FC = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const api = useApi();
+  // Asked of the server, not taken from the adapter's declaration — see the hook.
+  const serverHasLoudness = useServerLoudness();
   const preferredCodec = useSelector(selectPreferredCodec);
   const autoplayEnabled = useSelector(selectAutoplayEnabled);
   const resumeLongTracks = useSelector(selectResumeLongTracksEnabled);
@@ -101,7 +104,7 @@ const PlayerSettings: React.FC = () => {
 
       <SettingsCardHeader subtle title={t('settings.player.audio')} />
       <Crossfade />
-      {api.songs.reportsLoudness && <Loudness />}
+      {serverHasLoudness && <Loudness />}
       <SettingsCard>
         {/*
           A row rather than the equalizer itself: inline, its rotated band

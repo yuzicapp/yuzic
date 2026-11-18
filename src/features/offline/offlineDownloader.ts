@@ -28,6 +28,8 @@ import {
   stagingPathsToKeep,
   upsertResumable,
 } from './resumeState';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 const MAX_JOB_ATTEMPTS = 5;
 const CONCURRENT_TRACK_DOWNLOADS = 3;
@@ -109,7 +111,7 @@ export function createOfflineDownloader(deps: OfflineDownloaderDeps) {
       } catch (error) {
         // Every task on a session whose daemon is unreachable fails the same
         // way, so retry once on a foreground session before giving up.
-        console.warn(`Background download session failed for track ${trackId}; retrying in the foreground`, error);
+        log.downloads.warn('background download session failed, retrying in the foreground', { trackId, detail: detailOf(error) });
         result = await runWithSession(FOREGROUND_FILE_OPTIONS);
       }
       // Undefined when the transfer was cancelled or paused: nothing to record.
@@ -176,13 +178,13 @@ export function createOfflineDownloader(deps: OfflineDownloaderDeps) {
       downloadTrack,
       onJobComplete: job => removeJob(job.id),
       onJobRescheduled: (job, attempts) => {
-        console.warn(`Download job ${job.id} still failing after in-run retries; queued for the next pass (attempt ${attempts}/${MAX_JOB_ATTEMPTS})`);
+        log.downloads.warn('download job queued for the next pass', { job: job.id, attempts, maxAttempts: MAX_JOB_ATTEMPTS });
         store.updateJobs(jobs => jobs.map(existing => (
           existing.id === job.id ? { ...existing, attempts, updatedAt: Date.now() } : existing
         )));
       },
       onJobDropped: (job, attempts) => {
-        console.warn(`Download job ${job.id} dropped after ${attempts} failed attempts`);
+        log.downloads.error('download job dropped', { job: job.id, attempts });
         removeJob(job.id);
         deps.onJobDropped(job);
       },

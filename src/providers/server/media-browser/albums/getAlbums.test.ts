@@ -1,6 +1,7 @@
 import { getAlbums, normalizeAlbum } from './getAlbums';
 import { MediaBrowserClient } from '../client';
 import { JELLYFIN_BRAND, EMBY_BRAND } from '../brand';
+import { log } from '@/features/diagnostics/log';
 
 function makeClient(overrides: Partial<MediaBrowserClient> = {}): MediaBrowserClient {
   return {
@@ -92,13 +93,19 @@ describe('normalizeAlbum identity', () => {
   // A missing serverId is a programming error (every real adapter is built
   // from `Server.id`, which is required) — not a data case to paper over with
   // a fabricated scope that would corrupt every LocalId built against it.
-  // `normalizeAlbum` reports it (console.error, same as any other
+  // `normalizeAlbum` reports it (to the diagnostics log, same as any other
   // unparseable item) and drops the record rather than inventing one.
   it('drops the album instead of fabricating a placeholder identity, when the client has no serverId', () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    log.clear();
     const client = makeClient({ serverId: undefined });
+
     expect(normalizeAlbum(rawAlbum, client)).toBeNull();
-    expect(consoleError).toHaveBeenCalled();
-    consoleError.mockRestore();
+    expect(log.records()).toEqual([
+      expect.objectContaining({
+        scope: 'server',
+        level: 'error',
+        fields: expect.objectContaining({ operation: 'normalizeAlbum' }),
+      }),
+    ]);
   });
 });

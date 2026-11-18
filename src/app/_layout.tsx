@@ -20,15 +20,16 @@ import { useScreenBackground } from '@/features/theme/screenBackgroundContext';
 import { DlnaProvider } from '@/features/player/DlnaContext';
 import { PlaybackSinkProvider } from '@/features/player/PlaybackSinkContext';
 import { SongActionSheetProvider } from '@/features/entity-actions/SongActionSheetContext';
+import { ExternalResolutionProvider } from '@/features/sources/ExternalResolutionProvider';
+import { installDiagnostics } from '@/features/diagnostics/install';
+import { installFatalHandlers } from '@/features/diagnostics/fatalHandlers';
 import { DownloadProvider } from '@/features/offline/DownloadContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import store from '@/state/redux/store';
 import { persistor } from '@/state/redux/persistor';
-import { Alert, AppState } from 'react-native';
-import { setJSExceptionHandler, setNativeExceptionHandler } from 'react-native-exception-handler';
-import RNRestart from 'react-native-restart';
+import { AppState } from 'react-native';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PlayerExpansionProvider } from '@/features/player/PlayerExpansion';
 import PlayerHost from '@/features/player/PlayerHost';
@@ -48,6 +49,7 @@ import { clearImageMemoryCache, runImageCacheMigration } from '@/features/artwor
 import { useClientCertificate } from '@/features/mtls/useClientCertificate';
 import { CredentialsGate } from '@/features/servers/CredentialsGate';
 import { isCatalogQuery } from '@/features/library/catalogPersistence';
+import { holdsStreamCredentials } from '@/features/song/playableResourcePersistence';
 import { useCatalogHydration } from '@/features/library/useCatalogHydration';
 
 
@@ -68,6 +70,10 @@ onlineManager.setEventListener(setOnline => {
 enableFreeze(true);
 
 SplashScreen.preventAutoHideAsync();
+
+// At module scope, not in an effect: a crash during the first render has to
+// find the log already listening. See docs/architecture.md section 13.
+installDiagnostics();
 
 const LIBRARY_ERROR_QUERY_KEYS = new Set<string>([
   QueryKeys.Album,
@@ -185,10 +191,16 @@ const queryPersister = createAsyncStoragePersister({
  * `useCatalogHydration` for the read side. `defaultShouldDehydrateQuery` is
  * kept as the first test rather than replaced, so a query that TanStack would
  * not have persisted anyway (a failed one, chiefly) still isn't.
+ *
+ * Resolved stream URLs are excluded for an unrelated and harder reason: they
+ * are credentials, and this blob is not encrypted. See
+ * `features/song/playableResourcePersistence`.
  */
 const dehydrateOptions = {
   shouldDehydrateQuery: (query: Parameters<typeof defaultShouldDehydrateQuery>[0]) =>
-    defaultShouldDehydrateQuery(query) && !isCatalogQuery(query.queryKey),
+    defaultShouldDehydrateQuery(query)
+    && !isCatalogQuery(query.queryKey)
+    && !holdsStreamCredentials(query.queryKey),
 };
 
 const OFFLINE_TOAST_ID = 'offline-banner';
@@ -293,6 +305,12 @@ function AppShell() {
               <NavigationTheme isDarkMode={isDarkMode}>
               <ErrorBoundary>
               <BottomSheetModalProvider>
+                {/* Above SongActionSheetProvider and PlayerHost: both render
+                  * here rather than under `(home)`, and both reach for this
+                  * context. Mounted lower it covered the browsing screens
+                  * only, and playing a song threw into the ErrorBoundary
+                  * below (#325) — see `externalResolutionMount.test.ts`. */}
+                <ExternalResolutionProvider>
                 <SongActionSheetProvider>
                 <PlayerExpansionProvider>
                 <Stack>
@@ -320,6 +338,7 @@ function AppShell() {
                 <ToastHost />
                 </PlayerExpansionProvider>
                 </SongActionSheetProvider>
+                </ExternalResolutionProvider>
               </BottomSheetModalProvider>
               </ErrorBoundary>
               </NavigationTheme>
@@ -344,18 +363,7 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    const jsErrorHandler = (error: { name: string; message: string }, isFatal: boolean) => {
-      if (isFatal) {
-        Alert.alert(
-          i18n.t('common.error.unexpected'),
-          i18n.t('common.error.details', { name: error.name, message: error.message }),
-          [{ text: i18n.t('common.error.restart'), onPress: () => RNRestart.Restart() }]
-        );
-      }
-    };
-
-    setJSExceptionHandler(jsErrorHandler, true);
-    setNativeExceptionHandler(() => { }, false, true);
+    installFatalHandlers();
   }, []);
 
   // The splash comes down in `CredentialsGate`, once the app can render.
@@ -369,6 +377,9 @@ export default function RootLayout() {
         maxAge: QUERY_CACHE_MAX_AGE,
         dehydrateOptions,
       }}
+      // Drops stream URLs that a pre-exclusion blob restored, and does
+      // nothing once none are persisted — see `playableResourcePersistence`.
+      onSuccess={() => queryClient.removeQueries({ predicate: q => holdsStreamCredentials(q.queryKey) })}
     >
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>

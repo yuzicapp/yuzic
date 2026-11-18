@@ -78,7 +78,7 @@ function harness(over: Partial<{
   const providerCalls: ProviderCall[] = [];
   const engineCalls: { name: string; args: unknown[] }[] = [];
   const loaded: { ids: string[]; startIndex: number; play: boolean; seek?: number }[] = [];
-  const warnings: string[] = [];
+  const warnings: { message: string; fields?: Record<string, unknown> }[] = [];
   let bumps = 0;
 
   const provider: QueueFillProvider = {
@@ -121,7 +121,7 @@ function harness(over: Partial<{
         seek: seekToPosition,
       });
     },
-    logWarning: message => { warnings.push(message); },
+    logWarning: (message, fields) => { warnings.push({ message, fields }); },
     // Identity by default: these tests are about when autoplay fetches and
     // where it puts what it gets, not about the ranking policy, which has its
     // own suite. A test that cares passes its own.
@@ -246,7 +246,15 @@ describe('topping the queue up', () => {
 
     await expect(h.coordinator.fillQueueIfLow()).resolves.toBeUndefined();
 
-    expect(h.warnings).toEqual(['Queue fill from similarity-service failed', 'Autoplay fill failed']);
+    // The provider is a field now, not interpolated into the message, so
+    // this asserts on the identity rather than on a substring of prose.
+    expect(h.warnings).toEqual([
+      expect.objectContaining({
+        message: 'queue fill failed',
+        fields: expect.objectContaining({ provider: 'similarity-service' }),
+      }),
+      expect.objectContaining({ message: 'autoplay fill failed' }),
+    ]);
   });
 
   it('asks the next tier when the first answers with nothing', async () => {
@@ -267,7 +275,12 @@ describe('topping the queue up', () => {
     await h.coordinator.fillQueueIfLow();
 
     expect(ids(h.queue)).toEqual(['1', '2', '3', '50']);
-    expect(h.warnings).toEqual(['Queue fill from similarity-service failed']);
+    expect(h.warnings).toEqual([
+      expect.objectContaining({
+        message: 'queue fill failed',
+        fields: expect.objectContaining({ provider: 'similarity-service' }),
+      }),
+    ]);
   });
 
   it('stops at the first tier that answers', async () => {
@@ -324,7 +337,7 @@ describe('a queue that moved while the fill was in flight', () => {
 
     expect(ids(h.queue)).toEqual(['B1', 'B2']);
     expect(h.engineCalls).toEqual([]);
-    expect(h.warnings.join(' ')).toContain('discarded');
+    expect(h.warnings.map(w => w.message).join(' ')).toContain('discarded');
   });
 
   it('still fills when the queue merely advanced a track under it', async () => {

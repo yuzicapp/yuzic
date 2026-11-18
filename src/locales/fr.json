@@ -720,6 +720,17 @@
       "longestGap": "Jours sans écoute",
       "topArtists": "Vos artistes",
       "topTracks": "Vos titres"
+    },
+    "diagnostics": {
+      "title": "Diagnostics",
+      "explainer": "Yuzic enregistre ce qui ne fonctionne pas : morceaux en échec, plantages, téléchargements inachevés. Partagez ces informations avec un rapport de bug pour en trouver la cause. Les mots de passe et identifiants du serveur sont supprimés automatiquement ; les titres des morceaux et l'adresse de votre serveur peuvent apparaître.",
+      "share": "Partager les diagnostics",
+      "sharing": "Préparation…",
+      "clear": "Effacer les diagnostics",
+      "cleared": "Diagnostics effacés",
+      "empty": "Rien d'enregistré pour l'instant. Tout problème apparaîtra ici.",
+      "recordCount_one": "{{count}} entrée",
+      "recordCount_other": "{{count}} entrées"
     }
   },
   "common": {
@@ -776,7 +787,9 @@
     "home": {
       "subtitle": "Votre bibliothèque musicale personnelle. Diffusez depuis votre propre serveur, où que vous soyez.",
       "getStarted": "Commencer",
-      "terms": "En continuant, vous confirmez avoir lu et accepté nos Conditions d'utilisation et notre Politique de confidentialité"
+      "terms": "En continuant, vous confirmez avoir lu et accepté nos {{terms}} et notre {{privacy}}",
+      "termsLink": "Conditions d'utilisation",
+      "privacyLink": "Politique de confidentialité"
     },
     "servers": {
       "title": "Vos serveurs",

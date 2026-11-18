@@ -19,6 +19,8 @@ import type { PlayableResource } from './playableResource';
 import { segmentsFromContexts } from './playingQueue';
 import { buildRestoredQueue, decideRestore } from './restoreQueue';
 import type { LoadQueue } from './usePlaybackEngine';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * Puts back what was playing when the app last closed, once, for the active
@@ -75,7 +77,7 @@ export function useRestorePersistedQueue(
       if (decision.final) doneRef.current = true;
       if (decision.report && reportedSkipRef.current !== decision.reason) {
         reportedSkipRef.current = decision.reason;
-        console.warn(`[player] not restoring the persisted queue: ${decision.reason}`);
+        log.playback.info('not restoring the persisted queue', { reason: decision.reason });
       }
       return;
     }
@@ -100,7 +102,7 @@ export function useRestorePersistedQueue(
     session.setSegments(segmentsFromContexts(contexts, 'restored'));
     session.setActive(index, active);
     loadQueue.current(queue, index, false, Math.floor(persistedPositionMs / 1000)).catch(error => {
-      console.warn('[player] restoring the persisted queue failed', error);
+      log.playback.warn('restoring the persisted queue failed', { detail: detailOf(error) });
     });
   }, [
     activeServerId,

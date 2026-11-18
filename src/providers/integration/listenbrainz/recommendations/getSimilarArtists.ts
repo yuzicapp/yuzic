@@ -1,4 +1,6 @@
 import { fetchWithTimeout } from '@/providers/http/fetchWithTimeout';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 type LBSimilarArtist = {
   artistMbid: string;
@@ -57,7 +59,7 @@ export async function getLBSimilarArtists(
         comment: r.comment?.trim() || undefined,
       }));
   } catch (error) {
-    console.error('ListenBrainz getSimilarArtists failed:', error);
+    log.integration.error('request failed', { provider: 'listenbrainz', operation: 'getSimilarArtists', detail: detailOf(error) });
     throw error;
   }
 }

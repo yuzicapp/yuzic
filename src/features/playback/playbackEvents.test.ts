@@ -1,4 +1,5 @@
 import type { PlayerBackend } from '@/features/player/backend';
+import type { Fields } from '@/features/diagnostics/record';
 import type { PlayableResource } from '@/features/playback/playableResource';
 import type { Song } from '@/domain/entities/Song';
 import type { ContentKind } from '@/domain/playback/ContentKind';
@@ -61,6 +62,7 @@ function harness(over: Partial<{
   const removed: number[] = [];
   const toasts: number[] = [];
   const stops: number[] = [];
+  const logged: Fields[] = [];
 
   const backend = {
     seekTo: (s: number) => { engineCalls.push({ name: 'seekTo', args: [s] }); },
@@ -91,7 +93,7 @@ function harness(over: Partial<{
     },
     notifyError: () => { toasts.push(now); },
     notifyStopped: () => { stops.push(now); },
-    logFailure: () => {},
+    logFailure: info => { logged.push(info); },
     now: () => now,
   };
 
@@ -101,6 +103,7 @@ function harness(over: Partial<{
     removed,
     toasts,
     stops,
+    logged,
     get queue() { return currentQueue; },
     get current() { return current; },
     advance: (ms: number) => { now += ms; },
@@ -287,5 +290,66 @@ describe('a run of tracks that will not play', () => {
     expect(names(h.engineCalls).filter(n => n === 'setMediaItems')).toHaveLength(retriesBefore + 1);
     expect(h.removed).toHaveLength(MAX_DEAD_TRACKS_IN_A_ROW - 1);
     expect(h.stops).toHaveLength(2);
+  });
+});
+
+describe('what a failure is recorded as', () => {
+  // The record is what #324, #320 and #318 get diagnosed from, and until 1.3.0
+  // the only thing the engine offered was a sentence built for a listener —
+  // which on iOS interpolates an NSError that carries the failing URL, and
+  // every stream URL this app builds carries the user's credentials.
+  it('keeps the engine\'s own account of the failure, not just its sentence', () => {
+    const h = harness({ queue: [resource('1')] });
+
+    h.handlers.onError({
+      code: 'PLAYBACK_FAILED',
+      message: 'Could not open Track 1: timed out',
+      operation: 'stream',
+      domain: 'NSURLErrorDomain',
+      underlyingCode: -1001,
+    });
+
+    expect(h.logged[0]).toMatchObject({
+      code: 'PLAYBACK_FAILED',
+      operation: 'stream',
+      domain: 'NSURLErrorDomain',
+      underlyingCode: -1001,
+      songId: '1',
+    });
+  });
+
+  it('says nothing about the engine id when it agrees with the current track', () => {
+    // Equal is the normal case. Recording it anyway would put a second copy of
+    // the same id in every record, and bury the case below. Undefined rather
+    // than absent is enough: `fieldsOf` drops undefined on the way out, so it
+    // never reaches the export the user sends.
+    const h = harness({ queue: [resource('1')] });
+
+    h.handlers.onError({ message: 'boom', id: '1' });
+
+    expect(h.logged[0]?.engineId).toBeUndefined();
+  });
+
+  it('records the engine id when it disagrees with the current track', () => {
+    // The app handles a failure against whatever it thinks is playing — it
+    // drops that track and retries that queue. If the engine failed on a
+    // different one, every decision after this point is being made about the
+    // wrong song, and nothing else in the record would show it.
+    const h = harness({ queue: [resource('1')] });
+
+    h.handlers.onError({ message: 'boom', id: '7' });
+
+    expect(h.logged[0]).toMatchObject({ engineId: '7', songId: '1' });
+  });
+
+  it('still records a failure the engine could not classify', () => {
+    // `operation` is absent on errors raised outside playback. The record has
+    // to survive that rather than depend on it.
+    const h = harness({ queue: [resource('1')] });
+
+    h.handlers.onError({ message: 'boom' });
+
+    expect(h.logged).toHaveLength(1);
+    expect(h.logged[0]).toMatchObject({ songId: '1', detail: 'boom' });
   });
 });

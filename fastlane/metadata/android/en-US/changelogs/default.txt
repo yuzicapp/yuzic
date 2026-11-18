@@ -1,5 +1,7 @@
-Fixes for tapping an artist you are listening to, and for headphone buttons.
+Fixes the error that could cover the screen when you tapped a song, and makes lyrics, levelling and Favorites work where they didn't.
 
-- Tapping the artist on the player, for a track playing from an external source, opened a page that could not load. It now finds the artist where it actually lives
-- The sheet for an external track gains Go to album and Go to artist, which only library tracks had
-- A route change no longer pauses when one pair of headphones hands over to another — only when the sound would otherwise come out loud
+- Playing a song could fill the screen with "Something went wrong" while the music kept going behind it. Fixed
+- Lyrics with no timings can now be opened; only synced ones could be
+- Favorites is back in the add-to-playlist list
+- Volume levelling and its preamp now work on Jellyfin
+- Settings has Diagnostics: what went wrong, ready to share

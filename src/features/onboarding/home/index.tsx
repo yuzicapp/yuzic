@@ -1,7 +1,8 @@
 import { onDark, shadow, spacing, typography } from '@/constants/design';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '@/constants/links';
 import { useTheme } from '@/features/theme/useTheme';
 import React, { useState } from 'react';
-import { View, TouchableWithoutFeedback, StyleSheet, Platform } from 'react-native';
+import { View, TouchableWithoutFeedback, StyleSheet, Platform, Linking } from 'react-native';
 import { Text } from '@/components/Text';
 import { Image } from 'expo-image';
 import { Redirect, useRouter } from 'expo-router';
@@ -26,6 +27,38 @@ const WELCOME_ICON_SIZE = 150;
  * only when the window is short enough to ask.
  */
 const WELCOME_ICON_HEIGHT_SHARE = 0.22;
+
+/**
+ * The terms line, split into text and the two links inside it.
+ *
+ * The sentence is one translated string with `{{terms}}` and `{{privacy}}`
+ * in it, rather than three strings glued together at this call site, because
+ * glue assumes English word order — and the line exists to be read before
+ * someone agrees to it. A translator moves the placeholders where their
+ * grammar wants them and the links follow.
+ *
+ * Interpolating sentinels and splitting on them, rather than reading the raw
+ * template: i18next owns interpolation, and asking it for the unresolved
+ * string means depending on what it does with a value it was not given. These
+ * two characters cannot occur in the copy.
+ */
+const TERMS_MARK = '\u0001';
+const PRIVACY_MARK = '\u0002';
+
+type SentencePart = { text: string; href?: string };
+
+function termsSentence(t: (key: string, values?: Record<string, string>) => string): SentencePart[] {
+  const sentence = t('onboarding.home.terms', { terms: TERMS_MARK, privacy: PRIVACY_MARK });
+
+  return sentence
+    .split(/([\u0001\u0002])/)
+    .filter(piece => piece !== '')
+    .map(piece => {
+      if (piece === TERMS_MARK) return { text: t('onboarding.home.termsLink'), href: TERMS_URL };
+      if (piece === PRIVACY_MARK) return { text: t('onboarding.home.privacyLink'), href: PRIVACY_POLICY_URL };
+      return { text: piece };
+    });
+}
 
 export default function Home() {
     const { t } = useTranslation();
@@ -102,7 +135,20 @@ export default function Home() {
                 </TouchableWithoutFeedback>
 
                 <Text style={styles.termsText}>
-                    {t('onboarding.home.terms')}
+                    {termsSentence(t).map((part, index) =>
+                        part.href ? (
+                            <Text
+                                key={index}
+                                style={styles.termsLink}
+                                accessibilityRole="link"
+                                onPress={() => { void Linking.openURL(part.href as string); }}
+                            >
+                                {part.text}
+                            </Text>
+                        ) : (
+                            part.text
+                        )
+                    )}
                 </Text>
             </View>
         </SafeAreaView>
@@ -175,5 +221,16 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingHorizontal: spacing.controlGap,
         marginTop: spacing.md,
+    },
+    /**
+     * Underlined and brighter than the sentence around it. Underline alone is
+     * what says "link" without a colour, which matters here: the line sits on
+     * the splash's fixed dark background, where the theme's accent has not
+     * been chosen yet and would be the wrong thing to spend anyway — the
+     * accent means *yours*, and these are documents.
+     */
+    termsLink: {
+        color: onDark.text,
+        textDecorationLine: 'underline',
     },
 });

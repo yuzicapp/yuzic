@@ -1,6 +1,8 @@
 import type { NavidromeClient } from '../client';
 import type { SubsonicResponse } from '../types';
 import type { Share } from '@/providers/contracts/ServerAdapter';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /**
  * User-managed shares — Subsonic exposes public URLs to a track, album or
@@ -23,7 +25,7 @@ export async function getShares(client: NavidromeClient): Promise<Share[]> {
         visitCount: s.visitCount ?? undefined,
       }));
   } catch (error) {
-    console.error('Navidrome getShares failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'getShares', detail: detailOf(error) });
     throw error;
   }
 }
@@ -51,7 +53,7 @@ export async function createShare(
       expires: created.expires ?? undefined,
     };
   } catch (error) {
-    console.error('Navidrome createShare failed:', error);
+    log.server.error('request failed', { provider: 'navidrome', operation: 'createShare', detail: detailOf(error) });
     throw error;
   }
 }

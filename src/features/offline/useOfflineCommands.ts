@@ -21,6 +21,8 @@ import {
   tracksWithout,
 } from './removal';
 import type { LocalDownloadedTrackEntry } from './restore';
+import { log } from '@/features/diagnostics/log';
+import { detailOf } from '@/features/diagnostics/errorDetail';
 
 /** What the app can ask of offline storage. Stable for the life of the provider. */
 export type DownloadActionsType = {
@@ -77,11 +79,11 @@ export function useOfflineCommands(store: OfflineStore, downloader: OfflineDownl
       if (landed === tracks.length) {
         notify.success(t('settings.downloaders.downloadComplete'));
       } else {
-        console.warn(`${label} download incomplete: ${landed}/${tracks.length} tracks`);
+        log.downloads.warn('download incomplete', { label, landed, expected: tracks.length });
         notify.error(t('externalAlbum.download.failed'));
       }
     } catch (error) {
-      console.warn(`${label} download failed`, error);
+      log.downloads.error('download failed', { label, detail: detailOf(error) });
       notify.error(t('externalAlbum.download.failed'));
     }
   }, [downloader, store, t]);

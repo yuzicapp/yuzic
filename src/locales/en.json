@@ -720,6 +720,17 @@
       "longestGap": "Days untouched",
       "topArtists": "Your artists",
       "topTracks": "Your tracks"
+    },
+    "diagnostics": {
+      "title": "Diagnostics",
+      "explainer": "Yuzic records what goes wrong — failed tracks, crashes, downloads that did not finish. Share this with a bug report so the cause can be found. Passwords and server credentials are removed automatically; song titles and your server's address may appear.",
+      "share": "Share diagnostics",
+      "sharing": "Preparing…",
+      "clear": "Clear diagnostics",
+      "cleared": "Diagnostics cleared",
+      "empty": "Nothing recorded yet. Anything that goes wrong will show up here.",
+      "recordCount_one": "{{count}} record",
+      "recordCount_other": "{{count}} records"
     }
   },
   "common": {
@@ -776,7 +787,9 @@
     "home": {
       "subtitle": "Your personal music library. Stream from your own server anywhere.",
       "getStarted": "Get Started",
-      "terms": "By continuing you confirm that you've read and accepted our Terms and Privacy Policy"
+      "terms": "By continuing you confirm that you've read and accepted our {{terms}} and {{privacy}}",
+      "termsLink": "Terms",
+      "privacyLink": "Privacy Policy"
     },
     "servers": {
       "title": "Your Servers",
