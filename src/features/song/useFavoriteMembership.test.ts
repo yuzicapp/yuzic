@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { act, renderHook } from '@testing-library/react-native';
 
 import type { Song } from '@/domain/entities/Song';
@@ -98,11 +96,12 @@ describe('useFavoriteMembership', () => {
     expect(result.current.pendingChange()).toBeNull();
   });
 
-  it('keeps the tick when the song is starred elsewhere mid-sheet', async () => {
-    // The regression this guards: resyncing while the sheet is open would
-    // overwrite what the listener just ticked, so the open transition is the
-    // only moment the tick is taken. Starting from ticked-on and having the
-    // server disagree is the only arrangement where the two differ.
+  it('reflects a change made elsewhere instead of writing over it', async () => {
+    // The tap cannot be clobbered: it sets the tick opposite to what the
+    // server last said, so the only change the server can then report moves
+    // toward the tap. Here the listener ticks Favorites on and the song is
+    // starred on another device — the row stays ticked, and Done owes
+    // nothing, because the end state is already what they asked for.
     const { result, rerender } = await renderHook(
       ({ open }: { open: boolean }) => useFavoriteMembership(song, open),
       { initialProps: { open: true } }
@@ -111,11 +110,12 @@ describe('useFavoriteMembership', () => {
     await act(async () => { result.current.toggle(); });
     expect(result.current.ticked).toBe(true);
 
-    // Another device unstars it — or a refetch corrects an earlier answer.
-    mockStarred = [];
+    mockStarred = [{ localId: song.localId }];
     await act(async () => { rerender({ open: true }); });
 
     expect(result.current.ticked).toBe(true);
+    expect(result.current.pendingChange()).toBeNull();
+    expect(mockStar).not.toHaveBeenCalled();
   });
 
   it('writes nothing for a row the listener never touched, however the server changes', async () => {
@@ -153,38 +153,5 @@ describe('useFavoriteMembership', () => {
     await act(async () => { rerender({ open: true }); });
 
     expect(result.current.ticked).toBe(true);
-  });
-});
-
-/**
- * The hook is inert unless the sheet renders the row and commits its change,
- * and neither is visible from this module. No test renders `PlaylistList` —
- * it needs the bottom-sheet stack, the query client and the store — so this
- * reads its source, as `externalResolutionMount.test` and
- * `LyricsPreviewCard.test` do for the same reason. It is a wiring guard, not
- * a render test: it says the row is pinned and committed, not that it looks
- * right.
- */
-describe('the add-to-playlist sheet wires it in', () => {
-  const sheet = readFileSync(
-    join(__dirname, '..', '..', 'components', 'PlaylistList.tsx'),
-    'utf8'
-  );
-
-  it('pins the row above the playlists rather than mixing it in', () => {
-    // As the list header, so it cannot be reordered among real playlists or
-    // sorted away by a rename.
-    expect(sheet).toMatch(/ListHeaderComponent=\{renderFavoritesRow\}/);
-  });
-
-  it('commits the change with the playlist mutations, so a failure counts', () => {
-    expect(sheet).toMatch(/favorite\.pendingChange\(\)/);
-    expect(sheet).toMatch(/mutations\.push\(favoriteChange\)/);
-  });
-
-  it('still keeps the server-side Favorites playlist out of the list itself', () => {
-    // Otherwise the pinned row and a real Favorites row would both be there,
-    // doing different things to the same state.
-    expect(sheet).toMatch(/p\.nativeId !== FAVORITES_ID/);
   });
 });

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import type { Song } from '@/domain/entities/Song';
 import { useStarredSongs } from '@/features/library/useStarredSongs';
@@ -22,13 +22,24 @@ import { useUnstarSong } from '@/features/library/useUnstarSong';
  * is what #327 reports. Two controls over one piece of state do not confuse
  * anyone while they agree, and both of these read the same starred songs.
  *
- * The tick and the state it is compared against are both taken when the sheet
- * opens, and neither is resynced while it is open — the same base/selected
- * split `usePlaylistMembership` keeps, for the same two reasons. The starred
- * list is a query: a refetch mid-sheet would otherwise overwrite what the
- * listener just ticked, and comparing against a *live* value at Done would
- * let a change made elsewhere turn an untouched row into a write. The sheet
- * writes what the listener changed in it, and nothing else.
+ * The tick follows the starred list while the sheet is open, and Done writes
+ * only where the two disagree. That is worth being precise about, because the
+ * instinct — the one `usePlaylistMembership` follows with its separate
+ * `baseSelectedIds` — is to freeze the state at open so a refetch cannot
+ * overwrite the listener's tap.
+ *
+ * Here it cannot: a tap sets the tick to the opposite of what the server last
+ * said, so the only change the server can then report moves *toward* the tap,
+ * never away from it. Following instead buys the case where the listener taps
+ * twice and nets out — the row then shows what is true rather than what was
+ * true when the sheet opened — and it costs nothing, because a tick that
+ * agrees with the server owes no write either way.
+ *
+ * This had a frozen `base` beside the tick for exactly one commit. With the
+ * tick following too, `base` was equal to the live value at every moment the
+ * sheet was open, so diffing against one or the other was the same program —
+ * state that could not be distinguished by any test, which is the same as
+ * state that is not there.
  */
 export function useFavoriteMembership(song: Song | null, isSheetOpen: boolean) {
   const { songs: starredSongs } = useStarredSongs();
@@ -40,31 +51,25 @@ export function useFavoriteMembership(song: Song | null, isSheetOpen: boolean) {
   const isStarred = Boolean(song) && starredSongs.some(s => s.localId === song?.localId);
 
   const [ticked, setTicked] = useState(isStarred);
-  /** What the server held when the sheet opened — what Done diffs against. */
-  const [base, setBase] = useState(isStarred);
-  const wasOpen = useRef(false);
 
   useEffect(() => {
-    if (isSheetOpen && !wasOpen.current) {
-      setTicked(isStarred);
-      setBase(isStarred);
-    }
-    wasOpen.current = isSheetOpen;
+    if (!isSheetOpen) return;
+    setTicked(isStarred);
   }, [isSheetOpen, isStarred]);
 
   const toggle = useCallback(() => setTicked(value => !value), []);
 
   /**
-   * The star or unstar this sheet owes, or null if the tick ends where it
-   * started. Returned rather than awaited so the caller can settle it
+   * The star or unstar this sheet owes, or null if the tick agrees with the
+   * server already. Returned rather than awaited so the caller can settle it
    * alongside its playlist mutations and count a failure the same way.
    */
   const pendingChange = useCallback((): Promise<unknown> | null => {
-    if (!song || ticked === base) return null;
+    if (!song || ticked === isStarred) return null;
     return ticked
       ? starSong.mutateAsync(song.nativeId)
       : unstarSong.mutateAsync(song.nativeId);
-  }, [song, ticked, base, starSong, unstarSong]);
+  }, [song, ticked, isStarred, starSong, unstarSong]);
 
   return { ticked, toggle, pendingChange };
 }
