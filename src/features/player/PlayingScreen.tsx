@@ -266,11 +266,14 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
                                 </View>
                             </View>
 
-                            {/* The preview card exists to follow the current
-                                line, which unsynced lyrics have no notion of —
-                                they open in the sheet from the player's own
-                                control instead. */}
-                            {lyricsAvailable && lyrics?.synced && (
+                            {/* Not gated on `synced`. This card is the only
+                                way into the lyrics sheet — `openLyricsSheet`
+                                has no other caller — so gating it on timings
+                                left unsynced lyrics fetched, stored, rendered
+                                by the sheet, and unreachable (#316). The card
+                                shows them without a highlight; the sheet
+                                already did. */}
+                            {lyricsAvailable && lyrics && (
                                 <LyricsPreviewCardResolver
                                     lyrics={lyrics}
                                     contentWidth={columnWidth}
