@@ -114,12 +114,29 @@ string. The numbers were only ever in the build logs. Both now re-export, and
 `ANDROID_CODE: 157` rather than `unknown`, matching the build logs. The
 summary is worth reading again.
 
-**Play release notes** come from
-`fastlane/metadata/android/en-US/changelogs/`. There cannot be a
-`<version code>.txt` any more — the code is only known once Play has been asked
-— so notes live in `default.txt`, which supply falls back to, and
-`skip_upload_changelogs: false` is set explicitly to keep it that way. Update
-`default.txt` as part of a release; it is capped at **500 characters** by Play.
+**Both stores' release notes** come from one file:
+`fastlane/metadata/android/en-US/changelogs/default.txt`. Update it as part of
+a release. It is capped at **500 characters** by Play, which is the tighter of
+the two limits — the App Store allows 4000 — so what fits there fits both.
+
+It lives under `android/` because that is where supply looks. There cannot be
+a `<version code>.txt` any more, since the code is only known once Play has
+been asked, so notes live in `default.txt`, which supply falls back to;
+`skip_upload_changelogs: false` is set explicitly to keep it that way.
+
+The iOS lane reads the same file and writes it to
+`fastlane/metadata/ios/en-US/release_notes.txt` — generated, gitignored, never
+edited — then uploads only that field with `skip_metadata: false` and a
+`metadata_path` of its own. The separate path matters: deliver reads every
+subdirectory of its metadata path as a locale, and `android/` is not one. It
+is a separate `upload_to_app_store` call from the screenshots for the reason
+that lane's comments give at length — things that can fail independently
+should not be able to cost each other — and a failure there is logged and not
+fatal, since the build is already on TestFlight by then.
+
+Before this, iOS notes were not sent at all: the lane skipped metadata
+entirely, so "What's New" was whatever someone typed into App Store Connect,
+or whatever the previous version said.
 
 ## Release tags are `X.Y.Z`
 

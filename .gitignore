@@ -53,3 +53,7 @@ coverage/
 
 # Local mock server: failure injection, see tools/mock-jellyfin/server.js
 tools/mock-jellyfin/poison.txt
+
+# Generated at release time from the Play notes — see the ios lane in
+# fastlane/Fastfile. One source for both stores, so this is never edited.
+fastlane/metadata/ios/

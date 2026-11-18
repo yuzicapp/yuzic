@@ -366,6 +366,57 @@ platform :ios do
     # rather than discovered during it.
     next unless screenshots_replaceable?(api_key)
 
+    # The App Store's "What's New", from the same file Play's notes come from.
+    #
+    # It was never sent at all: this lane passes `skip_metadata: true`, and
+    # there was no iOS metadata tree, so every release's notes were typed into
+    # App Store Connect by hand or left as whatever the last version said.
+    #
+    # One source rather than two. `metadata/android/en-US/changelogs/default.txt`
+    # is already written for every release and already the thing the site's
+    # changelog is expanded from; Play caps it at 500 characters and the App
+    # Store allows 4000, so what fits there fits here.
+    #
+    # Generated rather than committed, and under `metadata/ios/` rather than
+    # `metadata/en-US/`: deliver reads every subdirectory of its metadata path
+    # as a locale, and the existing `metadata/android/` tree is supply's. Its
+    # own path keeps the two apart.
+    #
+    # A separate call from the screenshots below, for the reason the comment
+    # above gives: this lane's history is things that could not fail
+    # independently killing each other. Notes are text and cheap, screenshots
+    # are ten images; neither should be able to cost the other.
+    play_notes = File.join("fastlane", "metadata", "android", "en-US", "changelogs", "default.txt")
+    notes = File.exist?(play_notes) ? File.read(play_notes).strip : ""
+
+    if notes.empty?
+      UI.important("No release notes in #{play_notes} — leaving the App Store's What's New alone.")
+    else
+      ios_metadata = File.join("fastlane", "metadata", "ios", "en-US")
+      FileUtils.mkdir_p(ios_metadata)
+      File.write(File.join(ios_metadata, "release_notes.txt"), notes + "\n")
+
+      begin
+        upload_to_app_store(
+          api_key: api_key,
+          skip_binary_upload: true,
+          skip_screenshots: true,
+          skip_metadata: false,
+          metadata_path: File.join("fastlane", "metadata", "ios"),
+          # Only release_notes.txt exists in that tree, and deliver sends the
+          # files it finds — every other listing field is left as it is.
+          force: true,
+          submit_for_review: false,
+          run_precheck_before_submit: false
+        )
+      rescue => error
+        # Same rule as the screenshots below: the build is already on
+        # TestFlight, and notes that are one release stale are a smaller
+        # problem than a release that did not ship.
+        UI.important("Could not set the App Store release notes: #{error.message}")
+      end
+    end
+
     begin
       upload_to_app_store(
         api_key: api_key,
