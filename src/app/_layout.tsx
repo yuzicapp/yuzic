@@ -20,6 +20,7 @@ import { useScreenBackground } from '@/features/theme/screenBackgroundContext';
 import { DlnaProvider } from '@/features/player/DlnaContext';
 import { PlaybackSinkProvider } from '@/features/player/PlaybackSinkContext';
 import { SongActionSheetProvider } from '@/features/entity-actions/SongActionSheetContext';
+import { ExternalResolutionProvider } from '@/features/sources/ExternalResolutionProvider';
 import { DownloadProvider } from '@/features/offline/DownloadContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider, useSelector } from 'react-redux';
@@ -293,6 +294,20 @@ function AppShell() {
               <NavigationTheme isDarkMode={isDarkMode}>
               <ErrorBoundary>
               <BottomSheetModalProvider>
+                {/* Above SongActionSheetProvider and PlayerHost, both of
+                  * which render here rather than under `(home)`, and both of
+                  * which reach for this context: the song option sheet
+                  * through `useSongActions`, the player through
+                  * `PlayingScreen`. Mounted inside `(home)` instead, it
+                  * covered the browsing screens and nothing else, so tapping
+                  * a song or opening its options threw
+                  * "useExternalResolution must be used within
+                  * ExternalResolutionProvider" into the ErrorBoundary below
+                  * — audio playing on, the UI behind a full-screen error
+                  * (#325). It needs the router, the store, the query client
+                  * and the sheet portal, and all four are already in scope
+                  * at this depth. */}
+                <ExternalResolutionProvider>
                 <SongActionSheetProvider>
                 <PlayerExpansionProvider>
                 <Stack>
@@ -320,6 +335,7 @@ function AppShell() {
                 <ToastHost />
                 </PlayerExpansionProvider>
                 </SongActionSheetProvider>
+                </ExternalResolutionProvider>
               </BottomSheetModalProvider>
               </ErrorBoundary>
               </NavigationTheme>
