@@ -91,6 +91,10 @@ Connect *accepted*, leaving testers on the older-numbered build.
 **What the stores held at the last release**, as a sanity check rather than a
 source of truth — the next run should come out one above these:
 
+- 2.18.0 (2026-11-18): TestFlight build **140**, Play version code **161**.
+- 2.17.1 (2026-10-20): TestFlight build **139**, Play version code **160**.
+- 2.17.0 (2026-10-01): TestFlight build **138**, Play version code **159**.
+- 2.16.0 (2026-09-28): TestFlight build **137**, Play version code **158**.
 - 2.15.0 (2026-09-27): TestFlight build **136**, Play version code **157**.
 - 2.14.0 (2026-09-27): TestFlight build **135**, Play version code **156**.
 - 2.13.0 (2026-09-26): TestFlight build **134**, Play version code **155**.
