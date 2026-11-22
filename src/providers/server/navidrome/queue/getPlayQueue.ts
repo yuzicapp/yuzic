@@ -33,23 +33,26 @@ export async function getPlayQueue(client: NavidromeClient): Promise<ServerPlayQ
 }
 
 /**
- * Overwrites the server's queue with the given song ids. Subsonic spec calls
- * for repeated `id` params; the shared client's request layer flattens
- * duplicates through URLSearchParams so we use the same pattern as jukebox
- * setPlaylist: first id under `id`, the rest comma-joined under `ids`.
- * Navidrome accepts either form.
+ * Overwrites the server's queue with the given song ids. Subsonic takes the
+ * queue as repeated `id` params, one per song, and the client's request layer
+ * repeats a key for an array value. Navidrome reads nothing else: an `id` plus
+ * a comma-joined `ids` (the jukebox `set` shape) kept only the first song, so
+ * the queue on the server was always a single track.
  */
 export async function savePlayQueue(
   client: NavidromeClient,
   input: { songIds: string[]; currentSongId?: string; positionMs?: number }
 ): Promise<void> {
-  const [first, ...rest] = input.songIds;
-  const extra: Record<string, string | number> = {};
-  if (first) extra.id = first;
-  if (rest.length) extra.ids = rest.join(',');
-  if (input.currentSongId) extra.current = input.currentSongId;
+  // The array is the whole queue, in order: one `id` per song, not the first
+  // song under `id` and the others under a second key.
+  const params: Record<string, string | readonly string[]> = { id: input.songIds };
+  // Navidrome looks `current` up among the ids and falls back to the first song
+  // when it is not there, so it has to be one of the ids above.
+  if (input.currentSongId) params.current = input.currentSongId;
+  // `position` is whole milliseconds. A position of 0 is still sent: the check
+  // is on the type, not on truthiness, or a restart at 0:00 would be dropped.
   if (typeof input.positionMs === 'number') {
-    extra.position = String(Math.floor(input.positionMs));
+    params.position = String(Math.floor(input.positionMs));
   }
-  await client.request('savePlayQueue.view', extra, { method: 'POST' });
+  await client.request('savePlayQueue.view', params, { method: 'POST' });
 }
